@@ -48,7 +48,7 @@ export default function Hero() {
     <section
       id="top"
       ref={root}
-      className="relative flex min-h-[100svh] items-center justify-center px-6"
+      className="relative flex min-h-[100svh] items-center justify-center px-6 pt-28 pb-20 sm:pt-24"
     >
       <div ref={fade} className="mx-auto max-w-5xl text-center">
         <div

@@ -17,19 +17,14 @@ import {
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import api from '@/lib/api';
-
-const platformIcons: Record<string, any> = {
-  shopify: { icon: ShoppingBag, color: 'text-green-500', label: 'Shopify' },
-  salla: { icon: Globe, color: 'text-primary', label: 'Salla' },
-  woocommerce: { icon: Zap, color: 'text-purple-600', label: 'WooCommerce' },
-  zid: { icon: Store, color: 'text-orange-500', label: 'Zid' },
-};
-
-import { Globe, Zap, Store } from 'lucide-react';
+import { getPlatform } from '@/lib/platforms';
+import { useStores } from '@/components/providers/StoresProvider';
+import ConnectPrompt from '@/components/ui/ConnectPrompt';
 
 export default function CustomersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { connectedPlatforms, hasConnectedStore, loading: storesLoading } = useStores();
   const [customers, setCustomers] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,6 +76,9 @@ export default function CustomersPage() {
         </div>
       </div>
 
+      {!storesLoading && !hasConnectedStore ? (
+        <ConnectPrompt description="Connect a store to see customers from your orders here." />
+      ) : (
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-border bg-card/30 space-y-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -95,7 +93,7 @@ export default function CustomersPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground mr-2">Platform:</span>
-              {['All', 'Shopify', 'Salla', 'WooCommerce', 'Zid'].map((p) => (
+              {['All', ...connectedPlatforms.map((p) => getPlatform(p).name)].map((p) => (
                 <button 
                   key={p} 
                   onClick={() => setPlatform(p)}
@@ -150,11 +148,10 @@ export default function CustomersPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5">
                           {customerPlatforms.map((p: string) => {
-                            const info = platformIcons[p.toLowerCase()];
-                            if (!info) return null;
+                            const info = getPlatform(p);
                             const Icon = info.icon;
                             return (
-                              <div key={p} className={cn("p-1.5 rounded-lg bg-accent/50 border border-border/50", info.color)} title={info.label}>
+                              <div key={p} className={cn("p-1.5 rounded-lg bg-accent/50 border border-border/50", info.color)} title={info.name}>
                                 <Icon size={14} />
                               </div>
                             );
@@ -216,6 +213,7 @@ export default function CustomersPage() {
           </div>
         )}
       </Card>
+      )}
     </div>
   );
 }

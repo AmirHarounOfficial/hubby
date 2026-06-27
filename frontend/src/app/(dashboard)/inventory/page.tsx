@@ -19,11 +19,15 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
+import { useStores } from '@/components/providers/StoresProvider';
+import { useToast } from '@/components/ui/Toast';
+import ConnectPrompt from '@/components/ui/ConnectPrompt';
 
 export default function InventoryPage() {
+  const { stores, hasConnectedStore, loading: storesLoading } = useStores();
+  const { toast } = useToast();
   const [inventory, setInventory] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
-  const [stores, setStores] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all');
@@ -73,14 +77,12 @@ export default function InventoryPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [invRes, logsRes, storesRes] = await Promise.all([
+      const [invRes, logsRes] = await Promise.all([
         api.get('/inventory'),
         api.get('/inventory/logs'),
-        api.get('/stores'),
       ]);
       setInventory(invRes.data);
       setLogs(logsRes.data.data);
-      setStores(storesRes.data);
     } catch (err) {
       console.error('Failed to fetch inventory data', err);
     } finally {
@@ -122,10 +124,21 @@ export default function InventoryPage() {
             <History size={16} className="mr-2" />
             Stock History
           </Button>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             size="sm"
-            onClick={() => api.post('/stores/sync-all')}
+            onClick={async () => {
+              if (!hasConnectedStore) {
+                toast('Connect a store first to sync inventory.', 'info');
+                return;
+              }
+              try {
+                await api.post('/stores/sync-all');
+                toast('Global sync started across your connected stores.', 'success');
+              } catch {
+                toast('Could not start the sync.', 'error');
+              }
+            }}
           >
             <RefreshCw size={16} className="mr-2" />
             Push Global Sync
@@ -133,6 +146,9 @@ export default function InventoryPage() {
         </div>
       </div>
 
+      {!storesLoading && !hasConnectedStore ? (
+        <ConnectPrompt description="Connect a store to start tracking and syncing inventory across your channels." />
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-0 overflow-hidden">
@@ -304,6 +320,7 @@ export default function InventoryPage() {
           </Card>
         </div>
       </div>
+      )}
 
       <Modal
         isOpen={!!adjustItem}

@@ -22,6 +22,7 @@ import api from '@/lib/api';
 import Modal from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 import { useStores } from '@/components/providers/StoresProvider';
+import ConnectPrompt from '@/components/ui/ConnectPrompt';
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -235,6 +236,9 @@ export default function ProductsPage() {
         </div>
       )}
 
+      {!isLoading && !hasConnectedStore && products.length === 0 ? (
+        <ConnectPrompt description="Connect a store to sync your products, or add a global product manually." />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {isLoading ? (
           <div className="col-span-full py-20 text-center">
@@ -344,8 +348,9 @@ export default function ProductsPage() {
           </>
         )}
       </div>
-      <Modal 
-        isOpen={isCategoryModalOpen} 
+      )}
+      <Modal
+        isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
         title="Manage Categories"
       >

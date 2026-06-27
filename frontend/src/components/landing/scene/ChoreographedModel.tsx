@@ -60,7 +60,13 @@ export default function ChoreographedModel({
     // Mirror the side for the Arabic (right-to-left) layout so the shape stays
     // opposite its text, which the DOM grid flips automatically under dir=rtl.
     const mirror = layout.rtl ? -1 : 1;
-    const sideX = (side === 'left' ? -2.4 : 2.4) * mirror;
+    // A perspective FOV is vertical, so on narrow/portrait viewports the
+    // horizontal view shrinks and a fixed side offset (±2.4) falls off-screen.
+    // Clamp the offset to a fraction of the actual visible half-width so the
+    // shapes stay on-screen on phones while keeping the full spread on desktop.
+    const halfW = state.viewport.width / 2;
+    const sideMag = Math.min(2.4, halfW * 0.62);
+    const sideX = (side === 'left' ? -sideMag : sideMag) * mirror;
     const sweep = (side === 'left' ? 0.9 : -0.9) * mirror;
     // Sweep up its side, drifting a touch toward centre at the midpoint.
     g.position.x = sideX + (q - 0.5) * sweep;
