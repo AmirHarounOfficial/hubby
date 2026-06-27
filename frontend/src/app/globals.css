@@ -23,6 +23,12 @@
   --ring: #4F46E5;
   --radius: 0.75rem;
 
+  /* ---- Fonts (loaded at runtime via a <link> in the layout, so the
+     production build never depends on a Google Fonts network fetch) ---- */
+  --font-geist-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-geist-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --font-arabic: 'Cairo', var(--font-geist-sans);
+
   /* ---- Surface colors: DARK (default) ---- */
   --background: #0F172A;
   --foreground: #F1F5F9;
@@ -92,6 +98,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-geist-sans);
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
