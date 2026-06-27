@@ -67,6 +67,7 @@ every push to `main`), follow **[CICD.md](./CICD.md)**.
 
 - **Backend Tests**: `php artisan test` (inside backend container)
 - **Frontend Tests**: `npm run test` (inside frontend directory)
+- **CI/CD**: every push to `main` runs frontend build + backend tests, then auto-deploys.
 
 ---
 Developed by **Antigravity AI**
