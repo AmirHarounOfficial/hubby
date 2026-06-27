@@ -48,7 +48,9 @@ export default function Hero() {
     <section
       id="top"
       ref={root}
-      className="relative flex min-h-[100svh] items-center justify-center px-6 pt-28 pb-20 sm:pt-24"
+      // Top-align on phones (content can be taller than the viewport, so centering
+      // would push the badge up under the fixed navbar); center on larger screens.
+      className="relative flex min-h-[100svh] items-start justify-center px-6 pt-28 pb-20 sm:items-center sm:pt-24"
     >
       <div ref={fade} className="mx-auto max-w-5xl text-center">
         <div
@@ -62,7 +64,7 @@ export default function Hero() {
           {t.hero.badge}
         </div>
 
-        <h1 className="flex flex-col items-center text-balance text-5xl font-semibold leading-[1.04] tracking-tight sm:text-7xl md:text-8xl">
+        <h1 className="flex flex-col items-center text-balance text-4xl font-semibold leading-[1.06] tracking-tight sm:text-7xl md:text-8xl">
           <RevealText key={`t1-${locale}`} as="span" text={t.hero.title1} stagger={0.06} className="justify-center" />
           <RevealText
             key={`t2-${locale}`}

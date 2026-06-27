@@ -64,18 +64,23 @@ export default function ChoreographedModel({
     // horizontal view shrinks and a fixed side offset (±2.4) falls off-screen.
     // Clamp the offset to a fraction of the actual visible half-width so the
     // shapes stay on-screen on phones while keeping the full spread on desktop.
+    const mobile = state.size.width < 640;
     const halfW = state.viewport.width / 2;
     const sideMag = Math.min(2.4, halfW * 0.62);
     const sideX = (side === 'left' ? -sideMag : sideMag) * mirror;
     const sweep = (side === 'left' ? 0.9 : -0.9) * mirror;
     // Sweep up its side, drifting a touch toward centre at the midpoint.
     g.position.x = sideX + (q - 0.5) * sweep;
-    g.position.y = THREE.MathUtils.lerp(-3.6, 3.6, q);
+    // On phones the copy is top-aligned, so keep the shape in the lower portion
+    // (and a little smaller) so it frames the text instead of covering it.
+    g.position.y = mobile
+      ? THREE.MathUtils.lerp(-3.2, 0.4, q)
+      : THREE.MathUtils.lerp(-3.6, 3.6, q);
     g.position.z = THREE.MathUtils.lerp(-1.2, 0.4, Math.sin(Math.PI * q));
 
     // Grow to full size at the centre of the section, shrink at the edges.
     const env = Math.sin(Math.PI * q);
-    g.scale.setScalar(0.45 + env * 0.75);
+    g.scale.setScalar((0.45 + env * 0.75) * (mobile ? 0.6 : 1));
 
     if (spinRef.current) {
       spinRef.current.rotation.y = q * Math.PI * 2 + state.clock.elapsedTime * 0.15;

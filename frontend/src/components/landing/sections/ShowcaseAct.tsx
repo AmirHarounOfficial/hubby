@@ -59,7 +59,7 @@ function ShowcaseSection({ beat, locale }: { beat: Beat; locale: string }) {
   );
 
   return (
-    <section ref={ref} className="relative flex min-h-screen items-center px-6">
+    <section ref={ref} className="relative flex min-h-screen items-start px-6 pt-28 sm:items-center sm:pt-0">
       <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-2">
         {beat.side === 'left' ? (
           <>
