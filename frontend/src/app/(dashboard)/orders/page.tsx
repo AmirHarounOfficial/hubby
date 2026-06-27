@@ -5,28 +5,21 @@ import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  ExternalLink, 
+import {
+  Search,
+  Filter,
+  Download,
+  ExternalLink,
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
-  ShoppingBag,
-  Globe,
-  Zap,
-  Store
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import api from '@/lib/api';
-
-const platformIcons: Record<string, any> = {
-  shopify: { icon: ShoppingBag, color: 'text-green-500', label: 'Shopify' },
-  salla: { icon: Globe, color: 'text-primary', label: 'Salla' },
-  woocommerce: { icon: Zap, color: 'text-purple-600', label: 'WooCommerce' },
-  zid: { icon: Store, color: 'text-orange-500', label: 'Zid' },
-};
+import { getPlatform } from '@/lib/platforms';
+import { useStores } from '@/components/providers/StoresProvider';
+import { useToast } from '@/components/ui/Toast';
+import ConnectPrompt from '@/components/ui/ConnectPrompt';
 
 const statusColors: Record<string, string> = {
   paid: 'bg-secondary/10 text-secondary',
@@ -39,6 +32,8 @@ const statusColors: Record<string, string> = {
 
 export default function OrdersPage() {
   const router = useRouter();
+  const { connectedPlatforms, hasConnectedStore, loading: storesLoading } = useStores();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,6 +96,7 @@ export default function OrdersPage() {
       link.remove();
     } catch (err) {
       console.error('Export failed', err);
+      toast('Export failed. Please try again.', 'error');
     }
   };
 
@@ -131,6 +127,9 @@ export default function OrdersPage() {
         </div>
       </div>
 
+      {!storesLoading && !hasConnectedStore ? (
+        <ConnectPrompt description="Connect a store to start importing and managing your orders here." />
+      ) : (
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-border space-y-4 bg-card/30">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -145,7 +144,7 @@ export default function OrdersPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground mr-2">Platform:</span>
-              {['All', 'Shopify', 'Salla', 'WooCommerce', 'Zid'].map((p) => (
+              {['All', ...connectedPlatforms.map((p) => getPlatform(p).name)].map((p) => (
                 <button 
                   key={p} 
                   onClick={() => { setPlatform(p); setPage(1); }}
@@ -199,7 +198,7 @@ export default function OrdersPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {orders.map((order) => {
-                  const PlatformInfo = platformIcons[order.store?.platform] || { icon: Store, color: 'text-muted-foreground', label: 'Other' };
+                  const PlatformInfo = getPlatform(order.store?.platform);
                   const isMenuOpen = activeMenuId === order.id;
 
                   return (
@@ -219,7 +218,7 @@ export default function OrdersPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <PlatformInfo.icon size={16} className={PlatformInfo.color} />
-                          <span className="text-xs">{PlatformInfo.label}</span>
+                          <span className="text-xs">{PlatformInfo.name}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-xs text-muted-foreground">
@@ -273,10 +272,12 @@ export default function OrdersPage() {
                                       if (confirm('Are you sure you want to cancel this order?')) {
                                         try {
                                           await api.put(`/orders/${order.id}`, { status: 'Cancelled' });
+                                          toast('Order cancelled.', 'success');
                                           fetchOrders();
                                           setActiveMenuId(null);
                                         } catch (err) {
                                           console.error('Cancel failed', err);
+                                          toast('Could not cancel the order.', 'error');
                                         }
                                       }
                                     }}
@@ -341,6 +342,7 @@ export default function OrdersPage() {
           </div>
         )}
       </Card>
+      )}
     </div>
   );
 }

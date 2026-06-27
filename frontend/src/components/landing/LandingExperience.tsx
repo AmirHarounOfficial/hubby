@@ -59,7 +59,10 @@ function LandingInner() {
     <div
       dir={dir}
       lang={locale}
-      className="landing-root relative bg-[#070A16] text-white selection:bg-primary/40"
+      // `overflow-x-clip` contains the vw-based animated tracks so phones never
+      // get accidental horizontal scroll/zoom. `clip` (not `hidden`) avoids
+      // creating a scroll container that would break the GSAP pins / Lenis.
+      className="landing-root relative overflow-x-clip bg-[#070A16] text-white selection:bg-primary/40"
     >
       <Preloader />
       <Cursor />

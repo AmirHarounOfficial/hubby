@@ -20,9 +20,13 @@ import { cn, formatCurrency } from '@/lib/utils';
 import api from '@/lib/api';
 
 import Modal from '@/components/ui/Modal';
+import { useToast } from '@/components/ui/Toast';
+import { useStores } from '@/components/providers/StoresProvider';
 
 export default function ProductsPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const { hasConnectedStore } = useStores();
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -54,14 +58,18 @@ export default function ProductsPage() {
   };
 
   const handleSync = async () => {
+    if (!hasConnectedStore) {
+      toast('Connect a store first — there’s nowhere to sync products to yet.', 'info');
+      return;
+    }
     setIsSyncing(true);
     try {
       // Pass selected ids when any are checked (otherwise syncs all).
       await api.post('/products/sync', selectedIds.length ? { product_ids: selectedIds } : {});
-      alert('Sync started! Products will be updated in the background.');
+      toast('Sync started — products will update in the background.', 'success');
     } catch (err) {
       console.error('Sync failed', err);
-      alert('Sync failed. Please try again.');
+      toast('Sync failed. Please try again.', 'error');
     } finally {
       setIsSyncing(false);
     }
@@ -76,7 +84,7 @@ export default function ProductsPage() {
       setDeleteId(null);
     } catch (err) {
       console.error('Delete failed', err);
-      alert('Failed to delete product.');
+      toast('Failed to delete product.', 'error');
     }
   };
 
@@ -87,9 +95,10 @@ export default function ProductsPage() {
       await Promise.all(selectedIds.map(id => api.delete(`/products/${id}`)));
       setProducts(products.filter(p => !selectedIds.includes(p.id)));
       setSelectedIds([]);
-      alert('Selected products deleted.');
+      toast('Selected products deleted.', 'success');
     } catch (err) {
       console.error('Bulk delete failed', err);
+      toast('Bulk delete failed.', 'error');
     }
   };
 
