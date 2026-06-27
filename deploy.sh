@@ -26,10 +26,14 @@ if ! grep -q '^APP_KEY=base64:' .env; then
   exit 1
 fi
 
-# --- Pull latest code (skips cleanly if not a git checkout) --------------------
+# --- Sync to the latest origin/main (force, so a stuck/detached/diverged repo
+# can never silently rebuild stale code). .env and other ignored files are left
+# untouched. Fails loudly if it can't fetch instead of deploying old code. ------
 if [ -d .git ]; then
-  echo "📥 Pulling latest code..."
-  git pull origin main || echo "⚠️  git pull skipped/failed — continuing with local code."
+  echo "📥 Syncing to origin/main..."
+  git fetch origin main
+  git reset --hard origin/main
+  echo "   now at: $(git rev-parse --short HEAD) $(git log -1 --pretty=%s)"
 fi
 
 # --- Build & start -------------------------------------------------------------
