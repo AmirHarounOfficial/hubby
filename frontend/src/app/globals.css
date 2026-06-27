@@ -1,0 +1,393 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   COLOR PALETTE
+   ---------------------------------------------------------------------------
+   Edit the values here to re-theme the whole app.
+   - Brand colors are shared across light/dark (change them to rebrand).
+   - Surface colors come in two sets: DARK (default — landing + auth) and
+     LIGHT (the `.theme-light` block — applied to the dashboard).
+   =========================================================================== */
+:root {
+  /* ---- Brand colors (theme-independent) ---- */
+  --primary: #4F46E5;            /* indigo  */
+  --primary-foreground: #FFFFFF;
+  --secondary: #10B981;          /* emerald */
+  --secondary-foreground: #FFFFFF;
+  --destructive: #EF4444;        /* red     */
+  --destructive-foreground: #FFFFFF;
+  --warning: #F59E0B;            /* amber   */
+  --warning-foreground: #FFFFFF;
+  --success: #10B981;            /* emerald */
+  --success-foreground: #FFFFFF;
+  --ring: #4F46E5;
+  --radius: 0.75rem;
+
+  /* ---- Surface colors: DARK (default) ---- */
+  --background: #0F172A;
+  --foreground: #F1F5F9;
+  --card: #1E293B;
+  --card-foreground: #F1F5F9;
+  --popover: #0F172A;
+  --popover-foreground: #F1F5F9;
+  --muted: #334155;
+  --muted-foreground: #94A3B8;
+  --accent: #1E293B;
+  --accent-foreground: #F1F5F9;
+  --border: #334155;
+  --input: #334155;
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ---- Surface colors: LIGHT (applied to the dashboard) ---- */
+.theme-light {
+  --background: #F1F5F9;          /* slate-100 page  */
+  --foreground: #0F172A;          /* slate-900 text  */
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;    /* slate-500       */
+  --accent: #F1F5F9;              /* slate-100 hover */
+  --accent-foreground: #0F172A;
+  --border: #E2E8F0;             /* slate-200       */
+  --input: #E2E8F0;
+  --glass-bg: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(15, 23, 42, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+* {
+  border-color: var(--border);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Arabic typography is applied wherever the layout is right-to-left. */
+[dir="rtl"] {
+  font-family: var(--font-arabic), var(--font-geist-sans), system-ui, sans-serif;
+  letter-spacing: 0 !important; /* Arabic must not be letter-spaced. */
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #4F46E5, #10B981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes progress-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-progress-bar {
+  animation: progress-bar 2s infinite ease-in-out;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out forwards;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------------------------------------------------------------------------
+   Immersive landing page: custom cursor + helpers
+   --------------------------------------------------------------------------- */
+
+/* Hide the native cursor only on the landing experience, and only where a real
+   pointer exists (never on touch). */
+@media (pointer: fine) {
+  .landing-root,
+  .landing-root *,
+  .auth-root,
+  .auth-root * {
+    cursor: none !important;
+  }
+}
+
+.cursor-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 9999px;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: #ffffff;
+}
+
+.cursor-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.cursor-ring.is-hover {
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cursor-ring.is-down {
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+}
+
+.cursor-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #ffffff;
+  mix-blend-mode: difference;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-root {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   3D commerce-cube preloader
+   --------------------------------------------------------------------------- */
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+/* Two halves that split apart to reveal the page. */
+.preloader__panel {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: #05070f;
+  background-image: radial-gradient(
+    120% 120% at 50% 50%,
+    rgba(79, 70, 229, 0.18),
+    rgba(5, 7, 15, 0) 60%
+  );
+}
+.preloader__panel--top {
+  top: 0;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.preloader__panel--bottom {
+  bottom: 0;
+}
+
+.preloader__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+}
+
+/* The 3D cube. */
+.preloader__stage {
+  perspective: 900px;
+  width: 110px;
+  height: 110px;
+}
+
+.preloader__cube {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  transform-style: preserve-3d;
+  animation: cube-spin 9s linear infinite;
+}
+
+.preloader__face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 110px;
+  height: 110px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.04);
+  filter: drop-shadow(0 0 16px currentColor);
+}
+
+.preloader__face--0 {
+  transform: rotateY(0deg) translateZ(55px);
+}
+.preloader__face--1 {
+  transform: rotateY(90deg) translateZ(55px);
+}
+.preloader__face--2 {
+  transform: rotateY(180deg) translateZ(55px);
+}
+.preloader__face--3 {
+  transform: rotateY(-90deg) translateZ(55px);
+}
+.preloader__face--4 {
+  transform: rotateX(90deg) translateZ(55px);
+}
+.preloader__face--5 {
+  transform: rotateX(-90deg) translateZ(55px);
+}
+
+@keyframes cube-spin {
+  from {
+    transform: rotateX(-22deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(-22deg) rotateY(360deg);
+  }
+}
+
+.preloader__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.preloader__brand {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  padding-left: 0.42em;
+}
+
+.preloader__bar {
+  position: relative;
+  width: 200px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.preloader__bar-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: linear-gradient(to right, #4f46e5, #10b981);
+}
+
+.preloader__pct {
+  display: flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+  font-size: 56px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.preloader__pct-sign {
+  margin-left: 4px;
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader__cube {
+    animation-duration: 24s;
+  }
+}

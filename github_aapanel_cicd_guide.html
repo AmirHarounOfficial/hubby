@@ -1,0 +1,330 @@
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">GitHub to aapanel CI/CD deployment guide with step-by-step phases</h2>
+
+<style>
+  .guide { padding: 1rem 0; font-size: 15px; }
+  .phase { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 1rem; overflow: hidden; }
+  .phase-header { display: flex; align-items: center; gap: 12px; padding: 0.75rem 1rem; cursor: pointer; background: var(--color-background-secondary); user-select: none; }
+  .phase-header:hover { background: var(--color-background-tertiary); }
+  .phase-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .phase-title { font-weight: 500; font-size: 14px; flex: 1; }
+  .phase-badge { font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); }
+  .phase-body { padding: 1rem; display: none; border-top: 0.5px solid var(--color-border-tertiary); }
+  .phase-body.open { display: block; }
+  .chevron { transition: transform 0.2s; font-size: 16px; color: var(--color-text-secondary); }
+  .chevron.open { transform: rotate(180deg); }
+  .step { display: flex; gap: 10px; margin-bottom: 0.75rem; }
+  .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-text-secondary); margin-top: 8px; flex-shrink: 0; }
+  .step p { margin: 0; color: var(--color-text-primary); font-size: 14px; line-height: 1.6; }
+  .step code, code { font-family: var(--font-mono); font-size: 12px; background: var(--color-background-tertiary); border: 0.5px solid var(--color-border-tertiary); border-radius: 4px; padding: 1px 5px; }
+  .code-block { font-family: var(--font-mono); font-size: 12px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem; margin: 0.5rem 0; white-space: pre; overflow-x: auto; line-height: 1.7; color: var(--color-text-primary); }
+  .copy-btn { font-size: 12px; padding: 2px 8px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; float: right; margin-top: -0.2rem; }
+  .copy-btn:hover { background: var(--color-background-secondary); }
+  .note { font-size: 13px; color: var(--color-text-secondary); background: var(--color-background-info); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.5rem 0.75rem; margin: 0.5rem 0; }
+  .warn { font-size: 13px; color: var(--color-text-warning); background: var(--color-background-warning); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.5rem 0.75rem; margin: 0.5rem 0; }
+  .flow { display: flex; align-items: center; gap: 6px; margin: 0.75rem 0; flex-wrap: wrap; }
+  .flow-node { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); }
+  .flow-arrow { color: var(--color-text-tertiary); font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 0.75rem; }
+  .tab { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); cursor: pointer; background: transparent; color: var(--color-text-secondary); }
+  .tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-secondary); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+</style>
+
+<div class="guide">
+
+  <div class="flow" style="margin-bottom:1.25rem;">
+    <div class="flow-node"><i class="ti ti-brand-github" aria-hidden="true"></i> GitHub repo</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><i class="ti ti-settings-automation" aria-hidden="true"></i> GitHub Actions CI</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><i class="ti ti-lock" aria-hidden="true"></i> SSH deploy</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><i class="ti ti-server" aria-hidden="true"></i> aapanel server</div>
+  </div>
+
+  <!-- Phase 1 -->
+  <div class="phase">
+    <div class="phase-header" onclick="toggle(this)">
+      <div class="phase-num" style="background:#E6F1FB;color:#185FA5;">1</div>
+      <div class="phase-title">Set up GitHub repository</div>
+      <span class="phase-badge" style="background:var(--color-background-success);color:var(--color-text-success);">one-time</span>
+      <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+    </div>
+    <div class="phase-body">
+      <div class="step"><div class="step-dot"></div><p>Create a new private repo on GitHub (e.g. <code>hubbyglobal</code>). Keep it private since it contains infra config.</p></div>
+      <div class="step"><div class="step-dot"></div><p>Organise your project with a monorepo structure:</p></div>
+      <div class="code-block">hubbyglobal/
+├── backend/          ← Laravel app
+├── frontend/         ← Next.js / Vue / React
+├── docker/
+│   └── php.Dockerfile
+└── docker-compose.yml   ← your file goes here</div>
+      <div class="step"><div class="step-dot"></div><p>Add a <code>.gitignore</code> that excludes <code>.env</code>, <code>node_modules/</code>, <code>vendor/</code>, and <code>storage/logs/*</code>.</p></div>
+      <div class="step"><div class="step-dot"></div><p>Push your initial code:</p></div>
+      <div class="code-block">git init
+git remote add origin git@github.com:you/hubbyglobal.git
+git add .
+git commit -m "chore: initial commit"
+git push -u origin main</div>
+      <div class="warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Never commit <code>.env</code> files. All secrets go in GitHub → Settings → Secrets.</div>
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase">
+    <div class="phase-header" onclick="toggle(this)">
+      <div class="phase-num" style="background:#EAF3DE;color:#3B6D11;">2</div>
+      <div class="phase-title">Prepare aapanel server</div>
+      <span class="phase-badge" style="background:var(--color-background-success);color:var(--color-text-success);">one-time</span>
+      <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+    </div>
+    <div class="phase-body">
+      <div class="step"><div class="step-dot"></div><p>In aapanel, create a dedicated deploy user (or use your existing SSH user). Make sure Docker and Docker Compose are installed:</p></div>
+      <div class="code-block">curl -fsSL https://get.docker.com | sh
+apt install docker-compose-plugin -y</div>
+      <div class="step"><div class="step-dot"></div><p>Create a deploy key pair for GitHub Actions to use:</p></div>
+      <div class="code-block">ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/deploy_key
+# No passphrase
+cat ~/.ssh/deploy_key.pub >> ~/.ssh/authorized_keys</div>
+      <div class="step"><div class="step-dot"></div><p>Create your app directory and <code>.env</code> file on the server (this is the production env — not committed to git):</p></div>
+      <div class="code-block">mkdir -p /www/wwwroot/hubbyglobal
+nano /www/wwwroot/hubbyglobal/.env
+# Fill in your production DB, Redis, APP_KEY values</div>
+      <div class="step"><div class="step-dot"></div><p>In aapanel, create a site pointing to <code>/www/wwwroot/hubbyglobal/backend/public</code> and configure SSL via Let's Encrypt.</p></div>
+      <div class="note"><i class="ti ti-info-circle" aria-hidden="true"></i> The frontend port <code>3000</code> and API port <code>8000</code> should be proxied through aapanel's reverse proxy — not exposed directly.</div>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase">
+    <div class="phase-header" onclick="toggle(this)">
+      <div class="phase-num" style="background:#FAEEDA;color:#854F0B;">3</div>
+      <div class="phase-title">Add secrets to GitHub</div>
+      <span class="phase-badge" style="background:var(--color-background-success);color:var(--color-text-success);">one-time</span>
+      <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+    </div>
+    <div class="phase-body">
+      <div class="step"><div class="step-dot"></div><p>Go to your GitHub repo → <strong>Settings → Secrets and variables → Actions</strong>. Add these secrets:</p></div>
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;margin:0.5rem 0;">
+        <table style="width:100%;font-size:13px;border-collapse:collapse;">
+          <tr style="background:var(--color-background-secondary);">
+            <td style="padding:6px 10px;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary);">Secret name</td>
+            <td style="padding:6px 10px;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary);">Value</td>
+          </tr>
+          <tr><td style="padding:6px 10px;font-family:var(--font-mono);font-size:12px;border-bottom:0.5px solid var(--color-border-tertiary);">SSH_PRIVATE_KEY</td><td style="padding:6px 10px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">Contents of <code>~/.ssh/deploy_key</code> (private key)</td></tr>
+          <tr><td style="padding:6px 10px;font-family:var(--font-mono);font-size:12px;border-bottom:0.5px solid var(--color-border-tertiary);">SERVER_HOST</td><td style="padding:6px 10px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">Your server IP or domain</td></tr>
+          <tr><td style="padding:6px 10px;font-family:var(--font-mono);font-size:12px;border-bottom:0.5px solid var(--color-border-tertiary);">SERVER_USER</td><td style="padding:6px 10px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">SSH username (e.g. <code>root</code> or <code>deploy</code>)</td></tr>
+          <tr><td style="padding:6px 10px;font-family:var(--font-mono);font-size:12px;">SERVER_PORT</td><td style="padding:6px 10px;color:var(--color-text-secondary);"><code>22</code> (or your custom SSH port)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase">
+    <div class="phase-header" onclick="toggle(this)">
+      <div class="phase-num" style="background:#FBEAF0;color:#993556;">4</div>
+      <div class="phase-title">GitHub Actions CI/CD workflow</div>
+      <span class="phase-badge" style="background:var(--color-background-info);color:var(--color-text-info);">automated</span>
+      <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+    </div>
+    <div class="phase-body">
+      <div class="step"><div class="step-dot"></div><p>Create the file <code>.github/workflows/deploy.yml</code> in your repo:</p></div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'ci')">CI (test & lint)</button>
+        <button class="tab" onclick="switchTab(this,'cd')">CD (deploy to server)</button>
+        <button class="tab" onclick="switchTab(this,'full')">Full combined file</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-ci">
+        <div class="code-block">name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, mbstring, tokenizer
+      - run: cd backend && composer install --no-interaction
+      - run: cd backend && cp .env.testing .env
+      - run: cd backend && php artisan key:generate
+      - run: cd backend && php artisan test
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci
+      - run: cd frontend && npm run lint
+      - run: cd frontend && npm run build</div>
+      </div>
+
+      <div class="tab-panel" id="tab-cd">
+        <div class="code-block">  deploy:
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /www/wwwroot/hubbyglobal
+            git pull origin main
+            docker compose -f docker-compose.yml pull
+            docker compose up -d --build --remove-orphans
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
+            echo "Deploy complete ✓"</div>
+      </div>
+
+      <div class="tab-panel" id="tab-full">
+        <div class="code-block">name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.2' }
+      - run: cd backend && composer install --no-interaction
+      - run: cd backend && cp .env.testing .env && php artisan key:generate
+      - run: cd backend && php artisan test
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: cd frontend && npm ci && npm run lint && npm run build
+
+  deploy:
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /www/wwwroot/hubbyglobal
+            git pull origin main
+            docker compose up -d --build --remove-orphans
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan optimize
+            echo "Deploy complete ✓"</div>
+      </div>
+
+      <div class="note"><i class="ti ti-info-circle" aria-hidden="true"></i> The <code>deploy</code> job only runs on pushes to <code>main</code>, not on PRs — so PRs only trigger tests.</div>
+    </div>
+  </div>
+
+  <!-- Phase 5 -->
+  <div class="phase">
+    <div class="phase-header" onclick="toggle(this)">
+      <div class="phase-num" style="background:#EEEDFE;color:#534AB7;">5</div>
+      <div class="phase-title">Branch strategy & workflow</div>
+      <span class="phase-badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary);">ongoing</span>
+      <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+    </div>
+    <div class="phase-body">
+      <div class="flow" style="margin-bottom:1rem;">
+        <div class="flow-node">feature branch</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">PR → tests run</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">merge to main</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">auto deploy</div>
+      </div>
+      <div class="step"><div class="step-dot"></div><p>Work on feature branches: <code>git checkout -b feat/my-feature</code></p></div>
+      <div class="step"><div class="step-dot"></div><p>Open a PR — CI tests run automatically on every commit to the PR.</p></div>
+      <div class="step"><div class="step-dot"></div><p>Merge to <code>main</code> only when tests pass — this triggers the deploy job automatically.</p></div>
+      <div class="step"><div class="step-dot"></div><p>For hotfixes, create a <code>hotfix/</code> branch, test, then merge to main.</p></div>
+      <div class="note"><i class="ti ti-info-circle" aria-hidden="true"></i> Enable branch protection on <code>main</code>: require PR reviews + passing checks before merge (GitHub → Settings → Branches).</div>
+    </div>
+  </div>
+
+  <!-- Phase 6 -->
+  <div class="phase">
+    <div class="phase-header" onclick="toggle(this)">
+      <div class="phase-num" style="background:#E1F5EE;color:#0F6E56;">6</div>
+      <div class="phase-title">Zero-downtime & rollback tips</div>
+      <span class="phase-badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary);">optional</span>
+      <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+    </div>
+    <div class="phase-body">
+      <div class="step"><div class="step-dot"></div><p>Add a health check to your <code>docker-compose.yml</code> on the <code>app</code> service so Docker waits for it to be ready before routing traffic.</p></div>
+      <div class="step"><div class="step-dot"></div><p>To roll back, SSH in and run <code>git revert HEAD</code> then push, or manually run <code>git checkout &lt;prev-sha&gt;</code> and re-run <code>docker compose up -d --build</code>.</p></div>
+      <div class="step"><div class="step-dot"></div><p>Add a Slack/Discord notification step at the end of your workflow to alert on success or failure:</p></div>
+      <div class="code-block">- name: Notify
+  if: always()
+  uses: slackapi/slack-github-action@v1.26.0
+  with:
+    payload: |
+      {"text": "Deploy ${{ job.status }} on ${{ github.repository }}"}
+  env:
+    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}</div>
+    </div>
+  </div>
+
+  <div style="margin-top:1rem;text-align:center;">
+    <button onclick="sendPrompt('Can you generate the full deploy.yml file ready to paste into my repo?')" style="font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);">
+      Generate ready-to-use deploy.yml ↗
+    </button>
+    <button onclick="sendPrompt('How do I configure aapanel reverse proxy for port 3000 and 8000?')" style="font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);margin-left:8px;">
+      aapanel reverse proxy setup ↗
+    </button>
+  </div>
+</div>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+function switchTab(btn, id) {
+  const parent = btn.closest('.phase-body');
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  parent.querySelector('#tab-' + id).classList.add('active');
+}
+</script>

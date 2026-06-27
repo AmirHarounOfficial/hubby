@@ -1,0 +1,46 @@
+# Monorepo root ignores
+.DS_Store
+*.log
+Thumbs.db
+.idea/
+.vscode/
+
+# Production secrets (root .env is read by docker-compose + Laravel containers)
+/.env
+/.env.production
+
+# Stray local artifacts
+/.next
+
+# Backend ignores
+/backend/.env
+/backend/.env.backup
+/backend/.env.production
+/backend/vendor/
+/backend/public/storage
+/backend/storage/*.key
+/backend/.phpunit.result.cache
+# Ignore the cached files but KEEP the directory (via its .gitignore keeper),
+# otherwise a fresh clone has no bootstrap/cache dir and `composer install`
+# (package:discover) fails during the Docker build.
+/backend/bootstrap/cache/*
+!/backend/bootstrap/cache/.gitignore
+/backend/public/build/
+/backend/public/hot/
+
+# Frontend ignores
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+/frontend/.env*
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+
+# Mobile ignores
+/mobile/.dart_tool/
+/mobile/.flutter-plugins
+/mobile/.flutter-plugins-dependencies
+/mobile/build/
+/mobile/.pub-cache/
+/mobile/.env

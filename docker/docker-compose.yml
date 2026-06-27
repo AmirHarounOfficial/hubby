@@ -1,0 +1,118 @@
+services:
+  app:
+    build:
+      context: ../backend
+      dockerfile: ../docker/php.Dockerfile
+    volumes:
+      - ../backend:/var/www/html
+      - ./php-opcache.ini:/usr/local/etc/php/conf.d/zz-opcache.ini:ro
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=hubbyglobal
+      - DB_USERNAME=sail
+      - DB_PASSWORD=password
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ../backend:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+      - frontend
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+
+  mysql:
+    image: mysql:8.0
+    # Host port 3307 to avoid clashing with a local XAMPP MySQL on 3306.
+    # The app connects internally via the service name "mysql:3306".
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: hubbyglobal
+      MYSQL_USER: sail
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=sail
+      - PMA_PASSWORD=password
+    depends_on:
+      - mysql
+
+  horizon:
+    build:
+      context: ../backend
+      dockerfile: ../docker/php.Dockerfile
+    command: php artisan horizon
+    volumes:
+      - ../backend:/var/www/html
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=hubbyglobal
+      - DB_USERNAME=sail
+      - DB_PASSWORD=password
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+      - mysql
+
+  scheduler:
+    build:
+      context: ../backend
+      dockerfile: ../docker/php.Dockerfile
+    command: sh -c "while true; do php artisan schedule:run; sleep 60; done"
+    volumes:
+      - ../backend:/var/www/html
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=hubbyglobal
+      - DB_USERNAME=sail
+      - DB_PASSWORD=password
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+volumes:
+  mysql_data:

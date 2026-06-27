@@ -1,0 +1,18 @@
+# Keep the PHP image build context lean and reproducible.
+vendor
+node_modules
+.git
+.env
+.env.*
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+public/build
+public/hot
+public/storage
+*.log
+.DS_Store
+Thumbs.db
+tests
+.phpunit.result.cache

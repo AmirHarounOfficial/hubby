@@ -1,0 +1,104 @@
+# =============================================================================
+# HubbyGlobal — PRODUCTION stack
+# -----------------------------------------------------------------------------
+# Single domain (hubbynetwork.com): the internal nginx routes "/" to the Next.js
+# frontend and "/api" to the Laravel backend. It only listens on 127.0.0.1:8001
+# so it is NOT exposed publicly — aaPanel's nginx reverse-proxies to it and
+# terminates SSL. See DEPLOYMENT.md.
+#
+#   docker compose up -d --build
+# =============================================================================
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    # Only reachable from the host (aaPanel proxies to this). Never 0.0.0.0.
+    ports:
+      - "127.0.0.1:8001:80"
+    volumes:
+      - ./backend:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+      - frontend
+    restart: always
+
+  app:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.prod
+    env_file:
+      - .env
+    volumes:
+      - ./backend/storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/Dockerfile.frontend.prod
+    # No host port — only nginx talks to it (frontend:3000) on the internal network.
+    expose:
+      - "3000"
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis_prod_data:/data
+
+  horizon:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.prod
+    command: php artisan horizon
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: always
+
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.prod
+    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: always
+
+volumes:
+  mysql_prod_data:
+  redis_prod_data:
