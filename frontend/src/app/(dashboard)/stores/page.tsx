@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { PLATFORMS, getPlatform, type PlatformId } from '@/lib/platforms';
 import ConnectStoreModal from '@/components/stores/ConnectStoreModal';
+import { useStores } from '@/components/providers/StoresProvider';
 
 /** Visual treatment for each real store status the backend reports. */
 const STATUS_META: Record<string, { label: string; dot: string; text: string }> = {
@@ -36,35 +37,26 @@ const timeAgo = (iso?: string | null) => {
 };
 
 export default function StoresPage() {
-  const [stores, setStores] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Stores come from the shared provider so connect/disconnect updates the whole
+  // dashboard (Orders filter, connect banner, etc.) at once — not just this page.
+  const { stores, loading: isLoading, refresh } = useStores();
   const [busyId, setBusyId] = useState<number | null>(null);
   const [connectPlatform, setConnectPlatform] = useState<PlatformId | null>(null);
   const [oauthEnabled, setOauthEnabled] = useState<Record<string, boolean>>({});
 
-  const fetchStores = async () => {
-    try {
-      const response = await api.get('/stores');
-      setStores(response.data);
-    } catch (err) {
-      console.error('Failed to fetch stores', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchStores();
+    // Re-sync on landing here in case stores changed elsewhere.
+    refresh();
     // Which platforms offer one-click OAuth (operator has configured app keys).
     api.get('/stores/connect-options')
       .then((res) => setOauthEnabled(res.data?.oauth_enabled || {}))
       .catch(() => setOauthEnabled({}));
-  }, []);
+  }, [refresh]);
 
   const toggleMaster = async (id: number) => {
     try {
       await api.post(`/stores/${id}/set-master`);
-      fetchStores();
+      refresh();
     } catch (err) {
       console.error('Failed to set master store', err);
     }
@@ -74,9 +66,9 @@ export default function StoresPage() {
     setBusyId(id);
     try {
       await api.post(`/stores/${id}/sync`);
-      await fetchStores();
+      await refresh();
       // Sync runs in the background; re-poll shortly to reflect the result.
-      setTimeout(fetchStores, 5000);
+      setTimeout(refresh, 5000);
     } catch (err) {
       console.error('Failed to sync store', err);
     } finally {
@@ -88,7 +80,7 @@ export default function StoresPage() {
     if (!window.confirm('Disconnect this store? This removes it from your dashboard.')) return;
     try {
       await api.delete(`/stores/${id}`);
-      fetchStores();
+      refresh();
     } catch (err) {
       console.error('Failed to delete store', err);
     }
@@ -279,7 +271,7 @@ export default function StoresPage() {
         platformId={connectPlatform}
         oauthEnabled={connectPlatform ? !!oauthEnabled[connectPlatform] : false}
         onClose={() => setConnectPlatform(null)}
-        onConnected={fetchStores}
+        onConnected={refresh}
       />
     </div>
   );
