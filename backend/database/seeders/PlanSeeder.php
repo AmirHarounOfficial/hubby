@@ -19,7 +19,8 @@ class PlanSeeder extends Seeder
                 'price' => 0,
                 'store_limit' => 2,
                 'order_limit' => 500,
-                'features' => json_encode(['Shopify & Salla', 'Basic Analytics', '14 Days Trial']),
+                // Pass a plain array — the Plan model's `array` cast handles JSON encoding.
+                'features' => ['Shopify & Salla', 'Basic Analytics', '14 Days Trial'],
             ],
             [
                 'name' => 'Starter',
@@ -27,7 +28,7 @@ class PlanSeeder extends Seeder
                 'price' => 29,
                 'store_limit' => 5,
                 'order_limit' => 5000,
-                'features' => json_encode(['Shopify, Salla & WooCommerce', 'Advanced Analytics', 'Email Support']),
+                'features' => ['Shopify, Salla & WooCommerce', 'Advanced Analytics', 'Email Support'],
             ],
             [
                 'name' => 'Pro',
@@ -35,7 +36,7 @@ class PlanSeeder extends Seeder
                 'price' => 79,
                 'store_limit' => 15,
                 'order_limit' => 50000,
-                'features' => json_encode(['All Platforms', 'Full Parity', 'Priority Support', 'Custom Integrations']),
+                'features' => ['All Platforms', 'Full Parity', 'Priority Support', 'Custom Integrations'],
             ],
             [
                 'name' => 'Enterprise',
@@ -43,7 +44,7 @@ class PlanSeeder extends Seeder
                 'price' => 199,
                 'store_limit' => 999,
                 'order_limit' => 999999,
-                'features' => json_encode(['Unlimited Everything', 'Dedicated Account Manager', 'SLA', 'White-labeling']),
+                'features' => ['Unlimited Everything', 'Dedicated Account Manager', 'SLA', 'White-labeling'],
             ],
         ];
 

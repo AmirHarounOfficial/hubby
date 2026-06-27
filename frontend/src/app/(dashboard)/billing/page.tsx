@@ -168,7 +168,7 @@ export default function BillingPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {(plan.features && plan.features.length
+                  {(Array.isArray(plan.features) && plan.features.length
                     ? plan.features
                     : [
                         `${plan.store_limit ?? 'Unlimited'} stores`,
