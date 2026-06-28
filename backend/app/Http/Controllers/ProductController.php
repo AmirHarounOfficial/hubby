@@ -184,20 +184,28 @@ class ProductController extends Controller
     public function uploadImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            // Up to 8 MB — phone photos routinely exceed the old 2 MB cap.
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
         ]);
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $url = config('app.url') . '/storage/' . $path;
-            
-            return response()->json([
-                'url' => $url,
-                'path' => $path
-            ]);
+        if (! $request->hasFile('image')) {
+            return response()->json(['message' => 'No image uploaded'], 400);
         }
 
-        return response()->json(['message' => 'No image uploaded'], 400);
+        try {
+            $path = $request->file('image')->store('products', 'public');
+
+            return response()->json([
+                'url' => rtrim(config('app.url'), '/') . '/storage/' . $path,
+                'path' => $path,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Product image upload failed', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'message' => 'Could not save the image. Please try again.',
+            ], 500);
+        }
     }
 
     public function togglePlatformSync(Request $request, $id)
