@@ -17,6 +17,7 @@ import {
 import { cn, formatCurrency } from '@/lib/utils';
 import api from '@/lib/api';
 import { getPlatform } from '@/lib/platforms';
+import { PlatformLogo } from '@/components/ui/PlatformLogo';
 import { useStores } from '@/components/providers/StoresProvider';
 import { useToast } from '@/components/ui/Toast';
 import ConnectPrompt from '@/components/ui/ConnectPrompt';
@@ -217,7 +218,7 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <PlatformInfo.icon size={16} className={PlatformInfo.color} />
+                          <PlatformLogo platform={order.store?.platform} size={16} />
                           <span className="text-xs">{PlatformInfo.name}</span>
                         </div>
                       </td>

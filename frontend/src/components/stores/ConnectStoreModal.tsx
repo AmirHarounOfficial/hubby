@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import api from '@/lib/api';
 import { getPlatform, type PlatformId } from '@/lib/platforms';
+import { PlatformLogo } from '@/components/ui/PlatformLogo';
 
 interface ConnectStoreModalProps {
   platformId: PlatformId | null;
@@ -99,8 +100,8 @@ export default function ConnectStoreModal({ platformId, oauthEnabled = false, on
     <Modal isOpen={!!platformId} onClose={onClose} title={`Connect ${platform.name}`} size="lg">
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className={`p-3 rounded-2xl bg-background border border-border shadow-inner ${platform.color}`}>
-            <platform.icon size={26} />
+          <div className="p-3 rounded-2xl bg-background border border-border shadow-inner flex items-center justify-center">
+            <PlatformLogo platform={platform.id} size={26} />
           </div>
           <div>
             <p className="font-bold">{platform.name}</p>

@@ -67,16 +67,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                 child: Text(state.error!,
                                     style: const TextStyle(color: AppPalette.destructive)),
                               ),
-                            _field(_name, context.t('auth.name'), (v) => v!.isEmpty ? 'Required' : null),
+                            _field(_name, context.t('auth.name'), (v) => v!.isEmpty ? 'Required' : null,
+                                keyboard: TextInputType.name, hints: const [AutofillHints.name]),
                             const SizedBox(height: 12),
-                            _field(_org, context.t('auth.org'), (v) => v!.isEmpty ? 'Required' : null),
+                            _field(_org, context.t('auth.org'), (v) => v!.isEmpty ? 'Required' : null,
+                                hints: const [AutofillHints.organizationName]),
                             const SizedBox(height: 12),
                             _field(_email, context.t('auth.email'),
                                 (v) => v!.contains('@') ? null : 'Enter a valid email',
-                                keyboard: TextInputType.emailAddress),
+                                keyboard: TextInputType.emailAddress, hints: const [AutofillHints.email]),
                             const SizedBox(height: 12),
                             _field(_password, context.t('auth.password'),
-                                (v) => v!.length < 8 ? 'Min 8 characters' : null, obscure: true),
+                                (v) => v!.length < 8 ? 'Min 8 characters' : null, obscure: true,
+                                hints: const [AutofillHints.newPassword]),
                             const SizedBox(height: 18),
                             FilledButton(
                               onPressed: loading ? null : _submit,
@@ -99,11 +102,13 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _field(TextEditingController c, String label, String? Function(String?) val,
-      {bool obscure = false, TextInputType? keyboard}) {
+      {bool obscure = false, TextInputType? keyboard, List<String>? hints}) {
     return TextFormField(
       controller: c,
       obscureText: obscure,
       keyboardType: keyboard,
+      autofillHints: hints,
+      textInputAction: obscure ? TextInputAction.done : TextInputAction.next,
       decoration: InputDecoration(labelText: label),
       validator: val,
     );

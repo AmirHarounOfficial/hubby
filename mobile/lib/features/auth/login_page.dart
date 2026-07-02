@@ -65,6 +65,8 @@ class _LoginPageState extends State<LoginPage> {
                             TextFormField(
                               controller: _email,
                               keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              autofillHints: const [AutofillHints.username, AutofillHints.email],
                               decoration: InputDecoration(
                                 labelText: context.t('auth.email'),
                                 prefixIcon: const Icon(LucideIcons.mail, size: 18),
@@ -76,6 +78,8 @@ class _LoginPageState extends State<LoginPage> {
                             TextFormField(
                               controller: _password,
                               obscureText: true,
+                              textInputAction: TextInputAction.done,
+                              autofillHints: const [AutofillHints.password],
                               decoration: InputDecoration(
                                 labelText: context.t('auth.password'),
                                 prefixIcon: const Icon(LucideIcons.lock, size: 18),

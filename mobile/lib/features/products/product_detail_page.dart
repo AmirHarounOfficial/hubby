@@ -10,6 +10,7 @@ import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/app_widgets.dart';
 import '../../shared/widgets/async_builder.dart';
 import '../../shared/widgets/money_text.dart';
+import '../../shared/widgets/platform_logo.dart';
 import 'product_form_page.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -312,8 +313,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: Row(children: [
               Container(
                 height: 36, width: 36,
-                decoration: BoxDecoration(color: meta.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppPalette.rSm)),
-                child: Icon(meta.icon, color: meta.color, size: 18),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: AppPalette.surfaceAlt, borderRadius: BorderRadius.circular(AppPalette.rSm)),
+                child: PlatformLogo(platformId: meta.id, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(

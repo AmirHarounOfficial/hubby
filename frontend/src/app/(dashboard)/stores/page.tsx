@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { PLATFORMS, getPlatform, type PlatformId } from '@/lib/platforms';
+import { PlatformLogo } from '@/components/ui/PlatformLogo';
 import ConnectStoreModal from '@/components/stores/ConnectStoreModal';
 import { useStores } from '@/components/providers/StoresProvider';
 
@@ -174,8 +175,8 @@ export default function StoresPage() {
 
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={cn("p-3 rounded-2xl bg-background border border-border shadow-inner", PlatformInfo.color)}>
-                    <PlatformInfo.icon size={28} />
+                  <div className="p-3 rounded-2xl bg-background border border-border shadow-inner flex items-center justify-center">
+                    <PlatformLogo platform={store.platform} size={28} />
                   </div>
                   <div>
                     <h3 className="font-bold text-lg">{store.name}</h3>
@@ -259,7 +260,7 @@ export default function StoresPage() {
             onClick={() => setConnectPlatform(p.id)}
             className="min-h-[140px] rounded-2xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-4 text-muted-foreground hover:border-primary hover:text-primary transition-all bg-card/10 group"
           >
-            <p.icon size={32} className={cn('group-hover:scale-110 transition-transform', p.color)} />
+            <PlatformLogo platform={p.id} size={32} className="group-hover:scale-110 transition-transform" />
             <div className="text-center">
               <h4 className="font-bold text-foreground">Add {p.name}</h4>
             </div>

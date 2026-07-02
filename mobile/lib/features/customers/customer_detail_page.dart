@@ -10,6 +10,7 @@ import '../../l10n/strings.dart';
 import '../../shared/widgets/app_widgets.dart';
 import '../../shared/widgets/async_builder.dart';
 import '../../shared/widgets/money_text.dart';
+import '../../shared/widgets/platform_logo.dart';
 import '../orders/order_detail_page.dart';
 
 class CustomerDetailPage extends StatefulWidget {
@@ -150,7 +151,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Row(children: [
-                            Icon(meta.icon, color: meta.color, size: 18),
+                            PlatformLogo(platformId: meta.id, size: 18),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

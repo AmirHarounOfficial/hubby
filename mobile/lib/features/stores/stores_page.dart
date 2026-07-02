@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/platforms.dart';
 import '../../core/theme/app_palette.dart';
 import '../../shared/widgets/app_widgets.dart';
+import '../../shared/widgets/platform_logo.dart';
 import '../../l10n/strings.dart';
 import 'cubit/stores_cubit.dart';
 import 'connect_sheet.dart';
@@ -28,7 +29,7 @@ class StoresPage extends StatelessWidget {
                   spacing: 8, runSpacing: 8,
                   children: kPlatforms
                       .map((p) => ActionChip(
-                            avatar: Icon(p.icon, size: 16, color: p.color),
+                            avatar: PlatformLogo(platformId: p.id, size: 18),
                             label: Text(p.name),
                             onPressed: () => openConnectSheet(context, p.id),
                           ))
@@ -140,7 +141,7 @@ class StoresPage extends StatelessWidget {
       child: AppCard(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Icon(meta.icon, color: meta.color, size: 26),
+            PlatformLogo(platformId: meta.id, size: 26),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

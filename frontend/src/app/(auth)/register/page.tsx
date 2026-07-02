@@ -94,6 +94,7 @@ function RegisterInner() {
           <Input
             label={c.name}
             name="name"
+            autoComplete="name"
             placeholder={c.namePlaceholder}
             value={formData.name}
             onChange={handleChange}
@@ -104,6 +105,7 @@ function RegisterInner() {
           <Input
             label={c.org}
             name="organization_name"
+            autoComplete="organization"
             placeholder={c.orgPlaceholder}
             value={formData.organization_name}
             onChange={handleChange}
@@ -117,6 +119,7 @@ function RegisterInner() {
           label={c.email}
           name="email"
           type="email"
+          autoComplete="email"
           placeholder="name@example.com"
           value={formData.email}
           onChange={handleChange}
@@ -130,6 +133,7 @@ function RegisterInner() {
             label={c.password}
             name="password"
             type="password"
+            autoComplete="new-password"
             placeholder="••••••••"
             value={formData.password}
             onChange={handleChange}
@@ -141,6 +145,7 @@ function RegisterInner() {
             label={c.confirm}
             name="password_confirmation"
             type="password"
+            autoComplete="new-password"
             placeholder="••••••••"
             value={formData.password_confirmation}
             onChange={handleChange}

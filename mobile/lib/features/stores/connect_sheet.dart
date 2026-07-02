@@ -4,6 +4,7 @@ import '../../core/network/api_client.dart';
 import '../../core/platforms.dart';
 import '../../core/theme/app_palette.dart';
 import '../../shared/widgets/app_widgets.dart';
+import '../../shared/widgets/platform_logo.dart';
 import 'cubit/stores_cubit.dart';
 
 void openConnectSheet(BuildContext context, String platformId) {
@@ -70,7 +71,7 @@ class _ConnectSheetState extends State<_ConnectSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(children: [
-            Icon(p.icon, color: p.color),
+            PlatformLogo(platformId: p.id, size: 24),
             const SizedBox(width: 10),
             Text('Connect ${p.name}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ]),

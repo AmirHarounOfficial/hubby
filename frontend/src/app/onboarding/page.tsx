@@ -8,6 +8,7 @@ import { CheckCircle2, ArrowRight, Loader2, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { PLATFORMS, getPlatform } from '@/lib/platforms';
+import { PlatformLogo } from '@/components/ui/PlatformLogo';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -78,7 +79,7 @@ export default function OnboardingPage() {
                   onClick={() => handlePlatformSelect(p.id)}
                   className="bg-card border border-border p-6 rounded-2xl flex flex-col items-center gap-3 hover:border-primary hover:shadow-xl hover:shadow-primary/10 transition-all group"
                 >
-                  <p.icon size={32} className={cn("transition-transform group-hover:scale-110", p.color)} />
+                  <PlatformLogo platform={p.id} size={32} className="transition-transform group-hover:scale-110" />
                   <span className="text-sm font-semibold">{p.name}</span>
                 </button>
               ))}
@@ -88,12 +89,11 @@ export default function OnboardingPage() {
 
         {step === 2 && (() => {
           const platform = getPlatform(selectedPlatform);
-          const PlatformIcon = platform?.icon;
-          
+
           return (
             <Card className="p-8 text-center space-y-6">
-              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-2">
-                {PlatformIcon && <PlatformIcon size={32} />}
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-2">
+                <PlatformLogo platform={selectedPlatform} size={32} />
               </div>
               <div>
                 <h2 className="text-2xl font-bold mb-1">Connect {platform?.name}</h2>

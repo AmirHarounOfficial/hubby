@@ -10,6 +10,7 @@ import '../../l10n/strings.dart';
 import '../../shared/widgets/app_widgets.dart';
 import '../../shared/widgets/async_builder.dart';
 import '../../shared/widgets/money_text.dart';
+import '../../shared/widgets/platform_logo.dart';
 import '../stores/cubit/stores_cubit.dart';
 import 'customer_detail_page.dart';
 
@@ -94,8 +95,7 @@ class _CustomersPageState extends State<CustomersPage> {
                 onRetry: _reload,
                 builder: (context, items) {
                   if (items.isEmpty) {
-                    return Center(child: Text(context.t('customers.none'),
-                        style: const TextStyle(color: AppPalette.mutedForeground)));
+                    return EmptyState(icon: LucideIcons.users, title: context.t('customers.none'));
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.all(16),
@@ -134,7 +134,7 @@ class _CustomersPageState extends State<CustomersPage> {
                                         final m = platformFor(p);
                                         return Padding(
                                           padding: const EdgeInsetsDirectional.only(end: 6),
-                                          child: Icon(m.icon, size: 14, color: m.color),
+                                          child: PlatformLogo(platformId: m.id, size: 14),
                                         );
                                       }).toList(),
                                     ),

@@ -54,7 +54,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
         future: _future,
         onRetry: () => setState(() => _future = _load()),
         builder: (context, items) {
-          if (items.isEmpty) return Center(child: Text(context.t('notifications.none')));
+          if (items.isEmpty) {
+            return EmptyState(icon: LucideIcons.bell, title: context.t('notifications.none'));
+          }
           final unreadCount = items.where((n) => n['read_at'] == null).length;
           final df = DateFormat.MMMd().add_jm();
           return Column(

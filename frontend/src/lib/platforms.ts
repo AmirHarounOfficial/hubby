@@ -137,3 +137,8 @@ export const FALLBACK_PLATFORM: PlatformMeta = {
 };
 
 export const getPlatform = (id: string): PlatformMeta => platformMap[id] ?? FALLBACK_PLATFORM;
+
+/** Platform ids that ship a real brand logo at /platforms/{id}.svg. */
+export const PLATFORM_LOGO_IDS = new Set<string>([
+  'shopify', 'salla', 'amazon', 'noon', 'woocommerce', 'zid', 'trendyol',
+]);

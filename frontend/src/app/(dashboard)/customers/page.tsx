@@ -18,6 +18,7 @@ import {
 import { cn, formatCurrency } from '@/lib/utils';
 import api from '@/lib/api';
 import { getPlatform } from '@/lib/platforms';
+import { PlatformLogo } from '@/components/ui/PlatformLogo';
 import { useStores } from '@/components/providers/StoresProvider';
 import ConnectPrompt from '@/components/ui/ConnectPrompt';
 
@@ -147,15 +148,11 @@ export default function CustomersPage() {
                       <td className="px-6 py-4 text-xs text-muted-foreground">{customer.customer_email}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5">
-                          {customerPlatforms.map((p: string) => {
-                            const info = getPlatform(p);
-                            const Icon = info.icon;
-                            return (
-                              <div key={p} className={cn("p-1.5 rounded-lg bg-accent/50 border border-border/50", info.color)} title={info.name}>
-                                <Icon size={14} />
-                              </div>
-                            );
-                          })}
+                          {customerPlatforms.map((p: string) => (
+                            <div key={p} className="p-1.5 rounded-lg bg-accent/50 border border-border/50 flex items-center" title={getPlatform(p).name}>
+                              <PlatformLogo platform={p} size={14} />
+                            </div>
+                          ))}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">

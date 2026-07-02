@@ -8,6 +8,7 @@ import '../../core/theme/app_palette.dart';
 import '../../shared/widgets/app_widgets.dart';
 import '../../shared/widgets/async_builder.dart';
 import '../../shared/widgets/money_text.dart';
+import '../../shared/widgets/platform_logo.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -62,7 +63,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Row(children: [
-                        Icon(meta.icon, color: meta.color, size: 18),
+                        PlatformLogo(platformId: meta.id, size: 18),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

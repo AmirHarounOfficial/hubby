@@ -78,6 +78,7 @@ function LoginInner() {
         <Input
           label={c.email}
           type="email"
+          autoComplete="email"
           placeholder="name@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -89,6 +90,7 @@ function LoginInner() {
           <Input
             label={c.password}
             type="password"
+            autoComplete="current-password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

@@ -77,6 +77,7 @@ function ForgotInner() {
           <Input
             label={c.email}
             type="email"
+            autoComplete="email"
             placeholder="name@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

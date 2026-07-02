@@ -10,6 +10,7 @@ import '../../l10n/strings.dart';
 import '../../shared/widgets/app_widgets.dart';
 import '../../shared/widgets/async_builder.dart';
 import '../../shared/widgets/money_text.dart';
+import '../../shared/widgets/platform_logo.dart';
 import '../customers/customer_detail_page.dart';
 
 class OrderDetailPage extends StatefulWidget {
@@ -85,7 +86,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               AppCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
-                    Icon(meta.icon, color: meta.color, size: 22),
+                    PlatformLogo(platformId: meta.id, size: 22),
                     const SizedBox(width: 10),
                     Text('#${(o['external_id'] ?? '').toString().toUpperCase()}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -249,7 +250,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         Text(context.t('orders.store'), style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         Row(children: [
-          Icon(meta.icon, color: meta.color, size: 20),
+          PlatformLogo(platformId: meta.id, size: 20),
           const SizedBox(width: 10),
           Expanded(child: Text(store?['name']?.toString() ?? meta.name,
               style: const TextStyle(fontWeight: FontWeight.w600))),

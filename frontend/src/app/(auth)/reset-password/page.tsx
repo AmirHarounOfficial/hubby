@@ -114,6 +114,7 @@ function ResetInner() {
           <Input
             label={c.newPassword}
             type="password"
+            autoComplete="new-password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -124,6 +125,7 @@ function ResetInner() {
           <Input
             label={c.confirmPassword}
             type="password"
+            autoComplete="new-password"
             placeholder="••••••••"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}

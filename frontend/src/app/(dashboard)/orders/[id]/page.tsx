@@ -14,9 +14,6 @@ import {
   MapPin, 
   Calendar,
   ExternalLink,
-  ShoppingBag,
-  Globe,
-  Zap,
   Store as StoreIcon,
   CheckCircle2,
   Clock,
@@ -24,13 +21,7 @@ import {
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import api from '@/lib/api';
-
-const platformIcons: Record<string, any> = {
-  shopify: { icon: ShoppingBag, color: 'text-green-500', label: 'Shopify' },
-  salla: { icon: Globe, color: 'text-primary', label: 'Salla' },
-  woocommerce: { icon: Zap, color: 'text-purple-600', label: 'WooCommerce' },
-  zid: { icon: StoreIcon, color: 'text-orange-500', label: 'Zid' },
-};
+import { PlatformLogo } from '@/components/ui/PlatformLogo';
 
 const statusConfig: Record<string, any> = {
   paid: { color: 'text-secondary bg-secondary/10', icon: CheckCircle2, label: 'Paid' },
@@ -101,7 +92,6 @@ export default function OrderDetailsPage() {
   }
 
   const StatusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
-  const PlatformInfo = platformIcons[order.store?.platform] || { icon: StoreIcon, color: 'text-muted-foreground', label: 'Other' };
 
   return (
     <div className="space-y-6 pb-20 print:pb-0">
@@ -324,8 +314,8 @@ export default function OrderDetailsPage() {
               Store Details
             </h3>
             <div className="p-4 rounded-2xl bg-accent/20 border border-border flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-xl bg-card flex items-center justify-center shadow-sm", PlatformInfo.color)}>
-                <PlatformInfo.icon size={24} />
+              <div className="w-10 h-10 rounded-xl bg-card flex items-center justify-center shadow-sm">
+                <PlatformLogo platform={order.store?.platform} size={24} />
               </div>
               <div>
                 <p className="text-xs font-bold">{order.store?.name}</p>

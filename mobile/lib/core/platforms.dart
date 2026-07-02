@@ -78,6 +78,12 @@ const List<PlatformMeta> kPlatforms = [
   ),
 ];
 
+/// Platform ids that ship a real brand logo under assets/platforms/{id}.svg.
+/// Anything else falls back to the Lucide icon in [PlatformMeta.icon].
+const Set<String> kPlatformLogoIds = {
+  'shopify', 'salla', 'amazon', 'noon', 'woocommerce', 'zid', 'trendyol',
+};
+
 final Map<String, PlatformMeta> _byId = {for (final p in kPlatforms) p.id: p};
 
 PlatformMeta platformFor(String? id) =>

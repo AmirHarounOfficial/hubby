@@ -15,6 +15,7 @@ import '../../l10n/strings.dart';
 import '../../shared/widgets/app_widgets.dart';
 import '../../shared/widgets/async_builder.dart';
 import '../../shared/widgets/money_text.dart';
+import '../../shared/widgets/platform_logo.dart';
 import '../stores/cubit/stores_cubit.dart';
 import 'order_detail_page.dart';
 
@@ -153,7 +154,7 @@ class _OrdersPageState extends State<OrdersPage> {
                     onRetry: _reload,
                     builder: (context, orders) {
                       if (orders.isEmpty) {
-                        return Center(child: Text(context.t('orders.none')));
+                        return EmptyState(icon: LucideIcons.shoppingCart, title: context.t('orders.none'));
                       }
                       return ListView.separated(
                         padding: const EdgeInsets.all(16),
@@ -168,7 +169,7 @@ class _OrdersPageState extends State<OrdersPage> {
                             onTap: () => Navigator.of(context).push(MaterialPageRoute(
                                 builder: (_) => OrderDetailPage(orderId: o['id'] as int))),
                             child: Row(children: [
-                              Icon(meta.icon, color: meta.color, size: 22),
+                              PlatformLogo(platformId: meta.id, size: 22),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(

@@ -68,6 +68,8 @@ class MoneyText extends StatelessWidget {
       style: base,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+      // The riyal glyph is a picture; give screen readers a spoken amount.
+      semanticsLabel: 'SAR $number$tail',
     );
   }
 }
