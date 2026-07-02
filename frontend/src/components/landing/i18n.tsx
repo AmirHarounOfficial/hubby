@@ -16,7 +16,7 @@ const en = {
     start: 'Start free',
   },
   hero: {
-    badge: 'Shopify · Salla · Amazon · Noon · Zid · WooCommerce',
+    badge: 'Shopify · Salla · Amazon · Noon · Zid · WooCommerce · Trendyol',
     title1: 'Command every store',
     title2: 'from one universe.',
     subtitle:
@@ -204,7 +204,7 @@ const ar: Dict = {
     start: 'ابدأ مجانًا',
   },
   hero: {
-    badge: 'سلة · شوبيفاي · أمازون · نون · زد · ووكومرس',
+    badge: 'سلة · شوبيفاي · أمازون · نون · زد · ووكومرس · ترينديول',
     title1: 'تحكّم في كل متاجرك',
     title2: 'من كونٍ واحد.',
     subtitle:

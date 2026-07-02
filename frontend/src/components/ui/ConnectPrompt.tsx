@@ -12,7 +12,7 @@ import Card from './Card';
  */
 export default function ConnectPrompt({
   title = 'No platforms connected yet',
-  description = 'Connect a store to start syncing your data here. You can link Shopify, Salla, Amazon, Noon, WooCommerce or Zid.',
+  description = 'Connect a store to start syncing your data here. You can link Shopify, Salla, Amazon, Noon, WooCommerce, Zid or Trendyol.',
 }: {
   title?: string;
   description?: string;
