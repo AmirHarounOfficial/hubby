@@ -8,6 +8,11 @@ RUN npm ci
 
 COPY . .
 
+# Commit stamp: when GIT_SHA changes this layer is invalidated, so the build
+# below always reruns instead of reusing a cached, stale frontend image.
+ARG GIT_SHA=unknown
+ENV NEXT_PUBLIC_GIT_SHA=$GIT_SHA
+
 RUN npm run build
 
 ENV NODE_ENV=production

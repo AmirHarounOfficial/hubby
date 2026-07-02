@@ -42,6 +42,10 @@ services:
     build:
       context: ./frontend
       dockerfile: ../docker/Dockerfile.frontend.prod
+      args:
+        # Busts the Docker build cache whenever the commit changes, so a deploy
+        # can never silently reuse a stale frontend image. Set by deploy.sh.
+        GIT_SHA: ${GIT_SHA:-unknown}
     # No host port — only nginx talks to it (frontend:3000) on the internal network.
     expose:
       - "3000"

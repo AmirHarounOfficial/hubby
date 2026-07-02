@@ -37,8 +37,12 @@ if [ -d .git ]; then
 fi
 
 # --- Build & start -------------------------------------------------------------
-echo "🐳 Building and starting containers..."
-docker compose up -d --build --remove-orphans
+# Stamp the current commit into the build so the frontend image cache is busted
+# on every deploy (a green deploy must never silently ship a stale image), and
+# force-recreate so containers always adopt the freshly built image.
+export GIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+echo "🐳 Building and starting containers (GIT_SHA=$GIT_SHA)..."
+docker compose up -d --build --force-recreate --remove-orphans
 
 # --- Wait for the database to accept connections -------------------------------
 # Plain PDO connection test (works even before the migrations table exists).
