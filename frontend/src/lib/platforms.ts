@@ -1,4 +1,4 @@
-import { ShoppingBag, Globe, Zap, Store, Package, Sun, type LucideIcon } from 'lucide-react';
+import { ShoppingBag, Globe, Zap, Store, Package, Sun, Tag, type LucideIcon } from 'lucide-react';
 
 /**
  * Single source of truth for the e-commerce platforms HubbyGlobal connects to.
@@ -10,7 +10,8 @@ export type PlatformId =
   | 'woocommerce'
   | 'zid'
   | 'amazon'
-  | 'noon';
+  | 'noon'
+  | 'trendyol';
 
 export interface PlatformMeta {
   id: PlatformId;
@@ -102,6 +103,18 @@ export const PLATFORMS: PlatformMeta[] = [
     domainPlaceholder: 'your-store.zid.store',
     tokenLabel: 'Access token',
     help: 'Zid dashboard → Settings → API & integrations.',
+  },
+  {
+    id: 'trendyol',
+    name: 'Trendyol',
+    icon: Tag,
+    color: 'text-[#F27A1A]',
+    auth: 'manual',
+    domainLabel: 'Supplier ID',
+    domainPlaceholder: '1234567',
+    tokenLabel: 'API Key',
+    secretLabel: 'API Secret',
+    help: 'Trendyol Seller Center → Account Info → Integration Information (API Key & Secret).',
   },
 ];
 

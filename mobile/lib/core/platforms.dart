@@ -69,6 +69,13 @@ const List<PlatformMeta> kPlatforms = [
     domainLabel: 'Store URL', domainHint: 'your-store.zid.store',
     tokenLabel: 'Access token', help: 'Zid dashboard → Settings → API.',
   ),
+  PlatformMeta(
+    id: 'trendyol', name: 'Trendyol', icon: LucideIcons.tag,
+    color: Color(0xFFF27A1A), auth: 'manual',
+    domainLabel: 'Supplier ID', domainHint: '1234567',
+    tokenLabel: 'API Key', secretLabel: 'API Secret',
+    help: 'Trendyol Seller Center → Account Info → Integration Information.',
+  ),
 ];
 
 final Map<String, PlatformMeta> _byId = {for (final p in kPlatforms) p.id: p};

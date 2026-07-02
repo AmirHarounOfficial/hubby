@@ -13,6 +13,7 @@ class IntegrationFactory
             'zid' => new ZidService(),
             'amazon' => new AmazonService(),
             'noon' => new NoonService(),
+            'trendyol' => new TrendyolService(),
             default => throw new \Exception("Platform [{$platform}] not supported"),
         };
     }

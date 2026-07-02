@@ -143,6 +143,24 @@ class SyncProductsJob implements ShouldQueue
             ];
         }
 
+        if ($this->store->platform === 'trendyol') {
+            return [
+                'name' => $data['title'] ?? $data['productName'] ?? '',
+                'sku' => $data['stockCode'] ?? $data['barcode'] ?? 'TRD-' . ($data['id'] ?? ''),
+                'description' => $data['description'] ?? null,
+                'price' => $data['salePrice'] ?? $data['listPrice'] ?? $data['price'] ?? 0,
+                'stock' => $data['quantity'] ?? $data['stock'] ?? 0,
+                'image_url' => $data['images'][0]['url'] ?? $data['imageUrl'] ?? null,
+                'variants' => array_map(fn($v) => [
+                    'external_id' => (string) ($v['id'] ?? $v['barcode'] ?? ''),
+                    'name' => $v['name'] ?? $v['attributeValue'] ?? '',
+                    'sku' => $v['stockCode'] ?? $v['barcode'] ?? 'TRD-VAR-' . ($v['id'] ?? ''),
+                    'price' => $v['salePrice'] ?? $v['price'] ?? 0,
+                    'stock' => $v['quantity'] ?? 0,
+                ], $data['variants'] ?? []),
+            ];
+        }
+
         return $data;
     }
 }

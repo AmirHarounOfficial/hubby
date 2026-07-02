@@ -85,6 +85,17 @@ return [
         'webhook_secret' => env('NOON_WEBHOOK_SECRET'),
     ],
 
+    // Trendyol Marketplace API — Basic auth (API Key + Secret) + Supplier ID.
+    // The merchant supplies these on the connect screen; the operator only needs
+    // to set the webhook secret if using Trendyol webhooks.
+    'trendyol' => [
+        'client_id' => env('TRENDYOL_CLIENT_ID'),       // API Key
+        'client_secret' => env('TRENDYOL_CLIENT_SECRET'), // API Secret
+        'supplier_id' => env('TRENDYOL_SUPPLIER_ID'),
+        'base_url' => env('TRENDYOL_BASE_URL', 'https://api.trendyol.com'),
+        'webhook_secret' => env('TRENDYOL_WEBHOOK_SECRET'),
+    ],
+
     // ---- edfapay payment gateway (sandbox-ready; fill in .env to enable) ----
     'edfapay' => [
         'merchant_key' => env('EDFAPAY_MERCHANT_KEY'),

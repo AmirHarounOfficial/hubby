@@ -61,5 +61,6 @@ class AppPalette {
     'noon': Color(0xFFEAB308),
     'woocommerce': Color(0xFF9333EA),
     'zid': Color(0xFFF97316),
+    'trendyol': Color(0xFFF27A1A),
   };
 }

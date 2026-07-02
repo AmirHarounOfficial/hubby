@@ -19,6 +19,7 @@ class WebhookController extends Controller
                  $request->header('X-WC-Webhook-Topic') ??
                  $request->header('X-Noon-Event') ??
                  $request->header('X-Amzn-Notification-Type') ??
+                 $request->header('X-Trendyol-Event') ??
                  ($payload['eventType'] ?? $payload['notificationType'] ?? 'unknown');
 
         switch ($platform) {
@@ -39,6 +40,9 @@ class WebhookController extends Controller
                 break;
             case 'noon':
                 $this->handleNoon($event, $payload);
+                break;
+            case 'trendyol':
+                $this->handleTrendyol($event, $payload);
                 break;
         }
 
@@ -93,6 +97,21 @@ class WebhookController extends Controller
             $orderId = $payload['data']['id'] ?? $payload['order_id'] ?? null;
             if ($orderId) {
                 SyncOrdersJob::dispatch($orderId, 'noon');
+            }
+        }
+    }
+
+    protected function handleTrendyol($event, $payload)
+    {
+        // Trendyol pushes order/package status events; pull the affected order.
+        if (stripos($event, 'order') !== false || stripos($event, 'package') !== false) {
+            $orderId = $payload['orderNumber']
+                ?? $payload['data']['orderNumber']
+                ?? $payload['data']['id']
+                ?? $payload['order_id']
+                ?? null;
+            if ($orderId) {
+                SyncOrdersJob::dispatch($orderId, 'trendyol');
             }
         }
     }

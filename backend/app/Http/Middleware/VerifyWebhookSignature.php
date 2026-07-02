@@ -42,6 +42,10 @@ class VerifyWebhookSignature
                 'X-WC-Webhook-Signature',
                 base64_encode(hash_hmac('sha256', $raw, $secret, true)),
             ],
+            'trendyol' => [
+                'X-Trendyol-Signature',
+                base64_encode(hash_hmac('sha256', $raw, $secret, true)),
+            ],
             default => [null, null],
         };
 

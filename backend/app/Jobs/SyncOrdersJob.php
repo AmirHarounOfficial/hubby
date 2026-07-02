@@ -146,6 +146,24 @@ class SyncOrdersJob implements ShouldQueue
             ];
         }
 
+        if ($this->store->platform === 'trendyol') {
+            return [
+                'external_id' => (string) ($data['orderNumber'] ?? $data['id']),
+                'status' => strtolower($data['status'] ?? $data['shipmentPackageStatus'] ?? 'pending'),
+                'total' => $data['totalPrice'] ?? $data['grossAmount'] ?? 0,
+                'currency' => $data['currencyCode'] ?? 'TRY',
+                'customer_name' => trim(($data['customerFirstName'] ?? '') . ' ' . ($data['customerLastName'] ?? '')),
+                'customer_email' => $data['customerEmail'] ?? null,
+                'items' => array_map(fn($item) => [
+                    'external_id' => (string) ($item['id'] ?? $item['lineItemId'] ?? ''),
+                    'name' => $item['productName'] ?? $item['name'] ?? '',
+                    'sku' => $item['sku'] ?? $item['merchantSku'] ?? $item['barcode'] ?? null,
+                    'quantity' => $item['quantity'] ?? 1,
+                    'price' => $item['price'] ?? $item['amount'] ?? 0,
+                ], $data['lines'] ?? $data['items'] ?? []),
+            ];
+        }
+
         return $data;
     }
 }
