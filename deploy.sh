@@ -28,13 +28,25 @@ fi
 
 # --- Sync to the latest origin/main (force, so a stuck/detached/diverged repo
 # can never silently rebuild stale code). .env and other ignored files are left
-# untouched. Fails loudly if it can't fetch instead of deploying old code. ------
-if [ -d .git ]; then
-  echo "📥 Syncing to origin/main..."
-  git fetch origin main
-  git reset --hard origin/main
-  echo "   now at: $(git rev-parse --short HEAD) $(git log -1 --pretty=%s)"
+# untouched. Fails LOUDLY instead of ever building stale code silently. ---------
+echo "📂 Deploy directory: $(pwd)"
+if [ ! -d .git ]; then
+  echo "❌ $(pwd) is not a git checkout — deploy.sh cannot sync new code here."
+  echo "   The site is likely served from a DIFFERENT directory than the one"
+  echo "   GitHub Actions deploys into. Fix DEPLOY_PATH (or re-clone here)."
+  exit 1
 fi
+echo "📥 Syncing to origin/main..."
+echo "   remote: $(git remote get-url origin)"
+git fetch origin main
+git reset --hard origin/main
+HEAD_SHA="$(git rev-parse HEAD)"
+ORIGIN_SHA="$(git rev-parse origin/main)"
+if [ "$HEAD_SHA" != "$ORIGIN_SHA" ]; then
+  echo "❌ After reset, HEAD ($HEAD_SHA) != origin/main ($ORIGIN_SHA). Aborting."
+  exit 1
+fi
+echo "   now at: $(git rev-parse --short HEAD) $(git log -1 --pretty=%s)"
 
 # --- Build & start -------------------------------------------------------------
 # Stamp the current commit into the build so the frontend image cache is busted
@@ -74,5 +86,27 @@ docker compose exec -T app php artisan optimize
 
 echo "🔁 Restarting Horizon workers..."
 docker compose exec -T app php artisan horizon:terminate || true
+
+# --- Post-deploy self-check ----------------------------------------------------
+# Prove the freshly built frontend container is actually serving current code.
+# A brand-new asset (public/platforms/shopify.svg) must resolve; if it 404s, the
+# container is running stale code and the "green" deploy is a lie — fail loudly.
+echo "🔎 Verifying the frontend is serving current code..."
+FE_OK=0
+for i in $(seq 1 10); do
+  CODE="$(docker compose exec -T frontend node -e '
+    fetch("http://127.0.0.1:3000/platforms/shopify.svg")
+      .then(r => { process.stdout.write(String(r.status)); process.exit(0); })
+      .catch(() => { process.stdout.write("000"); process.exit(0); });' 2>/dev/null || echo 000)"
+  if [ "$CODE" = "200" ]; then FE_OK=1; break; fi
+  sleep 3
+done
+if [ "$FE_OK" -ne 1 ]; then
+  echo "❌ Frontend is serving STALE code (platforms/shopify.svg not found)."
+  echo "   The image did not rebuild from current source. Investigate the build"
+  echo "   context / cache, then rerun. GIT_SHA built = $GIT_SHA"
+  exit 1
+fi
+echo "   frontend OK (serving current build, GIT_SHA=$GIT_SHA)"
 
 echo "✅ Deployment successful!  →  https://hubbynetwork.com"
