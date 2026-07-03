@@ -13,7 +13,8 @@ import {
   Users,
   Activity
 } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { 
@@ -78,9 +79,9 @@ export default function DashboardPage() {
   };
 
   const stats = [
-    { label: 'Total Revenue', value: formatCurrency(summary?.total_revenue || 0), change: summary?.revenue_change ?? null, icon: TrendingUp, color: 'text-primary' },
+    { label: 'Total Revenue', value: <Money amount={summary?.total_revenue || 0} />, change: summary?.revenue_change ?? null, icon: TrendingUp, color: 'text-primary' },
     { label: 'Orders', value: summary?.total_orders || 0, change: summary?.orders_change ?? null, icon: ShoppingCart, color: 'text-secondary' },
-    { label: 'Avg Order Value', value: formatCurrency(summary?.avg_order_value || 0), change: null, icon: ArrowUpRight, color: 'text-warning' },
+    { label: 'Avg Order Value', value: <Money amount={summary?.avg_order_value || 0} />, change: null, icon: ArrowUpRight, color: 'text-warning' },
     { label: 'Active Products', value: summary?.active_products || 0, change: null, icon: Package, color: 'text-primary' },
   ];
 
@@ -199,7 +200,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold">{formatCurrency(order.total)}</p>
+                  <p className="text-sm font-bold"><Money amount={order.total} /></p>
                   <div className="flex items-center gap-1 text-[8px] font-bold uppercase tracking-tighter text-primary mt-0.5">
                     <ArrowUpRight size={8} />
                     Details
@@ -252,7 +253,7 @@ export default function DashboardPage() {
                     <p className="text-[10px] text-muted-foreground">{customer.orders_count} Orders</p>
                   </div>
                 </div>
-                <span className="text-xs font-bold">{formatCurrency(customer.total_spent)}</span>
+                <span className="text-xs font-bold"><Money amount={customer.total_spent} /></span>
               </div>
             ))}
             {topCustomers.length === 0 && (

@@ -19,7 +19,8 @@ import {
   BarChart3,
   Image as ImageIcon
 } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import Modal from '@/components/ui/Modal';
 
@@ -155,7 +156,7 @@ export default function ProductDetailsPage() {
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-bold text-sm mb-2">Price</h3>
-                    <p className="text-2xl font-bold text-secondary">{formatCurrency(product.price)}</p>
+                    <p className="text-2xl font-bold text-secondary"><Money amount={product.price} /></p>
                   </div>
                   <div>
                     <h3 className="font-bold text-sm mb-2">Total Stock</h3>
@@ -209,7 +210,7 @@ export default function ProductDetailsPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-xs font-bold">{formatCurrency(pp.price || product.price)}</p>
+                      <p className="text-xs font-bold"><Money amount={pp.price || product.price} /></p>
                       <p className="text-[10px] text-muted-foreground">Platform Price</p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -296,7 +297,7 @@ export default function ProductDetailsPage() {
                     <p className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5">{variant.sku}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-bold">{formatCurrency(variant.price)}</p>
+                    <p className="text-xs font-bold"><Money amount={variant.price} /></p>
                     <p className="text-[10px] text-muted-foreground">{variant.stock} in stock</p>
                   </div>
                 </div>

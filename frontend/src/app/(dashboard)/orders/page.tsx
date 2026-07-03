@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { getPlatform } from '@/lib/platforms';
 import { PlatformLogo } from '@/components/ui/PlatformLogo';
@@ -225,7 +226,7 @@ export default function OrdersPage() {
                       <td className="px-6 py-4 text-xs text-muted-foreground">
                         {new Date(order.created_at).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 text-sm font-bold">{formatCurrency(order.total, order.currency)}</td>
+                      <td className="px-6 py-4 text-sm font-bold"><Money amount={order.total} currency={order.currency} /></td>
                       <td className="px-6 py-4">
                         <span className={cn(
                           "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight",

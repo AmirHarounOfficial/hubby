@@ -12,6 +12,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 
 export default function BillingPage() {
@@ -161,7 +162,7 @@ export default function BillingPage() {
                 <div>
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   <div className="flex items-baseline gap-1 mt-2">
-                    <span className="text-4xl font-bold tracking-tight">{formatCurrency(plan.price)}</span>
+                    <span className="text-4xl font-bold tracking-tight"><Money amount={plan.price} /></span>
                     <span className="text-muted-foreground text-sm">/mo</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-4 leading-relaxed">{plan.description}</p>

@@ -20,6 +20,7 @@ import {
   Store
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 
 const statusColors: Record<string, string> = {
@@ -107,7 +108,7 @@ export default function CustomerProfilePage() {
               </div>
               <div className="p-4 rounded-2xl bg-accent/20 border border-border text-center">
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Total Spend</p>
-                <p className="text-xl font-bold text-secondary">{formatCurrency(customer.total_spend, customer.currency)}</p>
+                <p className="text-xl font-bold text-secondary"><Money amount={customer.total_spend} currency={customer.currency} /></p>
               </div>
             </div>
 
@@ -184,7 +185,7 @@ export default function CustomerProfilePage() {
                       <td className="px-6 py-4 text-xs text-muted-foreground">
                         {new Date(order.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 font-medium">{formatCurrency(order.total, order.currency)}</td>
+                      <td className="px-6 py-4 font-medium"><Money amount={order.total} currency={order.currency} /></td>
                       <td className="px-6 py-4">
                         <span className={cn(
                           "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight",
@@ -239,7 +240,7 @@ export default function CustomerProfilePage() {
                     <div>
                       <p className="text-sm font-bold">{tier} Tier</p>
                       <p className="text-[10px] text-muted-foreground">
-                        Based on {formatCurrency(spend, customer.currency)} lifetime spend
+                        Based on <Money amount={spend} currency={customer.currency} /> lifetime spend
                       </p>
                     </div>
                   </div>

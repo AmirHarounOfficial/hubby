@@ -16,7 +16,8 @@ import {
   Edit2,
   Trash2
 } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 
 import Modal from '@/components/ui/Modal';
@@ -309,7 +310,7 @@ export default function ProductsPage() {
                   <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
                     <div className="flex flex-col">
                       <span className="text-[10px] text-muted-foreground font-medium uppercase">Price</span>
-                      <span className="font-bold">{formatCurrency(product.price)}</span>
+                      <span className="font-bold"><Money amount={product.price} /></span>
                     </div>
                     <div className="flex flex-col text-right">
                       <span className="text-[10px] text-muted-foreground font-medium uppercase">Stock</span>

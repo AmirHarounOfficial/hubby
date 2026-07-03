@@ -19,7 +19,8 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { PlatformLogo } from '@/components/ui/PlatformLogo';
 
@@ -190,9 +191,9 @@ export default function OrderDetailsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{item.sku || 'N/A'}</td>
-                      <td className="px-6 py-4">{formatCurrency(item.price, order.currency)}</td>
+                      <td className="px-6 py-4"><Money amount={item.price} currency={order.currency} /></td>
                       <td className="px-6 py-4 text-center">{item.quantity}</td>
-                      <td className="px-6 py-4 text-right font-bold">{formatCurrency(item.price * item.quantity, order.currency)}</td>
+                      <td className="px-6 py-4 text-right font-bold"><Money amount={item.price * item.quantity} currency={order.currency} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -201,12 +202,12 @@ export default function OrderDetailsPage() {
             <div className="p-6 bg-accent/10 flex flex-col items-end gap-2 border-t border-border">
               <div className="flex justify-between w-full max-w-[240px] text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatCurrency(order.total, order.currency)}</span>
+                <span><Money amount={order.total} currency={order.currency} /></span>
               </div>
               <div className="h-px bg-border w-full max-w-[240px] my-1"></div>
               <div className="flex justify-between w-full max-w-[240px] text-lg font-bold">
                 <span>Total</span>
-                <span className="text-primary">{formatCurrency(order.total, order.currency)}</span>
+                <span className="text-primary"><Money amount={order.total} currency={order.currency} /></span>
               </div>
             </div>
           </Card>
@@ -357,7 +358,7 @@ export default function OrderDetailsPage() {
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Total</span>
-                <span className="font-bold">{formatCurrency(order.total, order.currency)}</span>
+                <span className="font-bold"><Money amount={order.total} currency={order.currency} /></span>
               </div>
               {['paid', 'processing', 'shipped', 'delivered'].includes((order.status || '').toLowerCase()) && (
                 <div className="p-3 rounded-xl bg-secondary/5 border border-secondary/10 flex items-center gap-3">

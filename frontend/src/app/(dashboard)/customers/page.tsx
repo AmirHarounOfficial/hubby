@@ -15,7 +15,8 @@ import {
   Filter,
   Users
 } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { getPlatform } from '@/lib/platforms';
 import { PlatformLogo } from '@/components/ui/PlatformLogo';
@@ -159,7 +160,7 @@ export default function CustomersPage() {
                         <span className="px-2 py-1 rounded-lg bg-accent text-xs font-bold">{customer.total_orders}</span>
                       </td>
                       <td className="px-6 py-4 text-sm font-bold text-secondary">
-                        {formatCurrency(customer.total_spend, 'SAR')}
+                        <Money amount={customer.total_spend} currency="SAR" />
                       </td>
                       <td className="px-6 py-4 text-xs text-muted-foreground">
                         {new Date(customer.last_order_date).toLocaleDateString()}

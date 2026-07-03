@@ -17,7 +17,8 @@ import {
   Cell,
 } from 'recharts';
 import { TrendingUp, ShoppingBag, DollarSign, Package, Download } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -95,7 +96,7 @@ export default function AnalyticsPage() {
   const kpis = [
     {
       label: 'Total Revenue',
-      value: formatCurrency(summary?.total_revenue ?? 0),
+      value: <Money amount={summary?.total_revenue ?? 0} />,
       trend: summary?.revenue_change,
       icon: DollarSign,
       color: 'text-secondary',
@@ -109,7 +110,7 @@ export default function AnalyticsPage() {
     },
     {
       label: 'Avg Order Value',
-      value: formatCurrency(summary?.avg_order_value ?? 0),
+      value: <Money amount={summary?.avg_order_value ?? 0} />,
       trend: null,
       icon: TrendingUp,
       color: 'text-purple-500',
