@@ -96,5 +96,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_stop: true
           script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            ./deploy.sh
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            echo "▶ Deploying in: $(pwd)"
+            # Guard against git 'detected dubious ownership' when the dir is owned
+            # by another user (e.g. www-data) than the SSH login user.
+            git config --global --add safe.directory "$(pwd)" || true
+            # Prove this is the repo that actually serves the site before building.
+            echo "▶ Remote: $(git remote get-url origin 2>/dev/null || echo 'NOT A GIT REPO')"
+            bash ./deploy.sh
