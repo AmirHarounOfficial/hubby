@@ -22,8 +22,10 @@ import { getPlatform } from '@/lib/platforms';
 import { PlatformLogo } from '@/components/ui/PlatformLogo';
 import { useStores } from '@/components/providers/StoresProvider';
 import ConnectPrompt from '@/components/ui/ConnectPrompt';
+import { useT } from '@/i18n';
 
 export default function CustomersPage() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { connectedPlatforms, hasConnectedStore, loading: storesLoading } = useStores();
@@ -72,39 +74,39 @@ export default function CustomersPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
             <Users className="text-primary" />
-            Customers
+            {t('customers.title')}
           </h1>
-          <p className="text-muted-foreground text-sm">View and manage your cross-platform customer base.</p>
+          <p className="text-muted-foreground text-sm">{t('customers.subtitle')}</p>
         </div>
       </div>
 
       {!storesLoading && !hasConnectedStore ? (
-        <ConnectPrompt description="Connect a store to see customers from your orders here." />
+        <ConnectPrompt description={t('customers.connectPrompt')} />
       ) : (
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-border bg-card/30 space-y-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-              <Input 
-                placeholder="Search by name or email..." 
-                className="pl-10" 
+              <Input
+                placeholder={t('customers.searchPlaceholder')}
+                className="pl-10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground mr-2">Platform:</span>
+              <span className="text-xs text-muted-foreground mr-2">{t('customers.platformLabel')}</span>
               {['All', ...connectedPlatforms.map((p) => getPlatform(p).name)].map((p) => (
-                <button 
-                  key={p} 
+                <button
+                  key={p}
                   onClick={() => setPlatform(p)}
                   className={cn(
                     "px-3 py-1.5 text-xs rounded-lg border border-border hover:bg-accent transition-all",
                     p === platform ? "bg-primary text-white border-primary" : "bg-background"
                   )}
                 >
-                  {p}
+                  {p === 'All' ? t('customers.allPlatforms') : p}
                 </button>
               ))}
             </div>
@@ -120,13 +122,13 @@ export default function CustomersPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-accent/50 text-muted-foreground text-[10px] uppercase tracking-wider font-bold">
-                  <th className="px-6 py-4">Customer</th>
-                  <th className="px-6 py-4">Email</th>
-                  <th className="px-6 py-4">Sources</th>
-                  <th className="px-6 py-4 text-center">Total Orders</th>
-                  <th className="px-6 py-4">Total Spend</th>
-                  <th className="px-6 py-4">Last Order</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+                  <th className="px-6 py-4">{t('customers.colCustomer')}</th>
+                  <th className="px-6 py-4">{t('customers.colEmail')}</th>
+                  <th className="px-6 py-4">{t('customers.colSources')}</th>
+                  <th className="px-6 py-4 text-center">{t('customers.colTotalOrders')}</th>
+                  <th className="px-6 py-4">{t('customers.colTotalSpend')}</th>
+                  <th className="px-6 py-4">{t('customers.colLastOrder')}</th>
+                  <th className="px-6 py-4 text-right">{t('customers.colAction')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -143,7 +145,7 @@ export default function CustomersPage() {
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
                             {customer.name?.charAt(0) || 'C'}
                           </div>
-                          <span className="text-sm font-medium">{customer.name || 'Anonymous'}</span>
+                          <span className="text-sm font-medium">{customer.name || t('customers.anonymous')}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-xs text-muted-foreground">{customer.customer_email}</td>
@@ -176,7 +178,7 @@ export default function CustomersPage() {
                 {customers.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-6 py-20 text-center text-muted-foreground">
-                      No customers found.
+                      {t('customers.noCustomers')}
                     </td>
                   </tr>
                 )}
@@ -188,7 +190,7 @@ export default function CustomersPage() {
         {meta && meta.last_page > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-border text-sm">
             <span className="text-muted-foreground text-xs">
-              Page {meta.current_page} of {meta.last_page} · {meta.total} customers
+              {t('customers.page')} {meta.current_page} {t('customers.of')} {meta.last_page} · {meta.total} {t('customers.customersWord')}
             </span>
             <div className="flex items-center gap-2">
               <Button
@@ -197,7 +199,7 @@ export default function CustomersPage() {
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
-                Previous
+                {t('customers.previous')}
               </Button>
               <Button
                 variant="outline"
@@ -205,7 +207,7 @@ export default function CustomersPage() {
                 disabled={page >= meta.last_page}
                 onClick={() => setPage((p) => p + 1)}
               >
-                Next
+                {t('customers.next')}
               </Button>
             </div>
           </div>

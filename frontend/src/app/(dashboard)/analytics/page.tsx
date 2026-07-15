@@ -20,6 +20,7 @@ import { TrendingUp, ShoppingBag, DollarSign, Package, Download } from 'lucide-r
 import { cn } from '@/lib/utils';
 import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
+import { useT } from '@/i18n';
 
 const PLATFORM_COLORS: Record<string, string> = {
   shopify: '#10B981',
@@ -38,6 +39,7 @@ type Summary = {
 };
 
 export default function AnalyticsPage() {
+  const t = useT();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [platforms, setPlatforms] = useState<any[]>([]);
@@ -90,33 +92,33 @@ export default function AnalyticsPage() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-full">Loading...</div>;
+    return <div className="flex items-center justify-center h-full">{t('analytics.loading')}</div>;
   }
 
   const kpis = [
     {
-      label: 'Total Revenue',
+      label: t('analytics.kpis.totalRevenue'),
       value: <Money amount={summary?.total_revenue ?? 0} />,
       trend: summary?.revenue_change,
       icon: DollarSign,
       color: 'text-secondary',
     },
     {
-      label: 'Total Orders',
+      label: t('analytics.kpis.totalOrders'),
       value: (summary?.total_orders ?? 0).toLocaleString(),
       trend: summary?.orders_change,
       icon: ShoppingBag,
       color: 'text-primary',
     },
     {
-      label: 'Avg Order Value',
+      label: t('analytics.kpis.avgOrderValue'),
       value: <Money amount={summary?.avg_order_value ?? 0} />,
       trend: null,
       icon: TrendingUp,
       color: 'text-purple-500',
     },
     {
-      label: 'Active Products',
+      label: t('analytics.kpis.activeProducts'),
       value: (summary?.active_products ?? 0).toLocaleString(),
       trend: null,
       icon: Package,
@@ -128,15 +130,15 @@ export default function AnalyticsPage() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground text-sm">Deep dive into your store performance over the last 30 days.</p>
+          <h1 className="text-2xl font-bold">{t('analytics.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('analytics.subtitle')}</p>
         </div>
         <button
           onClick={downloadReport}
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
         >
           <Download size={16} />
-          Download Report
+          {t('analytics.downloadReport')}
         </button>
       </div>
 
@@ -165,10 +167,10 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="p-6 flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-lg">Revenue Overview</h3>
+            <h3 className="font-bold text-lg">{t('analytics.revenueOverview')}</h3>
             <div className="flex items-center gap-2 text-xs">
               <div className="w-3 h-3 rounded-full bg-primary"></div>
-              <span>Last 30 days</span>
+              <span>{t('analytics.last30Days')}</span>
             </div>
           </div>
           <div className="h-[300px] w-full">
@@ -192,11 +194,11 @@ export default function AnalyticsPage() {
 
         <Card className="p-6 flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-lg">Platform Share</h3>
-            <span className="text-xs text-muted-foreground">Order volume by platform</span>
+            <h3 className="font-bold text-lg">{t('analytics.platformShare')}</h3>
+            <span className="text-xs text-muted-foreground">{t('analytics.platformShareSubtitle')}</span>
           </div>
           {platformShare.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">No order data yet.</div>
+            <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">{t('analytics.noOrderData')}</div>
           ) : (
             <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-8">
               <div className="h-[250px] w-[250px]">
@@ -228,7 +230,7 @@ export default function AnalyticsPage() {
       </div>
 
       <Card className="p-6 flex flex-col gap-6">
-        <h3 className="font-bold text-lg">Daily Orders</h3>
+        <h3 className="font-bold text-lg">{t('analytics.dailyOrders')}</h3>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={timeline}>

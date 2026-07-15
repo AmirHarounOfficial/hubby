@@ -18,12 +18,13 @@ import {
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
+import { useT } from '@/i18n';
 
 const tabs = [
-  { id: 'profile', label: 'Profile', icon: User },
-  { id: 'organization', label: 'Organization', icon: Building2 },
-  { id: 'security', label: 'Security', icon: Lock },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'profile', icon: User },
+  { id: 'organization', icon: Building2 },
+  { id: 'security', icon: Lock },
+  { id: 'notifications', icon: Bell },
 ];
 
 function Banner({ message, kind }: { message: string; kind: 'success' | 'error' }) {
@@ -43,6 +44,7 @@ function Banner({ message, kind }: { message: string; kind: 'success' | 'error' 
 }
 
 export default function SettingsPage() {
+  const t = useT();
   const [activeTab, setActiveTab] = useState('profile');
 
   const user = useAuthStore((s) => s.user);
@@ -97,9 +99,9 @@ export default function SettingsPage() {
     try {
       const res = await api.put('/profile', { name, email });
       setUser({ name: res.data.name, email: res.data.email });
-      setProfileMsg({ k: 'success', m: 'Profile updated.' });
+      setProfileMsg({ k: 'success', m: t('settings.profile.updated') });
     } catch (err: any) {
-      setProfileMsg({ k: 'error', m: err.response?.data?.message || 'Could not update profile.' });
+      setProfileMsg({ k: 'error', m: err.response?.data?.message || t('settings.profile.error') });
     } finally {
       setSavingProfile(false);
     }
@@ -113,9 +115,9 @@ export default function SettingsPage() {
     try {
       const res = await api.put('/organization', { name: orgName });
       updateOrganizationName(activeOrg.id, res.data.name);
-      setOrgMsg({ k: 'success', m: 'Organization updated.' });
+      setOrgMsg({ k: 'success', m: t('settings.organization.updated') });
     } catch (err: any) {
-      setOrgMsg({ k: 'error', m: err.response?.data?.message || 'Could not update organization.' });
+      setOrgMsg({ k: 'error', m: err.response?.data?.message || t('settings.organization.error') });
     } finally {
       setSavingOrg(false);
     }
@@ -134,11 +136,11 @@ export default function SettingsPage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      setPwMsg({ k: 'success', m: 'Password updated.' });
+      setPwMsg({ k: 'success', m: t('settings.security.updated') });
     } catch (err: any) {
       const errors = err.response?.data?.errors;
       const first = errors ? (Object.values(errors)[0] as string[])[0] : null;
-      setPwMsg({ k: 'error', m: first || err.response?.data?.message || 'Could not update password.' });
+      setPwMsg({ k: 'error', m: first || err.response?.data?.message || t('settings.security.error') });
     } finally {
       setSavingPw(false);
     }
@@ -147,8 +149,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-muted-foreground text-sm">Manage your personal preferences and organization settings.</p>
+        <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
+        <p className="text-muted-foreground text-sm">{t('settings.subtitle')}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -165,7 +167,7 @@ export default function SettingsPage() {
               )}
             >
               <tab.icon size={18} />
-              {tab.label}
+              {t(`settings.tabs.${tab.id}`)}
             </button>
           ))}
         </aside>
@@ -179,22 +181,22 @@ export default function SettingsPage() {
                     {(name || user?.name || '?').charAt(0)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold">Your Profile</h3>
-                    <p className="text-sm text-muted-foreground">This information is displayed across the platform.</p>
+                    <h3 className="text-lg font-bold">{t('settings.profile.title')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('settings.profile.desc')}</p>
                   </div>
                 </div>
 
                 {profileMsg && <Banner message={profileMsg.m} kind={profileMsg.k} />}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input label="Full Name" value={name} onChange={(e) => setName(e.target.value)} required />
-                  <Input label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input label={t('settings.profile.fullName')} value={name} onChange={(e) => setName(e.target.value)} required />
+                  <Input label={t('settings.profile.email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
 
                 <div className="flex justify-end">
                   <Button type="submit" isLoading={savingProfile}>
                     <Save size={16} className="mr-2" />
-                    Save Changes
+                    {t('settings.profile.save')}
                   </Button>
                 </div>
               </form>
@@ -205,19 +207,19 @@ export default function SettingsPage() {
             <Card className="p-8">
               <form onSubmit={saveOrg} className="space-y-8">
                 <div>
-                  <h3 className="text-lg font-bold">Organization Settings</h3>
-                  <p className="text-sm text-muted-foreground">Manage your company details.</p>
+                  <h3 className="text-lg font-bold">{t('settings.organization.title')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('settings.organization.desc')}</p>
                 </div>
 
                 {orgMsg && <Banner message={orgMsg.m} kind={orgMsg.k} />}
 
                 <div className="space-y-6">
-                  <Input label="Organization Name" value={orgName} onChange={(e) => setOrgName(e.target.value)} required />
+                  <Input label={t('settings.organization.name')} value={orgName} onChange={(e) => setOrgName(e.target.value)} required />
                 </div>
 
                 <div className="flex justify-end">
                   <Button type="submit" isLoading={savingOrg} disabled={!activeOrg}>
-                    Update Organization
+                    {t('settings.organization.update')}
                   </Button>
                 </div>
               </form>
@@ -228,22 +230,22 @@ export default function SettingsPage() {
             <Card className="p-8">
               <form onSubmit={savePassword} className="space-y-8">
                 <div>
-                  <h3 className="text-base font-bold">Change Password</h3>
-                  <p className="text-sm text-muted-foreground">Use at least 8 characters.</p>
+                  <h3 className="text-base font-bold">{t('settings.security.title')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('settings.security.desc')}</p>
                 </div>
 
                 {pwMsg && <Banner message={pwMsg.m} kind={pwMsg.k} />}
 
                 <div className="grid grid-cols-1 gap-4">
-                  <Input label="Current Password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
-                  <Input label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
-                  <Input label="Confirm New Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                  <Input label={t('settings.security.currentPassword')} type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+                  <Input label={t('settings.security.newPassword')} type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                  <Input label={t('settings.security.confirmPassword')} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                 </div>
 
                 <div className="flex justify-end">
                   <Button type="submit" isLoading={savingPw}>
                     <ShieldCheck size={16} className="mr-2" />
-                    Update Password
+                    {t('settings.security.update')}
                   </Button>
                 </div>
               </form>
@@ -253,16 +255,16 @@ export default function SettingsPage() {
           {activeTab === 'notifications' && (
             <Card className="p-8 space-y-8">
               <div>
-                <h3 className="text-lg font-bold">Email Notifications</h3>
-                <p className="text-sm text-muted-foreground">Choose what notifications you want to receive.</p>
+                <h3 className="text-lg font-bold">{t('settings.notifications.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('settings.notifications.desc')}</p>
               </div>
 
               <div className="space-y-4">
                 {[
-                  { key: 'new_orders', label: 'New Orders', desc: 'Receive an email for every new order.', icon: ShoppingBag },
-                  { key: 'inventory_alerts', label: 'Inventory Alerts', desc: 'Get notified when stock levels are low.', icon: Box },
-                  { key: 'security_updates', label: 'Security Updates', desc: 'Important account security notifications.', icon: Lock },
-                  { key: 'marketing', label: 'Marketing', desc: 'Tips, features, and platform updates.', icon: Zap },
+                  { key: 'new_orders', label: t('settings.notifications.items.newOrders.label'), desc: t('settings.notifications.items.newOrders.desc'), icon: ShoppingBag },
+                  { key: 'inventory_alerts', label: t('settings.notifications.items.inventoryAlerts.label'), desc: t('settings.notifications.items.inventoryAlerts.desc'), icon: Box },
+                  { key: 'security_updates', label: t('settings.notifications.items.securityUpdates.label'), desc: t('settings.notifications.items.securityUpdates.desc'), icon: Lock },
+                  { key: 'marketing', label: t('settings.notifications.items.marketing.label'), desc: t('settings.notifications.items.marketing.desc'), icon: Zap },
                 ].map((item) => (
                   <NotificationToggle
                     key={item.key}

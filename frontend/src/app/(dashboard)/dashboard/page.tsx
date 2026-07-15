@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { useT } from '@/i18n';
 import { 
   BarChart, 
   Bar, 
@@ -30,6 +31,7 @@ import {
 } from 'recharts';
 
 export default function DashboardPage() {
+  const t = useT();
   const router = useRouter();
   const [summary, setSummary] = useState<any>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
@@ -68,7 +70,7 @@ export default function DashboardPage() {
     setIsSyncing(true);
     try {
       await api.post('/stores/sync-all');
-      alert('Syncing started for all stores! Data will update shortly.');
+      alert(t('dashboard.syncStarted'));
       // Refresh after a delay to show new data
       setTimeout(fetchDashboardData, 5000);
     } catch (err) {
@@ -79,22 +81,22 @@ export default function DashboardPage() {
   };
 
   const stats = [
-    { label: 'Total Revenue', value: <Money amount={summary?.total_revenue || 0} />, change: summary?.revenue_change ?? null, icon: TrendingUp, color: 'text-primary' },
-    { label: 'Orders', value: summary?.total_orders || 0, change: summary?.orders_change ?? null, icon: ShoppingCart, color: 'text-secondary' },
-    { label: 'Avg Order Value', value: <Money amount={summary?.avg_order_value || 0} />, change: null, icon: ArrowUpRight, color: 'text-warning' },
-    { label: 'Active Products', value: summary?.active_products || 0, change: null, icon: Package, color: 'text-primary' },
+    { label: t('dashboard.stats.totalRevenue'), value: <Money amount={summary?.total_revenue || 0} />, change: summary?.revenue_change ?? null, icon: TrendingUp, color: 'text-primary' },
+    { label: t('dashboard.stats.orders'), value: summary?.total_orders || 0, change: summary?.orders_change ?? null, icon: ShoppingCart, color: 'text-secondary' },
+    { label: t('dashboard.stats.avgOrderValue'), value: <Money amount={summary?.avg_order_value || 0} />, change: null, icon: ArrowUpRight, color: 'text-warning' },
+    { label: t('dashboard.stats.activeProducts'), value: summary?.active_products || 0, change: null, icon: Package, color: 'text-primary' },
   ];
 
   if (isLoading && !timeline.length) {
-    return <div className="flex items-center justify-center h-full">Loading...</div>;
+    return <div className="flex items-center justify-center h-full">{t('dashboard.loading')}</div>;
   }
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Welcome back to Hubby dashboard.</p>
+          <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('dashboard.welcome')}</p>
         </div>
         <button 
           onClick={handleSyncAll}
@@ -105,7 +107,7 @@ export default function DashboardPage() {
           )}
         >
           <RefreshCw size={14} className={cn(isSyncing && "animate-spin")} />
-          {isSyncing ? 'Syncing...' : 'Sync All Stores'}
+          {isSyncing ? t('dashboard.syncing') : t('dashboard.syncAll')}
         </button>
       </div>
 
@@ -139,16 +141,16 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <h3 className="font-bold flex items-center gap-2">
               <Activity size={18} className="text-primary" />
-              Revenue Growth
+              {t('dashboard.revenueGrowth')}
             </h3>
             <select 
               value={revenueRange}
               onChange={(e) => setRevenueRange(e.target.value)}
               className="bg-background border border-border rounded-lg px-2 py-1 text-xs outline-none cursor-pointer hover:border-primary/50 transition-all"
             >
-              <option value="7">Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
+              <option value="7">{t('dashboard.last7Days')}</option>
+              <option value="30">{t('dashboard.last30Days')}</option>
+              <option value="90">{t('dashboard.last90Days')}</option>
             </select>
           </div>
           <div className="h-[350px] w-full">
@@ -174,12 +176,12 @@ export default function DashboardPage() {
 
         <Card className="p-6 flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold">Recent Orders</h3>
-            <button 
+            <h3 className="font-bold">{t('dashboard.recentOrders')}</h3>
+            <button
               onClick={() => router.push('/orders')}
               className="text-xs text-primary hover:underline font-bold"
             >
-              View All
+              {t('dashboard.viewAll')}
             </button>
           </div>
           
@@ -195,22 +197,22 @@ export default function DashboardPage() {
                     #{order.external_id?.slice(-4).toUpperCase() || 'ORD'}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{order.customer_name || 'Guest Customer'}</p>
-                    <p className="text-[10px] text-muted-foreground">{order.store?.platform || 'Direct'} • {new Date(order.created_at).toLocaleDateString()}</p>
+                    <p className="text-sm font-medium">{order.customer_name || t('dashboard.guestCustomer')}</p>
+                    <p className="text-[10px] text-muted-foreground">{order.store?.platform || t('dashboard.direct')} • {new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold"><Money amount={order.total} /></p>
                   <div className="flex items-center gap-1 text-[8px] font-bold uppercase tracking-tighter text-primary mt-0.5">
                     <ArrowUpRight size={8} />
-                    Details
+                    {t('dashboard.details')}
                   </div>
                 </div>
               </div>
             ))}
             {recentOrders.length === 0 && (
               <div className="text-center py-10 text-muted-foreground text-sm">
-                No orders yet.
+                {t('dashboard.noOrders')}
               </div>
             )}
           </div>
@@ -221,7 +223,7 @@ export default function DashboardPage() {
         <Card className="p-6 space-y-6">
           <h4 className="font-bold text-sm flex items-center gap-2">
             <BarChart3 size={16} className="text-secondary" />
-            Orders by Day
+            {t('dashboard.ordersByDay')}
           </h4>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -239,7 +241,7 @@ export default function DashboardPage() {
         <Card className="p-6 space-y-6">
           <h4 className="font-bold text-sm flex items-center gap-2">
             <Users size={16} className="text-purple-500" />
-            Top Customers
+            {t('dashboard.topCustomers')}
           </h4>
           <div className="space-y-4">
             {topCustomers.map((customer, index) => (
@@ -249,15 +251,15 @@ export default function DashboardPage() {
                     {customer.customer_name?.charAt(0) || 'G'}
                   </div>
                   <div>
-                    <p className="text-xs font-bold">{customer.customer_name || 'Guest'}</p>
-                    <p className="text-[10px] text-muted-foreground">{customer.orders_count} Orders</p>
+                    <p className="text-xs font-bold">{customer.customer_name || t('dashboard.guest')}</p>
+                    <p className="text-[10px] text-muted-foreground">{customer.orders_count} {t('dashboard.ordersWord')}</p>
                   </div>
                 </div>
                 <span className="text-xs font-bold"><Money amount={customer.total_spent} /></span>
               </div>
             ))}
             {topCustomers.length === 0 && (
-              <p className="text-xs text-muted-foreground">Recent customer insights will appear here as orders flow in.</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.topCustomersEmpty')}</p>
             )}
           </div>
         </Card>
@@ -267,14 +269,14 @@ export default function DashboardPage() {
             <RefreshCw size={24} className="animate-spin-slow" />
           </div>
           <div>
-            <h4 className="font-bold text-sm">System Health</h4>
-            <p className="text-xs text-muted-foreground mt-1">Backend services are connected. Analytics updated in real-time.</p>
+            <h4 className="font-bold text-sm">{t('dashboard.systemHealth')}</h4>
+            <p className="text-xs text-muted-foreground mt-1">{t('dashboard.systemHealthDesc')}</p>
           </div>
-          <button 
+          <button
             onClick={() => router.push('/settings')}
             className="text-xs font-bold text-primary hover:underline"
           >
-            View System Status
+            {t('dashboard.viewSystemStatus')}
           </button>
         </Card>
       </div>

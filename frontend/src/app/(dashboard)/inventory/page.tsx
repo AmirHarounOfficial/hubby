@@ -22,8 +22,10 @@ import api from '@/lib/api';
 import { useStores } from '@/components/providers/StoresProvider';
 import { useToast } from '@/components/ui/Toast';
 import ConnectPrompt from '@/components/ui/ConnectPrompt';
+import { useT } from '@/i18n';
 
 export default function InventoryPage() {
+  const t = useT();
   const { stores, hasConnectedStore, loading: storesLoading } = useStores();
   const { toast } = useToast();
   const [inventory, setInventory] = useState<any[]>([]);
@@ -53,7 +55,7 @@ export default function InventoryPage() {
     if (!adjustItem) return;
     const delta = parseInt(change, 10);
     if (Number.isNaN(delta) || delta === 0) {
-      setAdjustError('Enter a non-zero change (e.g. 10 or -5).');
+      setAdjustError(t('inventory.nonZeroError'));
       return;
     }
     setSubmitting(true);
@@ -68,7 +70,7 @@ export default function InventoryPage() {
       setAdjustItem(null);
       await fetchData();
     } catch (err: any) {
-      setAdjustError(err.response?.data?.message || 'Failed to adjust stock.');
+      setAdjustError(err.response?.data?.message || t('inventory.adjustFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -109,45 +111,45 @@ export default function InventoryPage() {
   });
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-full">Loading...</div>;
+    return <div className="flex items-center justify-center h-full">{t('inventory.loading')}</div>;
   }
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Inventory</h1>
-          <p className="text-muted-foreground text-sm">Monitor and sync stock levels across all sales channels.</p>
+          <h1 className="text-2xl font-bold">{t('inventory.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('inventory.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm">
             <History size={16} className="mr-2" />
-            Stock History
+            {t('inventory.stockHistory')}
           </Button>
           <Button
             variant="primary"
             size="sm"
             onClick={async () => {
               if (!hasConnectedStore) {
-                toast('Connect a store first to sync inventory.', 'info');
+                toast(t('inventory.connectFirst'), 'info');
                 return;
               }
               try {
                 await api.post('/stores/sync-all');
-                toast('Global sync started across your connected stores.', 'success');
+                toast(t('inventory.syncStarted'), 'success');
               } catch {
-                toast('Could not start the sync.', 'error');
+                toast(t('inventory.syncFailed'), 'error');
               }
             }}
           >
             <RefreshCw size={16} className="mr-2" />
-            Push Global Sync
+            {t('inventory.pushGlobalSync')}
           </Button>
         </div>
       </div>
 
       {!storesLoading && !hasConnectedStore ? (
-        <ConnectPrompt description="Connect a store to start tracking and syncing inventory across your channels." />
+        <ConnectPrompt description={t('inventory.connectDescription')} />
       ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
@@ -155,18 +157,18 @@ export default function InventoryPage() {
             <div className="p-4 border-b border-border bg-card/30 flex items-center justify-between">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <Input 
-                  placeholder="Search by SKU or Product..." 
-                  className="pl-10" 
+                <Input
+                  placeholder={t('inventory.searchPlaceholder')}
+                  className="pl-10"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <div className="flex gap-2">
                 {([
-                  { k: 'all', label: 'All' },
-                  { k: 'low', label: 'Low Stock' },
-                  { k: 'out', label: 'Out of Stock' },
+                  { k: 'all', label: t('inventory.filterAll') },
+                  { k: 'low', label: t('inventory.filterLow') },
+                  { k: 'out', label: t('inventory.filterOut') },
                 ] as const).map((f) => (
                   <button
                     key={f.k}
@@ -188,11 +190,11 @@ export default function InventoryPage() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-accent/50 text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
-                    <th className="px-6 py-4">Product / SKU</th>
-                    <th className="px-6 py-4">Current Stock</th>
-                    <th className="px-6 py-4">Stores</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <th className="px-6 py-4">{t('inventory.colProduct')}</th>
+                    <th className="px-6 py-4">{t('inventory.colStock')}</th>
+                    <th className="px-6 py-4">{t('inventory.colStores')}</th>
+                    <th className="px-6 py-4">{t('inventory.colStatus')}</th>
+                    <th className="px-6 py-4 text-right">{t('inventory.colActions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -206,7 +208,7 @@ export default function InventoryPage() {
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
                             <span className="text-sm font-semibold">{item.name}</span>
-                            <span className="text-[10px] font-mono text-primary font-bold">{item.sku || 'NO-SKU'}</span>
+                            <span className="text-[10px] font-mono text-primary font-bold">{item.sku || t('inventory.noSku')}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -217,11 +219,11 @@ export default function InventoryPage() {
                             )}>
                               {totalStock}
                             </span>
-                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Units</span>
+                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{t('inventory.units')}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-xs font-medium">
-                          {item.stores?.length || 0} Connected
+                          {item.stores?.length || 0} {t('inventory.connected')}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
@@ -236,7 +238,7 @@ export default function InventoryPage() {
                               "text-[10px] font-bold uppercase tracking-widest",
                               isOut ? "text-destructive" : isLow ? "text-warning" : "text-secondary"
                             )}>
-                              {isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Sync'}
+                              {isOut ? t('inventory.statusOut') : isLow ? t('inventory.statusLow') : t('inventory.statusInSync')}
                             </span>
                           </div>
                         </td>
@@ -246,7 +248,7 @@ export default function InventoryPage() {
                             size="xs"
                             onClick={() => openAdjust(item)}
                           >
-                            Adjust
+                            {t('inventory.adjust')}
                           </Button>
                         </td>
                       </tr>
@@ -262,7 +264,7 @@ export default function InventoryPage() {
           <Card className="p-6 flex flex-col gap-6">
             <h3 className="font-bold text-lg flex items-center gap-2">
               <History size={20} className="text-primary" />
-              Recent Adjustments
+              {t('inventory.recentAdjustments')}
             </h3>
             <div className="space-y-4">
               {logs.map((log) => (
@@ -275,7 +277,7 @@ export default function InventoryPage() {
                       {log.change > 0 ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold">{log.product?.name || 'Unknown Product'}</p>
+                      <p className="text-sm font-bold">{log.product?.name || t('inventory.unknownProduct')}</p>
                       <p className="text-[10px] text-muted-foreground">{log.source} • {new Date(log.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
@@ -288,7 +290,7 @@ export default function InventoryPage() {
                 </div>
               ))}
             </div>
-            <Button variant="ghost" size="sm" className="w-full text-xs font-bold">View Full Audit Log</Button>
+            <Button variant="ghost" size="sm" className="w-full text-xs font-bold">{t('inventory.viewFullAuditLog')}</Button>
           </Card>
 
           <Card className="p-6 bg-primary/5 border-primary/20 space-y-4">
@@ -296,11 +298,10 @@ export default function InventoryPage() {
               <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                 <RefreshCw size={20} />
               </div>
-              <h4 className="font-bold text-sm">Automatic Syncing</h4>
+              <h4 className="font-bold text-sm">{t('inventory.automaticSyncing')}</h4>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Stock levels are kept in sync across every connected store. Adjust a
-              variant once and it propagates from the master store.
+              {t('inventory.automaticSyncingDesc')}
             </p>
             {(() => {
               const connected = stores.filter((s) => s.status === 'connected').length;
@@ -308,7 +309,7 @@ export default function InventoryPage() {
               return (
                 <div className="pt-2">
                   <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                    <span>Stores Connected</span>
+                    <span>{t('inventory.storesConnected')}</span>
                     <span className="text-secondary">{connected}/{stores.length}</span>
                   </div>
                   <div className="w-full bg-accent h-1.5 rounded-full overflow-hidden">
@@ -325,7 +326,7 @@ export default function InventoryPage() {
       <Modal
         isOpen={!!adjustItem}
         onClose={() => setAdjustItem(null)}
-        title={`Adjust stock — ${adjustItem?.name ?? ''}`}
+        title={`${t('inventory.adjustStock')} — ${adjustItem?.name ?? ''}`}
         size="sm"
       >
         <form onSubmit={submitAdjust} className="space-y-5">
@@ -337,7 +338,7 @@ export default function InventoryPage() {
 
           {adjustItem?.variants?.length > 0 && (
             <div className="space-y-1.5 w-full">
-              <label className="text-xs font-medium text-muted-foreground ml-1">Variant</label>
+              <label className="text-xs font-medium text-muted-foreground ml-1">{t('inventory.variant')}</label>
               <select
                 value={variantId}
                 onChange={(e) => setVariantId(e.target.value)}
@@ -345,7 +346,7 @@ export default function InventoryPage() {
               >
                 {adjustItem.variants.map((v: any) => (
                   <option key={v.id} value={v.id}>
-                    {(v.name || v.sku || `Variant ${v.id}`)} — {v.stock ?? 0} in stock
+                    {(v.name || v.sku || `${t('inventory.variantFallback')} ${v.id}`)} — {v.stock ?? 0} {t('inventory.inStock')}
                   </option>
                 ))}
               </select>
@@ -353,27 +354,27 @@ export default function InventoryPage() {
           )}
 
           <Input
-            label="Change (use a negative number to remove stock)"
+            label={t('inventory.changeLabel')}
             type="number"
-            placeholder="e.g. 10 or -5"
+            placeholder={t('inventory.changePlaceholder')}
             value={change}
             onChange={(e) => setChange(e.target.value)}
             required
           />
 
           <Input
-            label="Reason"
-            placeholder="e.g. Restock, Damaged, Recount"
+            label={t('inventory.reasonLabel')}
+            placeholder={t('inventory.reasonPlaceholder')}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           />
 
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="ghost" onClick={() => setAdjustItem(null)}>
-              Cancel
+              {t('inventory.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              Apply adjustment
+              {t('inventory.applyAdjustment')}
             </Button>
           </div>
         </form>

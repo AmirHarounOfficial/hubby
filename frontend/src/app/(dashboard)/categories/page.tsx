@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import Modal from '@/components/ui/Modal';
+import { useT } from '@/i18n';
 
 // Helper to build a tree from flat categories
 const buildTree = (categories: any[], parentId: number | null = null): any[] => {
@@ -40,6 +41,7 @@ const CategoryNode = ({
   onEdit: (id: number) => void,
   onDelete: (category: any) => void
 }) => {
+  const t = useT();
   const [isExpanded, setIsExpanded] = useState(true);
   const hasChildren = category.children && category.children.length > 0;
 
@@ -73,14 +75,14 @@ const CategoryNode = ({
           <button 
             className="p-1.5 bg-background rounded-md border border-border hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm"
             onClick={(e) => { e.stopPropagation(); onEdit(category.id); }}
-            title="Edit Category"
+            title={t('categories.editTooltip')}
           >
             <Edit2 size={14} />
           </button>
           <button 
             className="p-1.5 bg-background rounded-md border border-border hover:bg-destructive hover:text-white hover:border-destructive transition-all shadow-sm"
             onClick={(e) => { e.stopPropagation(); onDelete(category); }}
-            title="Delete Category"
+            title={t('categories.deleteTooltip')}
           >
             <Trash2 size={14} />
           </button>
@@ -105,6 +107,7 @@ const CategoryNode = ({
 };
 
 export default function CategoriesPage() {
+  const t = useT();
   const router = useRouter();
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -140,7 +143,7 @@ export default function CategoriesPage() {
       setDeletingCategory(null);
     } catch (err) {
       console.error('Failed to delete category', err);
-      alert('Failed to delete category.');
+      alert(t('categories.deleteFailed'));
     } finally {
       setIsDeleting(false);
     }
@@ -160,12 +163,12 @@ export default function CategoriesPage() {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Categories</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage your product hierarchy and collections.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('categories.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('categories.subtitle')}</p>
         </div>
         <Button onClick={() => router.push('/categories/new')} className="shadow-lg shadow-primary/20">
           <Plus size={18} className="mr-2" />
-          Add Category
+          {t('categories.addCategory')}
         </Button>
       </div>
 
@@ -173,8 +176,8 @@ export default function CategoriesPage() {
         <div className="p-4 border-b border-border/50 bg-card/50 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <Input 
-              placeholder="Search categories..." 
+            <Input
+              placeholder={t('categories.searchPlaceholder')}
               className="pl-9 bg-background/50 border-border/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -182,7 +185,7 @@ export default function CategoriesPage() {
           </div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground bg-accent/30 px-3 py-1.5 rounded-lg border border-border/50">
             <FolderTree size={14} className="text-primary" />
-            <span>{categories.length} Total</span>
+            <span>{categories.length} {t('categories.total')}</span>
           </div>
         </div>
 
@@ -190,20 +193,20 @@ export default function CategoriesPage() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="text-sm font-medium">Loading hierarchy...</p>
+              <p className="text-sm font-medium">{t('categories.loading')}</p>
             </div>
           ) : displayTree.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center">
               <div className="w-16 h-16 rounded-2xl bg-accent/30 flex items-center justify-center mb-4 border border-border shadow-sm">
                 <FolderTree size={24} className="text-muted-foreground" />
               </div>
-              <p className="text-lg font-bold">No categories found</p>
+              <p className="text-lg font-bold">{t('categories.emptyTitle')}</p>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                {searchQuery ? "Try adjusting your search terms." : "Create your first category to start organizing products."}
+                {searchQuery ? t('categories.emptySearchHint') : t('categories.emptyHint')}
               </p>
               {!searchQuery && (
                 <Button onClick={() => router.push('/categories/new')} variant="outline" className="mt-6">
-                  Create Category
+                  {t('categories.createCategory')}
                 </Button>
               )}
             </div>
@@ -225,23 +228,22 @@ export default function CategoriesPage() {
       <Modal 
         isOpen={!!deletingCategory} 
         onClose={() => setDeletingCategory(null)}
-        title="Delete Category"
+        title={t('categories.deleteTitle')}
       >
         <div className="space-y-6">
           <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex gap-3">
             <Trash2 size={20} className="text-destructive shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-sm font-bold text-destructive">Warning</h4>
+              <h4 className="text-sm font-bold text-destructive">{t('categories.warning')}</h4>
               <p className="text-xs text-destructive/80 mt-1 leading-relaxed">
-                You are about to delete <strong>{deletingCategory?.name}</strong>. 
-                Products assigned to this category will lose their assignment unless they are reassigned.
+                {t('categories.deleteWarningPrefix')}<strong>{deletingCategory?.name}</strong>{t('categories.deleteWarningSuffix')}
               </p>
             </div>
           </div>
 
           {deletingCategory?.children && deletingCategory.children.length > 0 && (
             <div className="space-y-3">
-              <p className="text-sm font-bold text-foreground">What should happen to its subcategories?</p>
+              <p className="text-sm font-bold text-foreground">{t('categories.subcategoriesQuestion')}</p>
               
               <label className={cn(
                 "flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all",
@@ -257,8 +259,8 @@ export default function CategoriesPage() {
                   onChange={() => setDeleteStrategy('move_to_root')} 
                 />
                 <div>
-                  <p className="text-sm font-bold">Move to Root Level (Recommended)</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Subcategories will be preserved and moved up to the top level.</p>
+                  <p className="text-sm font-bold">{t('categories.moveToRootTitle')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t('categories.moveToRootDesc')}</p>
                 </div>
               </label>
 
@@ -276,16 +278,16 @@ export default function CategoriesPage() {
                   onChange={() => setDeleteStrategy('cascade')} 
                 />
                 <div>
-                  <p className="text-sm font-bold text-destructive">Delete All Subcategories</p>
-                  <p className="text-xs text-destructive/70 mt-0.5">Permanently delete this category and every subcategory beneath it.</p>
+                  <p className="text-sm font-bold text-destructive">{t('categories.deleteAllTitle')}</p>
+                  <p className="text-xs text-destructive/70 mt-0.5">{t('categories.deleteAllDesc')}</p>
                 </div>
               </label>
             </div>
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button variant="outline" onClick={() => setDeletingCategory(null)} disabled={isDeleting}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete} isLoading={isDeleting}>Delete Category</Button>
+            <Button variant="outline" onClick={() => setDeletingCategory(null)} disabled={isDeleting}>{t('categories.cancel')}</Button>
+            <Button variant="destructive" onClick={handleDelete} isLoading={isDeleting}>{t('categories.deleteButton')}</Button>
           </div>
         </div>
       </Modal>

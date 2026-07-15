@@ -24,8 +24,10 @@ import Modal from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 import { useStores } from '@/components/providers/StoresProvider';
 import ConnectPrompt from '@/components/ui/ConnectPrompt';
+import { useT } from '@/i18n';
 
 export default function ProductsPage() {
+  const t = useT();
   const router = useRouter();
   const { toast } = useToast();
   const { hasConnectedStore } = useStores();
@@ -61,17 +63,17 @@ export default function ProductsPage() {
 
   const handleSync = async () => {
     if (!hasConnectedStore) {
-      toast('Connect a store first — there’s nowhere to sync products to yet.', 'info');
+      toast(t('products.list.toastConnectFirst'), 'info');
       return;
     }
     setIsSyncing(true);
     try {
       // Pass selected ids when any are checked (otherwise syncs all).
       await api.post('/products/sync', selectedIds.length ? { product_ids: selectedIds } : {});
-      toast('Sync started — products will update in the background.', 'success');
+      toast(t('products.list.toastSyncStarted'), 'success');
     } catch (err) {
       console.error('Sync failed', err);
-      toast('Sync failed. Please try again.', 'error');
+      toast(t('products.list.toastSyncFailed'), 'error');
     } finally {
       setIsSyncing(false);
     }
@@ -86,21 +88,21 @@ export default function ProductsPage() {
       setDeleteId(null);
     } catch (err) {
       console.error('Delete failed', err);
-      toast('Failed to delete product.', 'error');
+      toast(t('products.list.toastDeleteFailed'), 'error');
     }
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} products?`)) return;
+    if (!confirm(`${t('products.list.bulkDeleteConfirmPrefix')} ${selectedIds.length} ${t('products.list.bulkDeleteConfirmSuffix')}`)) return;
     try {
       // For now, we delete one by one if backend doesn't support bulk delete
       await Promise.all(selectedIds.map(id => api.delete(`/products/${id}`)));
       setProducts(products.filter(p => !selectedIds.includes(p.id)));
       setSelectedIds([]);
-      toast('Selected products deleted.', 'success');
+      toast(t('products.list.toastBulkDeleted'), 'success');
     } catch (err) {
       console.error('Bulk delete failed', err);
-      toast('Bulk delete failed.', 'error');
+      toast(t('products.list.toastBulkDeleteFailed'), 'error');
     }
   };
 
@@ -155,8 +157,8 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Products</h1>
-          <p className="text-muted-foreground text-sm">Centralized product and inventory management.</p>
+          <h1 className="text-2xl font-bold">{t('products.list.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('products.list.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -166,7 +168,7 @@ export default function ProductsPage() {
             isLoading={isSyncing}
           >
             <RefreshCw size={16} className={cn("mr-2", isSyncing && "animate-spin")} />
-            Sync Products
+            {t('products.list.syncProducts')}
           </Button>
           <Button 
             variant="primary" 
@@ -174,7 +176,7 @@ export default function ProductsPage() {
             onClick={() => router.push('/products/new')}
           >
             <Plus size={16} className="mr-2" />
-            Add Global Product
+            {t('products.list.addGlobalProduct')}
           </Button>
         </div>
       </div>
@@ -182,9 +184,9 @@ export default function ProductsPage() {
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-          <Input 
-            placeholder="Search products by name or SKU..." 
-            className="pl-10" 
+          <Input
+            placeholder={t('products.list.searchPlaceholder')}
+            className="pl-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -192,12 +194,12 @@ export default function ProductsPage() {
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" className="text-xs" onClick={() => {router.push('/categories')}}>
             <Tag size={14} className="mr-2" />
-            Categories ({categories.length})
+            {t('products.list.categories')} ({categories.length})
           </Button>
           <div className="relative group">
             <Button variant="ghost" size="sm" className={cn("text-xs", selectedIds.length > 0 && "bg-primary/10 text-primary")}>
               <Layers size={14} className="mr-2" />
-              {selectedIds.length > 0 ? `${selectedIds.length} Selected` : 'Bulk Actions'}
+              {selectedIds.length > 0 ? `${selectedIds.length} ${t('products.list.selectedSuffix')}` : t('products.list.bulkActions')}
             </Button>
             {selectedIds.length > 0 && (
               <div className="absolute top-full right-0 mt-2 w-48 bg-card border border-border rounded-xl shadow-xl z-20 overflow-hidden">
@@ -205,19 +207,19 @@ export default function ProductsPage() {
                   onClick={handleSync}
                   className="w-full px-4 py-3 text-xs text-left hover:bg-accent flex items-center gap-2"
                 >
-                  <RefreshCw size={12} /> Sync Selected
+                  <RefreshCw size={12} /> {t('products.list.syncSelected')}
                 </button>
                 <button 
                   onClick={handleBulkDelete}
                   className="w-full px-4 py-3 text-xs text-left hover:bg-destructive/10 text-destructive flex items-center gap-2"
                 >
-                  <Trash2 size={12} /> Delete Selected
+                  <Trash2 size={12} /> {t('products.list.deleteSelected')}
                 </button>
                 <button 
                   onClick={() => setSelectedIds([])}
                   className="w-full px-4 py-3 text-xs text-left border-t border-border hover:bg-accent"
                 >
-                  Clear Selection
+                  {t('products.list.clearSelection')}
                 </button>
               </div>
             )}
@@ -227,24 +229,24 @@ export default function ProductsPage() {
 
       {selectedIds.length > 0 && (
         <div className="bg-primary/10 border border-primary/20 p-3 rounded-xl flex items-center justify-between">
-          <p className="text-xs font-bold text-primary">{selectedIds.length} products selected for bulk operation.</p>
+          <p className="text-xs font-bold text-primary">{selectedIds.length} {t('products.list.selectedForBulk')}</p>
           <div className="flex items-center gap-2">
             <Button size="xs" variant="outline" onClick={toggleSelectAll}>
-              {selectedIds.length === products.length ? 'Deselect All' : 'Select All'}
+              {selectedIds.length === products.length ? t('products.list.deselectAll') : t('products.list.selectAll')}
             </Button>
-            <Button size="xs" variant="primary" onClick={handleBulkDelete}>Delete All</Button>
+            <Button size="xs" variant="primary" onClick={handleBulkDelete}>{t('products.list.deleteAll')}</Button>
           </div>
         </div>
       )}
 
       {!isLoading && !hasConnectedStore && products.length === 0 ? (
-        <ConnectPrompt description="Connect a store to sync your products, or add a global product manually." />
+        <ConnectPrompt description={t('products.list.connectPromptDesc')} />
       ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {isLoading ? (
           <div className="col-span-full py-20 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading products...</p>
+            <p className="text-muted-foreground">{t('products.list.loading')}</p>
           </div>
         ) : (
           <>
@@ -276,7 +278,7 @@ export default function ProductsPage() {
                   )}
                   {product.stock === 0 && (
                     <div className="absolute top-3 left-4 bg-destructive text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                      Out of Stock
+                      {t('products.list.outOfStock')}
                     </div>
                   )}
                   <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
@@ -309,11 +311,11 @@ export default function ProductsPage() {
 
                   <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase">Price</span>
+                      <span className="text-[10px] text-muted-foreground font-medium uppercase">{t('products.list.price')}</span>
                       <span className="font-bold"><Money amount={product.price} /></span>
                     </div>
                     <div className="flex flex-col text-right">
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase">Stock</span>
+                      <span className="text-[10px] text-muted-foreground font-medium uppercase">{t('products.list.stock')}</span>
                       <span className={cn(
                         "font-bold",
                         product.stock <= 15 ? "text-warning" : "text-foreground"
@@ -330,7 +332,7 @@ export default function ProductsPage() {
                       ))}
                     </div>
                     <span className="text-[10px] text-muted-foreground font-medium">
-                      {product.stores?.length || 0} Connected Stores
+                      {product.stores?.length || 0} {t('products.list.connectedStores')}
                     </span>
                   </div>
                 </div>
@@ -344,7 +346,7 @@ export default function ProductsPage() {
               <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Plus size={24} />
               </div>
-              <span className="text-sm font-medium">Add New Product</span>
+              <span className="text-sm font-medium">{t('products.list.addNewProduct')}</span>
             </button>
           </>
         )}
@@ -353,17 +355,17 @@ export default function ProductsPage() {
       <Modal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
-        title="Manage Categories"
+        title={t('products.list.manageCategories')}
       >
         <div className="space-y-6">
           <form onSubmit={handleCreateCategory} className="flex gap-2">
-            <Input 
-              placeholder="Category name..." 
+            <Input
+              placeholder={t('products.list.categoryNamePlaceholder')}
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               className="flex-1"
             />
-            <Button type="submit" isLoading={isCreatingCategory}>Add</Button>
+            <Button type="submit" isLoading={isCreatingCategory}>{t('products.list.add')}</Button>
           </form>
 
           <div className="space-y-2">
@@ -382,12 +384,12 @@ export default function ProductsPage() {
               </div>
             ))}
             {categories.length === 0 && (
-              <p className="text-center py-6 text-sm text-muted-foreground">No categories defined yet.</p>
+              <p className="text-center py-6 text-sm text-muted-foreground">{t('products.list.noCategories')}</p>
             )}
           </div>
           
           <div className="flex justify-end pt-4 border-t border-border">
-            <Button variant="outline" onClick={() => setIsCategoryModalOpen(false)}>Done</Button>
+            <Button variant="outline" onClick={() => setIsCategoryModalOpen(false)}>{t('products.list.done')}</Button>
           </div>
         </div>
       </Modal>
@@ -395,15 +397,15 @@ export default function ProductsPage() {
       <Modal 
         isOpen={!!deleteId} 
         onClose={() => setDeleteId(null)}
-        title="Delete Product"
+        title={t('products.list.deleteProductTitle')}
       >
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete this product? This will remove the global mapping, but platform-specific products will remain on their respective stores.
+            {t('products.list.deleteProductBody')}
           </p>
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete Product</Button>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>{t('products.list.cancel')}</Button>
+            <Button variant="destructive" onClick={handleDelete}>{t('products.list.deleteProductButton')}</Button>
           </div>
         </div>
       </Modal>

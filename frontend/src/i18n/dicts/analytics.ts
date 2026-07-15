@@ -1,0 +1,38 @@
+export const analytics = {
+  en: {
+    loading: 'Loading...',
+    title: 'Analytics',
+    subtitle: 'Deep dive into your store performance over the last 30 days.',
+    downloadReport: 'Download Report',
+    kpis: {
+      totalRevenue: 'Total Revenue',
+      totalOrders: 'Total Orders',
+      avgOrderValue: 'Avg Order Value',
+      activeProducts: 'Active Products',
+    },
+    revenueOverview: 'Revenue Overview',
+    last30Days: 'Last 30 days',
+    platformShare: 'Platform Share',
+    platformShareSubtitle: 'Order volume by platform',
+    noOrderData: 'No order data yet.',
+    dailyOrders: 'Daily Orders',
+  },
+  ar: {
+    loading: 'جارٍ التحميل...',
+    title: 'التحليلات',
+    subtitle: 'نظرة معمقة على أداء متجرك خلال آخر 30 يومًا.',
+    downloadReport: 'تنزيل التقرير',
+    kpis: {
+      totalRevenue: 'إجمالي الإيرادات',
+      totalOrders: 'إجمالي الطلبات',
+      avgOrderValue: 'متوسط قيمة الطلب',
+      activeProducts: 'المنتجات النشطة',
+    },
+    revenueOverview: 'نظرة عامة على الإيرادات',
+    last30Days: 'آخر 30 يومًا',
+    platformShare: 'حصة المنصات',
+    platformShareSubtitle: 'حجم الطلبات حسب المنصة',
+    noOrderData: 'لا توجد بيانات طلبات بعد.',
+    dailyOrders: 'الطلبات اليومية',
+  },
+};

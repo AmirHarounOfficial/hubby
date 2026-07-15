@@ -20,21 +20,23 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/ui/Logo';
+import { useI18n } from '@/i18n';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: ShoppingBag, label: 'Orders', href: '/orders' },
-  { icon: Users, label: 'Customers', href: '/customers' },
-  { icon: Package, label: 'Products', href: '/products' },
-  { icon: Database, label: 'Inventory', href: '/inventory' },
-  { icon: StoreIcon, label: 'Stores', href: '/stores' },
-  { icon: BarChart3, label: 'Analytics', href: '/analytics' },
-  { icon: CreditCard, label: 'Billing', href: '/billing' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
+  { icon: LayoutDashboard, key: 'dashboard', href: '/dashboard' },
+  { icon: ShoppingBag, key: 'orders', href: '/orders' },
+  { icon: Users, key: 'customers', href: '/customers' },
+  { icon: Package, key: 'products', href: '/products' },
+  { icon: Database, key: 'inventory', href: '/inventory' },
+  { icon: StoreIcon, key: 'stores', href: '/stores' },
+  { icon: BarChart3, key: 'analytics', href: '/analytics' },
+  { icon: CreditCard, key: 'billing', href: '/billing' },
+  { icon: Settings, key: 'settings', href: '/settings' },
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (v: boolean) => void }) {
   const pathname = usePathname();
+  const { t, dir } = useI18n();
   const { organizations, activeOrgId, setActiveOrgId } = useAuthStore();
   const activeOrg = organizations.find(o => o.id === activeOrgId);
 
@@ -52,7 +54,7 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsO
             onClick={() => setIsOpen(!isOpen)}
             className="p-2 hover:bg-accent rounded-lg"
           >
-            {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            {(isOpen ? dir === 'ltr' : dir === 'rtl') ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
         </div>
 
@@ -85,7 +87,7 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsO
               "min-w-[22px]",
               pathname.startsWith(item.href) ? "text-white" : "group-hover:text-primary"
             )} />
-            {isOpen && <span className="ml-4 font-medium">{item.label}</span>}
+            {isOpen && <span className="ms-4 font-medium">{t('nav.' + item.key)}</span>}
           </Link>
         ))}
       </nav>

@@ -1,6 +1,7 @@
 import AppShell from '@/components/layout/AppShell';
 import { ToastProvider } from '@/components/ui/Toast';
 import { StoresProvider } from '@/components/providers/StoresProvider';
+import { I18nProvider } from '@/i18n';
 
 // The dashboard is auth-gated and entirely data-driven, so there's nothing to
 // statically prerender. Forcing dynamic rendering also avoids CSR-bailout build
@@ -9,10 +10,12 @@ export const dynamic = 'force-dynamic';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ToastProvider>
-      <StoresProvider>
-        <AppShell>{children}</AppShell>
-      </StoresProvider>
-    </ToastProvider>
+    <I18nProvider>
+      <ToastProvider>
+        <StoresProvider>
+          <AppShell>{children}</AppShell>
+        </StoresProvider>
+      </ToastProvider>
+    </I18nProvider>
   );
 }

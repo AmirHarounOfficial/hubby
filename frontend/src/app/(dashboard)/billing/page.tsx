@@ -14,8 +14,10 @@ import {
 import { cn, formatCurrency } from '@/lib/utils';
 import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
+import { useT } from '@/i18n';
 
 export default function BillingPage() {
+  const t = useT();
   const [plans, setPlans] = useState<any[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function BillingPage() {
   const [isCancelling, setIsCancelling] = useState(false);
 
   const handleCancel = async () => {
-    if (!window.confirm('Cancel your subscription? You will keep access until the period ends.')) return;
+    if (!window.confirm(t('billing.confirmCancel'))) return;
     setIsCancelling(true);
     try {
       await api.post('/billing/cancel');
@@ -64,7 +66,7 @@ export default function BillingPage() {
         window.location.href = res.data.checkout_url;
         return;
       }
-      alert('Subscription updated successfully!');
+      alert(t('billing.subscribeSuccess'));
       fetchData();
     } catch (err) {
       console.error('Subscription failed', err);
@@ -74,19 +76,19 @@ export default function BillingPage() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-full">Loading...</div>;
+    return <div className="flex items-center justify-center h-full">{t('billing.loading')}</div>;
   }
 
   return (
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Billing & Subscription</h1>
-          <p className="text-muted-foreground text-sm">Manage your plan, payment methods, and invoices.</p>
+          <h1 className="text-2xl font-bold">{t('billing.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('billing.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2 text-xs font-bold bg-secondary/10 text-secondary px-4 py-2 rounded-full">
+        <div className="flex items-center gap-2 text-xs font-bold bg-secondary/10 text-secondary px-4 py-2 rounded-full uppercase">
           <ShieldCheck size={16} />
-          SECURE PAYMENTS BY EDFAPAY
+          {t('billing.securePayments')}
         </div>
       </div>
 
@@ -97,23 +99,25 @@ export default function BillingPage() {
           </div>
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-xl font-bold">
-              Current Plan: {subscription?.plan?.name || 'Trial'}
+              {t('billing.currentPlan')}: {subscription?.plan?.name || t('billing.trial')}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {subscription 
-                ? `Your next billing date is ${new Date(subscription.ends_at).toLocaleDateString()} for ${formatCurrency(subscription.plan.price)}.`
-                : 'You are currently on a free trial.'
+              {subscription
+                ? t('billing.nextBilling')
+                    .replace('{date}', new Date(subscription.ends_at).toLocaleDateString())
+                    .replace('{amount}', formatCurrency(subscription.plan.price))
+                : t('billing.freeTrial')
               }
             </p>
           </div>
           <div className="shrink-0 space-y-3 w-full md:w-auto">
             {subscription && subscription.status === 'active' ? (
               <Button variant="outline" className="w-full bg-background" isLoading={isCancelling} onClick={handleCancel}>
-                Cancel Subscription
+                {t('billing.cancelSubscription')}
               </Button>
             ) : (
               <Button variant="primary" className="w-full" onClick={() => document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth' })}>
-                Choose a Plan
+                {t('billing.choosePlan')}
               </Button>
             )}
           </div>
@@ -121,7 +125,7 @@ export default function BillingPage() {
 
         <Card className="p-8 flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold">Payment Method</h3>
+            <h3 className="font-bold">{t('billing.paymentMethod')}</h3>
             <CreditCard size={20} className="text-muted-foreground" />
           </div>
           <div className="p-4 rounded-xl border border-dashed border-border bg-background flex items-center gap-4">
@@ -129,20 +133,20 @@ export default function BillingPage() {
               <CreditCard size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold">No payment method on file</p>
-              <p className="text-[10px] text-muted-foreground">Subscriptions activate instantly during preview.</p>
+              <p className="text-sm font-bold">{t('billing.noPaymentMethod')}</p>
+              <p className="text-[10px] text-muted-foreground">{t('billing.activateInstantly')}</p>
             </div>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Card payments (EdfaPay) will appear here once configured.
+            {t('billing.cardPaymentsNote')}
           </p>
         </Card>
       </div>
 
       <div id="plans" className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold">Choose the right plan for you</h2>
-          <p className="text-muted-foreground mt-2">Scale your multi-store business with our flexible pricing.</p>
+          <h2 className="text-3xl font-bold">{t('billing.plansTitle')}</h2>
+          <p className="text-muted-foreground mt-2">{t('billing.plansSubtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -155,7 +159,7 @@ export default function BillingPage() {
               )}>
                 {plan.name === 'Pro' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-xl">
-                    Recommended
+                    {t('billing.recommended')}
                   </div>
                 )}
                 
@@ -163,7 +167,7 @@ export default function BillingPage() {
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   <div className="flex items-baseline gap-1 mt-2">
                     <span className="text-4xl font-bold tracking-tight"><Money amount={plan.price} /></span>
-                    <span className="text-muted-foreground text-sm">/mo</span>
+                    <span className="text-muted-foreground text-sm">{t('billing.perMonth')}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-4 leading-relaxed">{plan.description}</p>
                 </div>
@@ -172,8 +176,8 @@ export default function BillingPage() {
                   {(Array.isArray(plan.features) && plan.features.length
                     ? plan.features
                     : [
-                        `${plan.store_limit ?? 'Unlimited'} stores`,
-                        `${plan.order_limit ? plan.order_limit.toLocaleString() : 'Unlimited'} orders / month`,
+                        t('billing.featureStores').replace('{count}', String(plan.store_limit ?? t('billing.unlimited'))),
+                        t('billing.featureOrders').replace('{count}', plan.order_limit ? plan.order_limit.toLocaleString() : t('billing.unlimited')),
                       ]
                   ).map((feature: string) => (
                     <div key={feature} className="flex items-center gap-3">
@@ -192,7 +196,7 @@ export default function BillingPage() {
                   isLoading={isSubscribing === plan.id}
                   disabled={isCurrent}
                 >
-                  {isCurrent ? 'Current Plan' : 'Switch to ' + plan.name}
+                  {isCurrent ? t('billing.currentPlanBtn') : `${t('billing.switchTo')} ${plan.name}`}
                 </Button>
               </Card>
             );
@@ -204,11 +208,11 @@ export default function BillingPage() {
         <div className="flex items-center gap-4">
           <HelpCircle size={24} className="text-primary" />
           <div>
-            <h4 className="font-bold text-sm">Have questions about our pricing?</h4>
-            <p className="text-xs text-muted-foreground">Our team is here to help you find the best plan for your needs.</p>
+            <h4 className="font-bold text-sm">{t('billing.questionsTitle')}</h4>
+            <p className="text-xs text-muted-foreground">{t('billing.questionsSubtitle')}</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="font-bold">Contact Support</Button>
+        <Button variant="ghost" size="sm" className="font-bold">{t('billing.contactSupport')}</Button>
       </Card>
     </div>
   );

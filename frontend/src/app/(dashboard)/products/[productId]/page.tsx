@@ -23,8 +23,10 @@ import { cn } from '@/lib/utils';
 import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import Modal from '@/components/ui/Modal';
+import { useT } from '@/i18n';
 
 export default function ProductDetailsPage() {
+  const t = useT();
   const { productId } = useParams();
   const router = useRouter();
   const [product, setProduct] = useState<any>(null);
@@ -53,7 +55,7 @@ export default function ProductDetailsPage() {
       router.push('/products');
     } catch (err) {
       console.error('Delete failed', err);
-      alert('Failed to delete product.');
+      alert(t('products.detail.alertDeleteFailed'));
     }
   };
 
@@ -71,7 +73,7 @@ export default function ProductDetailsPage() {
       });
     } catch (err) {
       console.error('Toggle sync failed', err);
-      alert('Failed to update sync status.');
+      alert(t('products.detail.alertSyncFailed'));
     } finally {
       setIsSyncingStore(null);
     }
@@ -88,9 +90,9 @@ export default function ProductDetailsPage() {
   if (!product) {
     return (
       <div className="text-center py-20">
-        <h2 className="text-xl font-bold">Product not found</h2>
+        <h2 className="text-xl font-bold">{t('products.detail.notFound')}</h2>
         <Button onClick={() => router.push('/products')} className="mt-4">
-          Back to Products
+          {t('products.detail.backToProducts')}
         </Button>
       </div>
     );
@@ -110,7 +112,7 @@ export default function ProductDetailsPage() {
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest">{product.sku}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-border"></span>
-              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Global Product</span>
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{t('products.detail.globalProduct')}</span>
             </div>
             <h1 className="text-2xl font-bold mt-1">{product.name}</h1>
             {product.category && (
@@ -124,11 +126,11 @@ export default function ProductDetailsPage() {
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" onClick={() => router.push(`/products/${productId}/edit`)}>
             <Edit2 size={16} className="mr-2" />
-            Edit Product
+            {t('products.detail.editProduct')}
           </Button>
           <Button variant="destructive" size="sm" onClick={() => setIsDeleting(true)}>
             <Trash2 size={16} className="mr-2" />
-            Delete
+            {t('products.detail.delete')}
           </Button>
         </div>
       </div>
@@ -147,26 +149,26 @@ export default function ProductDetailsPage() {
               </div>
               <div className="md:col-span-3 p-6 space-y-6">
                 <div>
-                  <h3 className="font-bold text-sm mb-2">Description</h3>
+                  <h3 className="font-bold text-sm mb-2">{t('products.detail.description')}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {product.description || 'No description provided for this product.'}
+                    {product.description || t('products.detail.noDescription')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <h3 className="font-bold text-sm mb-2">Price</h3>
+                    <h3 className="font-bold text-sm mb-2">{t('products.detail.price')}</h3>
                     <p className="text-2xl font-bold text-secondary"><Money amount={product.price} /></p>
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm mb-2">Total Stock</h3>
+                    <h3 className="font-bold text-sm mb-2">{t('products.detail.totalStock')}</h3>
                     <div className="flex items-center gap-2">
                       <p className={cn(
                         "text-2xl font-bold",
                         product.stock <= 15 ? "text-warning" : "text-foreground"
                       )}>{product.stock}</p>
                       <span className="text-[10px] font-bold text-muted-foreground uppercase bg-accent px-2 py-0.5 rounded">
-                        {product.stock > 15 ? 'Healthy' : 'Low Stock'}
+                        {product.stock > 15 ? t('products.detail.healthy') : t('products.detail.lowStock')}
                       </span>
                     </div>
                   </div>
@@ -180,10 +182,10 @@ export default function ProductDetailsPage() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <Store size={18} className="text-primary" />
-                Linked Platform Products
+                {t('products.detail.linkedPlatformProducts')}
               </h3>
               <span className="text-[10px] font-bold text-muted-foreground uppercase bg-accent px-2 py-0.5 rounded">
-                {product.platform_products?.length || 0} Stores
+                {product.platform_products?.length || 0} {t('products.detail.storesSuffix')}
               </span>
             </div>
             <div className="space-y-4">
@@ -203,7 +205,7 @@ export default function ProductDetailsPage() {
                           "text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase",
                           pp.sync_enabled ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
                         )}>
-                          {pp.sync_enabled ? 'Sync On' : 'Sync Off'}
+                          {pp.sync_enabled ? t('products.detail.syncOn') : t('products.detail.syncOff')}
                         </span>
                       </div>
                     </div>
@@ -211,7 +213,7 @@ export default function ProductDetailsPage() {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <p className="text-xs font-bold"><Money amount={pp.price || product.price} /></p>
-                      <p className="text-[10px] text-muted-foreground">Platform Price</p>
+                      <p className="text-[10px] text-muted-foreground">{t('products.detail.platformPrice')}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button 
@@ -221,7 +223,7 @@ export default function ProductDetailsPage() {
                           "w-10 h-5 rounded-full relative transition-all duration-300 outline-none",
                           pp.sync_enabled ? "bg-primary" : "bg-muted"
                         )}
-                        title={pp.sync_enabled ? "Disable Sync" : "Enable Sync"}
+                        title={pp.sync_enabled ? t('products.detail.disableSync') : t('products.detail.enableSync')}
                       >
                         <div className={cn(
                           "absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-all duration-300",
@@ -238,8 +240,8 @@ export default function ProductDetailsPage() {
               ))}
               {(!product.platform_products || product.platform_products.length === 0) && (
                 <div className="text-center py-10 bg-accent/10 rounded-2xl border border-dashed border-border">
-                  <p className="text-xs text-muted-foreground">This product is not linked to any store yet.</p>
-                  <Button variant="ghost" size="sm" className="mt-2 text-primary">Link to Store</Button>
+                  <p className="text-xs text-muted-foreground">{t('products.detail.notLinked')}</p>
+                  <Button variant="ghost" size="sm" className="mt-2 text-primary">{t('products.detail.linkToStore')}</Button>
                 </div>
               )}
             </div>
@@ -251,30 +253,30 @@ export default function ProductDetailsPage() {
           <Card className="p-6">
             <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
               <BarChart3 size={18} className="text-primary" />
-              Inventory Insights
+              {t('products.detail.inventoryInsights')}
             </h3>
             {(() => {
               const totalStock = (product.variants || []).reduce((acc: number, v: any) => acc + (v.stock || 0), 0);
               const variantCount = product.variants?.length || 0;
               const storeCount = new Set((product.platform_products || []).map((pp: any) => pp.store_id)).size;
-              const status = totalStock === 0 ? 'Out of stock' : totalStock < 10 ? 'Low stock' : 'In stock';
+              const status = totalStock === 0 ? t('products.detail.statusOutOfStock') : totalStock < 10 ? t('products.detail.statusLowStock') : t('products.detail.statusInStock');
               const statusColor = totalStock === 0 ? 'text-destructive' : totalStock < 10 ? 'text-warning' : 'text-secondary';
               return (
                 <div className="space-y-4">
                   <div className="p-4 rounded-2xl bg-accent/30 border border-border">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Stock</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('products.detail.totalStock')}</span>
                       <span className={cn('text-xs font-bold', statusColor)}>{status}</span>
                     </div>
-                    <p className="text-2xl font-bold">{totalStock}<span className="text-xs font-medium text-muted-foreground ml-1">units</span></p>
+                    <p className="text-2xl font-bold">{totalStock}<span className="text-xs font-medium text-muted-foreground ml-1">{t('products.detail.units')}</span></p>
                   </div>
                   <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Variants</span>
+                      <span className="text-muted-foreground">{t('products.detail.variants')}</span>
                       <span className="font-bold">{variantCount}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Linked stores</span>
+                      <span className="text-muted-foreground">{t('products.detail.linkedStores')}</span>
                       <span className="font-bold">{storeCount}</span>
                     </div>
                   </div>
@@ -287,7 +289,7 @@ export default function ProductDetailsPage() {
           <Card className="p-6">
             <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
               <Layers size={18} className="text-primary" />
-              Variants
+              {t('products.detail.variants')}
             </h3>
             <div className="space-y-3">
               {product.variants?.map((variant: any) => (
@@ -298,12 +300,12 @@ export default function ProductDetailsPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-bold"><Money amount={variant.price} /></p>
-                    <p className="text-[10px] text-muted-foreground">{variant.stock} in stock</p>
+                    <p className="text-[10px] text-muted-foreground">{variant.stock} {t('products.detail.inStockSuffix')}</p>
                   </div>
                 </div>
               ))}
               {(!product.variants || product.variants.length === 0) && (
-                <p className="text-xs text-muted-foreground text-center py-4">No variants for this product.</p>
+                <p className="text-xs text-muted-foreground text-center py-4">{t('products.detail.noVariants')}</p>
               )}
               <Button
                 variant="outline"
@@ -311,7 +313,7 @@ export default function ProductDetailsPage() {
                 className="w-full mt-2"
                 onClick={() => router.push(`/products/${productId}/edit`)}
               >
-                Manage Variants
+                {t('products.detail.manageVariants')}
               </Button>
             </div>
           </Card>
@@ -321,16 +323,15 @@ export default function ProductDetailsPage() {
       <Modal 
         isOpen={isDeleting} 
         onClose={() => setIsDeleting(false)}
-        title="Delete Global Product"
+        title={t('products.detail.deleteGlobalProduct')}
       >
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete **{product.name}**? This action cannot be undone. 
-            All global inventory mapping for this product will be lost.
+            {t('products.detail.deleteBodyPrefix')} <strong>{product.name}</strong>{t('products.detail.deleteBodySuffix')}
           </p>
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setIsDeleting(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete Permanently</Button>
+            <Button variant="outline" onClick={() => setIsDeleting(false)}>{t('products.detail.cancel')}</Button>
+            <Button variant="destructive" onClick={handleDelete}>{t('products.detail.deletePermanently')}</Button>
           </div>
         </div>
       </Modal>

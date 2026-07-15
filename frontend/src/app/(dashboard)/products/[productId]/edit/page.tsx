@@ -21,8 +21,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
+import { useT } from '@/i18n';
 
 export default function EditProductPage() {
+  const t = useT();
   const { productId } = useParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +84,7 @@ export default function EditProductPage() {
         
       } catch (err) {
         console.error('Failed to fetch data', err);
-        alert('Failed to load product data.');
+        alert(t('products.form.alertLoadFailed'));
       } finally {
         setIsLoading(false);
       }
@@ -126,7 +128,7 @@ export default function EditProductPage() {
       setFormData({ ...formData, image_url: response.data.url });
     } catch (err) {
       console.error('Upload failed', err);
-      alert('Failed to upload image.');
+      alert(t('products.form.alertUploadFailed'));
     } finally {
       setIsUploadingImage(false);
     }
@@ -175,7 +177,7 @@ export default function EditProductPage() {
       router.push(`/products/${productId}`);
     } catch (err) {
       console.error('Update failed', err);
-      alert('Failed to update product.');
+      alert(t('products.form.alertUpdateFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -200,8 +202,8 @@ export default function EditProductPage() {
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Edit Global Product</h1>
-            <p className="text-sm text-muted-foreground">Modify centralized product data and platform mappings.</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t('products.form.editTitle')}</h1>
+            <p className="text-sm text-muted-foreground">{t('products.form.editSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -209,12 +211,12 @@ export default function EditProductPage() {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-sm border-b border-border pb-2 text-primary uppercase tracking-widest">Basic Information</h3>
+            <h3 className="font-bold text-sm border-b border-border pb-2 text-primary uppercase tracking-widest">{t('products.form.basicInformation')}</h3>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Product Name</label>
-                <Input 
-                  placeholder="e.g. Premium Cotton T-Shirt" 
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.productName')}</label>
+                <Input
+                  placeholder={t('products.form.productNamePlaceholder')}
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   required
@@ -222,23 +224,23 @@ export default function EditProductPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Global SKU</label>
-                  <Input 
-                    placeholder="e.g. TS-PRM-001" 
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.globalSku')}</label>
+                  <Input
+                    placeholder={t('products.form.skuPlaceholder')}
                     value={formData.sku}
                     onChange={(e) => setFormData({...formData, sku: e.target.value})}
                     required
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Global Price</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.globalPrice')}</label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                    <Input 
+                    <Input
                       type="number"
                       step="0.01"
                       className="pl-10"
-                      placeholder="0.00" 
+                      placeholder={t('products.form.pricePlaceholder')}
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
                       required
@@ -247,22 +249,22 @@ export default function EditProductPage() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</label>
-                <textarea 
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.description')}</label>
+                <textarea
                   className="w-full min-h-[120px] bg-background border border-border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                  placeholder="Describe your product..."
+                  placeholder={t('products.form.descriptionPlaceholder')}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Category</label>
-                <select 
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.category')}</label>
+                <select
                   className="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
                   value={formData.category_id}
                   onChange={(e) => setFormData({...formData, category_id: e.target.value})}
                 >
-                  <option value="">Select a category...</option>
+                  <option value="">{t('products.form.selectCategory')}</option>
                   {renderCategoryOptions(categories)}
                 </select>
               </div>
@@ -273,9 +275,9 @@ export default function EditProductPage() {
             <div className="flex items-center justify-between border-b border-border pb-2">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <Store size={18} className="text-primary" />
-                Store Synchronization
+                {t('products.form.storeSynchronization')}
               </h3>
-              <span className="text-[10px] text-muted-foreground font-bold uppercase">Channels</span>
+              <span className="text-[10px] text-muted-foreground font-bold uppercase">{t('products.form.channels')}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {stores.map((store) => (
@@ -300,21 +302,21 @@ export default function EditProductPage() {
                     </div>
                   </div>
                   {selectedStores.includes(store.id) && (
-                    <span className="text-[8px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full uppercase">Linked</span>
+                    <span className="text-[8px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full uppercase">{t('products.form.linked')}</span>
                   )}
                 </div>
               ))}
             </div>
             <p className="text-[10px] text-muted-foreground bg-primary/5 p-2 rounded-lg border border-primary/10">
-              Unlinking a store will stop automatic stock updates for this product on that platform.
+              {t('products.form.unlinkNote')}
             </p>
           </Card>
 
           <Card className="p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-2">
-              <h3 className="font-bold text-sm">Product Variants</h3>
+              <h3 className="font-bold text-sm">{t('products.form.productVariants')}</h3>
               <Button type="button" variant="ghost" size="sm" className="h-8 text-primary" onClick={addVariant}>
-                <Plus size={14} className="mr-1" /> Add Variant
+                <Plus size={14} className="mr-1" /> {t('products.form.addVariant')}
               </Button>
             </div>
             
@@ -331,18 +333,18 @@ export default function EditProductPage() {
                   
                   <div className="grid grid-cols-2 gap-4 mr-8">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Variant Name</label>
-                      <Input 
-                        placeholder="e.g. Blue / XL" 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.variantName')}</label>
+                      <Input
+                        placeholder={t('products.form.variantNamePlaceholder')}
                         value={variant.name}
                         onChange={(e) => updateVariant(index, 'name', e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Variant SKU</label>
-                      <Input 
-                        placeholder="e.g. TS-PRM-001-BL-XL" 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.variantSku')}</label>
+                      <Input
+                        placeholder={t('products.form.variantSkuPlaceholder')}
                         value={variant.sku}
                         onChange={(e) => updateVariant(index, 'sku', e.target.value)}
                         required
@@ -352,21 +354,21 @@ export default function EditProductPage() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price</label>
-                      <Input 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.price')}</label>
+                      <Input
                         type="number"
                         step="0.01"
-                        placeholder="0.00" 
+                        placeholder={t('products.form.pricePlaceholder')}
                         value={variant.price}
                         onChange={(e) => updateVariant(index, 'price', e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Stock</label>
-                      <Input 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.stock')}</label>
+                      <Input
                         type="number"
-                        placeholder="0" 
+                        placeholder={t('products.form.zeroPlaceholder')}
                         value={variant.stock}
                         onChange={(e) => updateVariant(index, 'stock', e.target.value)}
                         required
@@ -381,7 +383,7 @@ export default function EditProductPage() {
 
         <div className="space-y-6">
           <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-sm border-b border-border pb-2 text-secondary uppercase tracking-widest">Media</h3>
+            <h3 className="font-bold text-sm border-b border-border pb-2 text-secondary uppercase tracking-widest">{t('products.form.media')}</h3>
             <input 
               type="file" 
               className="hidden" 
@@ -402,29 +404,29 @@ export default function EditProductPage() {
                 <>
                   <img src={formData.image_url} alt="Preview" className="object-cover w-full h-full" />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-white text-xs font-bold uppercase tracking-widest">Change Image</span>
+                    <span className="text-white text-xs font-bold uppercase tracking-widest">{t('products.form.changeImage')}</span>
                   </div>
                 </>
               ) : (
                 <>
                   <ImageIcon size={32} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                  <span className="text-xs font-medium text-muted-foreground">Upload Image</span>
+                  <span className="text-xs font-medium text-muted-foreground">{t('products.form.uploadImage')}</span>
                 </>
               )}
             </div>
-            <p className="text-[10px] text-muted-foreground text-center italic">Best for high-conversion: 1000x1000px</p>
+            <p className="text-[10px] text-muted-foreground text-center italic">{t('products.form.imageHintEdit')}</p>
           </Card>
 
           <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-sm border-b border-border pb-2">Inventory Management</h3>
+            <h3 className="font-bold text-sm border-b border-border pb-2">{t('products.form.inventoryManagement')}</h3>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Stock</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.totalStock')}</label>
               <div className="relative">
                 <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                <Input 
+                <Input
                   type="number"
                   className="pl-10"
-                  placeholder="0" 
+                  placeholder={t('products.form.zeroPlaceholder')}
                   value={formData.stock}
                   onChange={(e) => setFormData({...formData, stock: e.target.value})}
                   required
@@ -432,9 +434,9 @@ export default function EditProductPage() {
               </div>
             </div>
             <div className="p-4 rounded-2xl bg-warning/5 border border-warning/20">
-              <p className="text-[10px] text-warning font-bold uppercase mb-1">Manual Override</p>
+              <p className="text-[10px] text-warning font-bold uppercase mb-1">{t('products.form.manualOverride')}</p>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Updating stock here will trigger an immediate push to all linked stores.
+                {t('products.form.manualOverrideNote')}
               </p>
             </div>
           </Card>
@@ -446,7 +448,7 @@ export default function EditProductPage() {
               isLoading={isSaving}
             >
               <Save size={18} className="mr-2" />
-              Save Changes
+              {t('products.form.saveChanges')}
             </Button>
             <Button 
               type="button" 
@@ -454,7 +456,7 @@ export default function EditProductPage() {
               className="w-full"
               onClick={() => router.back()}
             >
-              Discard Changes
+              {t('products.form.discardChanges')}
             </Button>
           </div>
         </div>

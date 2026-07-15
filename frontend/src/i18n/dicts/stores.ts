@@ -1,0 +1,86 @@
+export const stores = {
+  en: {
+    title: 'Connected Stores',
+    subtitle: 'Manage your multi-channel connections and master sync settings.',
+    connect: 'Connect a store',
+    loading: 'Loading...',
+    add: 'Add',
+    summary: {
+      stores: 'Stores',
+      connected: 'Connected',
+      syncing: 'Syncing',
+      errors: 'Errors',
+    },
+    master: {
+      title: 'Master Store',
+      description:
+        'Your master store is the central inventory source. When stock changes there, Hubby automatically pushes the update to every other connected store.',
+      lastNetworkSync: 'Last network sync',
+      badge: 'Master Store',
+    },
+    card: {
+      lastSynced: 'Last synced',
+      syncError: 'Last sync failed — your credentials may have expired. Reconnect to fix it.',
+      reconnect: 'Reconnect',
+      setMaster: 'Set as Master',
+      syncNow: 'Sync now',
+      disconnect: 'Disconnect',
+    },
+    status: {
+      connected: 'Connected',
+      syncing: 'Syncing…',
+      error: 'Sync error',
+      disconnected: 'Disconnected',
+    },
+    time: {
+      never: 'Never',
+      justNow: 'just now',
+      minutesAgo: '{n}m ago',
+      hoursAgo: '{n}h ago',
+      daysAgo: '{n}d ago',
+    },
+    confirmDisconnect: 'Disconnect this store? This removes it from your dashboard.',
+  },
+  ar: {
+    title: 'المتاجر المرتبطة',
+    subtitle: 'أدر اتصالاتك متعددة القنوات وإعدادات المزامنة الرئيسية.',
+    connect: 'ربط متجر',
+    loading: 'جارٍ التحميل...',
+    add: 'إضافة',
+    summary: {
+      stores: 'المتاجر',
+      connected: 'متصل',
+      syncing: 'قيد المزامنة',
+      errors: 'أخطاء',
+    },
+    master: {
+      title: 'المتجر الرئيسي',
+      description:
+        'المتجر الرئيسي هو المصدر المركزي للمخزون. عند تغيّر المخزون فيه، يقوم Hubby تلقائيًا بدفع التحديث إلى كل متجر آخر مرتبط.',
+      lastNetworkSync: 'آخر مزامنة للشبكة',
+      badge: 'المتجر الرئيسي',
+    },
+    card: {
+      lastSynced: 'آخر مزامنة',
+      syncError: 'فشلت آخر مزامنة — قد تكون بيانات اعتمادك منتهية الصلاحية. أعد الربط لإصلاح ذلك.',
+      reconnect: 'إعادة الربط',
+      setMaster: 'تعيين كمتجر رئيسي',
+      syncNow: 'مزامنة الآن',
+      disconnect: 'قطع الاتصال',
+    },
+    status: {
+      connected: 'متصل',
+      syncing: 'قيد المزامنة…',
+      error: 'خطأ في المزامنة',
+      disconnected: 'غير متصل',
+    },
+    time: {
+      never: 'أبدًا',
+      justNow: 'الآن',
+      minutesAgo: 'قبل {n} د',
+      hoursAgo: 'قبل {n} س',
+      daysAgo: 'قبل {n} ي',
+    },
+    confirmDisconnect: 'قطع الاتصال بهذا المتجر؟ سيؤدي هذا إلى إزالته من لوحة التحكم.',
+  },
+};

@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { PlatformLogo } from '@/components/ui/PlatformLogo';
+import { useT } from '@/i18n';
 
 const statusConfig: Record<string, any> = {
   paid: { color: 'text-secondary bg-secondary/10', icon: CheckCircle2, label: 'Paid' },
@@ -34,6 +35,7 @@ const statusConfig: Record<string, any> = {
 };
 
 export default function OrderDetailsPage() {
+  const t = useT();
   const { id } = useParams();
   const router = useRouter();
   const [order, setOrder] = useState<any>(null);
@@ -84,9 +86,9 @@ export default function OrderDetailsPage() {
   if (!order) {
     return (
       <div className="text-center py-20">
-        <h2 className="text-xl font-bold">Order not found</h2>
+        <h2 className="text-xl font-bold">{t('orders.detail.notFound')}</h2>
         <Button onClick={() => router.push('/orders')} className="mt-4">
-          Back to Orders
+          {t('orders.detail.backToOrders')}
         </Button>
       </div>
     );
@@ -106,16 +108,16 @@ export default function OrderDetailsPage() {
           </button>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
-              Order #{order.external_id.slice(-6).toUpperCase()}
+              {t('orders.detail.order')} #{order.external_id.slice(-6).toUpperCase()}
               <span className={cn(
                 "px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5",
                 StatusInfo.color
               )}>
                 <StatusInfo.icon size={12} />
-                {StatusInfo.label}
+                {t(`orders.status.${order.status.toLowerCase()}`)}
               </span>
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">Placed on {new Date(order.created_at).toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('orders.detail.placedOn')} {new Date(order.created_at).toLocaleString()}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -127,7 +129,7 @@ export default function OrderDetailsPage() {
               onClick={() => updateStatus('Paid')}
               disabled={isUpdating}
             >
-              Mark as Paid
+              {t('orders.detail.markAsPaid')}
             </Button>
           )}
           {order.status.toLowerCase() !== 'cancelled' && order.status.toLowerCase() !== 'shipped' && (
@@ -138,11 +140,11 @@ export default function OrderDetailsPage() {
               onClick={() => updateStatus('Cancelled')}
               disabled={isUpdating}
             >
-              Cancel Order
+              {t('orders.detail.cancelOrder')}
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={handlePrint}>
-            Print Order
+            {t('orders.detail.printOrder')}
           </Button>
           {['paid', 'processing'].includes(order.status.toLowerCase()) && (
             <Button 
@@ -151,7 +153,7 @@ export default function OrderDetailsPage() {
               onClick={() => updateStatus('Shipped')}
               disabled={isUpdating}
             >
-              Fulfill Items
+              {t('orders.detail.fulfillItems')}
             </Button>
           )}
         </div>
@@ -163,20 +165,20 @@ export default function OrderDetailsPage() {
           <Card className="p-0 overflow-hidden">
             <div className="p-4 border-b border-border bg-card/30 flex items-center gap-2">
               <Package size={18} className="text-primary" />
-              <h3 className="font-bold text-sm">Line Items</h3>
+              <h3 className="font-bold text-sm">{t('orders.detail.lineItems')}</h3>
               <span className="ml-auto text-[10px] font-bold text-muted-foreground uppercase bg-accent px-2 py-0.5 rounded">
-                {order.items?.length || 0} Products
+                {order.items?.length || 0} {t('orders.detail.products')}
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-accent/30 text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
-                    <th className="px-6 py-3">Product</th>
-                    <th className="px-6 py-3">SKU</th>
-                    <th className="px-6 py-3">Price</th>
-                    <th className="px-6 py-3 text-center">Qty</th>
-                    <th className="px-6 py-3 text-right">Total</th>
+                    <th className="px-6 py-3">{t('orders.items.product')}</th>
+                    <th className="px-6 py-3">{t('orders.items.sku')}</th>
+                    <th className="px-6 py-3">{t('orders.items.price')}</th>
+                    <th className="px-6 py-3 text-center">{t('orders.items.qty')}</th>
+                    <th className="px-6 py-3 text-right">{t('orders.items.total')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -201,12 +203,12 @@ export default function OrderDetailsPage() {
             </div>
             <div className="p-6 bg-accent/10 flex flex-col items-end gap-2 border-t border-border">
               <div className="flex justify-between w-full max-w-[240px] text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-muted-foreground">{t('orders.detail.subtotal')}</span>
                 <span><Money amount={order.total} currency={order.currency} /></span>
               </div>
               <div className="h-px bg-border w-full max-w-[240px] my-1"></div>
               <div className="flex justify-between w-full max-w-[240px] text-lg font-bold">
-                <span>Total</span>
+                <span>{t('orders.detail.total')}</span>
                 <span className="text-primary"><Money amount={order.total} currency={order.currency} /></span>
               </div>
             </div>
@@ -216,7 +218,7 @@ export default function OrderDetailsPage() {
           <Card className="p-6">
             <h3 className="font-bold text-sm mb-6 flex items-center gap-2">
               <Clock size={18} className="text-primary" />
-              Order Activity
+              {t('orders.detail.orderActivity')}
             </h3>
             {(() => {
               const status = (order.status || '').toLowerCase();
@@ -227,17 +229,18 @@ export default function OrderDetailsPage() {
                       <div className="w-2 h-2 rounded-full bg-destructive"></div>
                     </div>
                     <div>
-                      <p className="text-sm font-bold">Order Cancelled</p>
+                      <p className="text-sm font-bold">{t('orders.detail.orderCancelled')}</p>
                       <p className="text-[10px] text-muted-foreground/60 mt-2">{new Date(order.updated_at).toLocaleString()}</p>
                     </div>
                   </div>
                 );
               }
+              const platformName = order.store?.platform || t('orders.timeline.theStore');
               const steps = [
-                { key: 'paid', label: 'Paid', desc: `Payment recorded on ${order.store?.platform || 'the store'}.` },
-                { key: 'processing', label: 'Processing', desc: 'Order is being prepared for fulfilment.' },
-                { key: 'shipped', label: 'Shipped', desc: 'Handed over to the carrier.' },
-                { key: 'delivered', label: 'Delivered', desc: 'Delivered to the customer.' },
+                { key: 'paid', label: t('orders.status.paid'), desc: `${t('orders.timeline.paidDesc')} ${platformName}.` },
+                { key: 'processing', label: t('orders.status.processing'), desc: t('orders.timeline.processingDesc') },
+                { key: 'shipped', label: t('orders.status.shipped'), desc: t('orders.timeline.shippedDesc') },
+                { key: 'delivered', label: t('orders.status.delivered'), desc: t('orders.timeline.deliveredDesc') },
               ];
               const currentIdx = steps.findIndex((s) => s.key === status);
               return (
@@ -277,25 +280,25 @@ export default function OrderDetailsPage() {
           <Card className="p-6">
             <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
               <User size={18} className="text-primary" />
-              Customer Information
+              {t('orders.detail.customerInformation')}
             </h3>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-lg font-bold border border-primary/20">
                 {order.customer_name?.charAt(0) || 'G'}
               </div>
               <div>
-                <p className="text-sm font-bold">{order.customer_name || 'Guest Customer'}</p>
-                <p className="text-xs text-muted-foreground">Customer</p>
+                <p className="text-sm font-bold">{order.customer_name || t('orders.guestCustomer')}</p>
+                <p className="text-xs text-muted-foreground">{t('orders.detail.customer')}</p>
               </div>
             </div>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <Mail size={14} className="text-muted-foreground" />
-                <span className="text-xs font-medium truncate">{order.customer_email || 'No email provided'}</span>
+                <span className="text-xs font-medium truncate">{order.customer_email || t('orders.detail.noEmail')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Calendar size={14} className="text-muted-foreground" />
-                <span className="text-xs font-medium">Order placed {new Date(order.created_at).toLocaleDateString()}</span>
+                <span className="text-xs font-medium">{t('orders.detail.orderPlaced')} {new Date(order.created_at).toLocaleDateString()}</span>
               </div>
             </div>
             <Button 
@@ -304,7 +307,7 @@ export default function OrderDetailsPage() {
               className="w-full mt-6"
               onClick={() => router.push(`/customers/${encodeURIComponent(order.customer_email)}`)}
             >
-              View Customer Profile
+              {t('orders.detail.viewCustomerProfile')}
             </Button>
           </Card>
 
@@ -312,7 +315,7 @@ export default function OrderDetailsPage() {
           <Card className="p-6">
             <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
               <StoreIcon size={18} className="text-primary" />
-              Store Details
+              {t('orders.detail.storeDetails')}
             </h3>
             <div className="p-4 rounded-2xl bg-accent/20 border border-border flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-card flex items-center justify-center shadow-sm">
@@ -335,11 +338,11 @@ export default function OrderDetailsPage() {
             </div>
             <div className="mt-4 space-y-3">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Original Order ID</span>
+                <span className="text-muted-foreground">{t('orders.detail.originalOrderId')}</span>
                 <span className="font-mono font-medium">#{order.external_id}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Currency</span>
+                <span className="text-muted-foreground">{t('orders.detail.currency')}</span>
                 <span className="font-medium">{order.currency}</span>
               </div>
             </div>
@@ -349,15 +352,15 @@ export default function OrderDetailsPage() {
           <Card className="p-6">
             <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
               <CreditCard size={18} className="text-primary" />
-              Payment Details
+              {t('orders.detail.paymentDetails')}
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Status</span>
-                <span className="font-medium capitalize">{order.status}</span>
+                <span className="text-muted-foreground">{t('orders.detail.paymentStatus')}</span>
+                <span className="font-medium capitalize">{t(`orders.status.${order.status.toLowerCase()}`)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Total</span>
+                <span className="text-muted-foreground">{t('orders.detail.total')}</span>
                 <span className="font-bold"><Money amount={order.total} currency={order.currency} /></span>
               </div>
               {['paid', 'processing', 'shipped', 'delivered'].includes((order.status || '').toLowerCase()) && (
@@ -366,8 +369,8 @@ export default function OrderDetailsPage() {
                     <CheckCircle2 size={16} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-secondary">Payment recorded</p>
-                    <p className="text-[9px] text-muted-foreground">Synced from {order.store?.platform || 'the store'}</p>
+                    <p className="text-[10px] font-bold text-secondary">{t('orders.detail.paymentRecorded')}</p>
+                    <p className="text-[9px] text-muted-foreground">{t('orders.detail.syncedFrom')} {order.store?.platform || t('orders.timeline.theStore')}</p>
                   </div>
                 </div>
               )}

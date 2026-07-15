@@ -7,8 +7,10 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { ChevronLeft, Save } from 'lucide-react';
 import api from '@/lib/api';
+import { useT } from '@/i18n';
 
 export default function EditCategoryPage() {
+  const t = useT();
   const router = useRouter();
   const { categoryId } = useParams();
   const [isSaving, setIsSaving] = useState(false);
@@ -40,7 +42,7 @@ export default function EditCategoryPage() {
         setCategories(allCatsRes.data);
       } catch (err) {
         console.error('Failed to fetch data', err);
-        alert('Failed to load category.');
+        alert(t('categories.loadFailed'));
       } finally {
         setIsLoading(false);
       }
@@ -62,7 +64,7 @@ export default function EditCategoryPage() {
       if (err.response?.data?.message) {
         alert(err.response.data.message);
       } else {
-        alert('Failed to update category.');
+        alert(t('categories.updateFailed'));
       }
     } finally {
       setIsSaving(false);
@@ -111,17 +113,17 @@ export default function EditCategoryPage() {
           <ChevronLeft size={20} />
         </button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Edit Category</h1>
-          <p className="text-sm text-muted-foreground">Modify category details and placement.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('categories.editTitle')}</h1>
+          <p className="text-sm text-muted-foreground">{t('categories.editSubtitle')}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card className="p-6 space-y-6">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Category Name</label>
-            <Input 
-              placeholder="e.g. T-Shirts" 
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('categories.nameLabel')}</label>
+            <Input
+              placeholder={t('categories.namePlaceholder')}
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               required
@@ -130,38 +132,38 @@ export default function EditCategoryPage() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex justify-between">
-              Parent Category
-              <span className="text-[10px] text-muted-foreground/50 lowercase tracking-normal font-medium">(Optional)</span>
+              {t('categories.parentLabel')}
+              <span className="text-[10px] text-muted-foreground/50 lowercase tracking-normal font-medium">{t('categories.optional')}</span>
             </label>
-            <select 
+            <select
               className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
               value={formData.parent_id}
               onChange={(e) => setFormData({...formData, parent_id: e.target.value})}
             >
-              <option value="">None (Top Level Category)</option>
+              <option value="">{t('categories.parentNone')}</option>
               {renderCategoryOptions(categories)}
             </select>
-            <p className="text-[10px] text-muted-foreground mt-1">You cannot assign a category as a child of itself.</p>
+            <p className="text-[10px] text-muted-foreground mt-1">{t('categories.selfParentHint')}</p>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex justify-between">
-              Description
-              <span className="text-[10px] text-muted-foreground/50 lowercase tracking-normal font-medium">(Optional)</span>
+              {t('categories.descriptionLabel')}
+              <span className="text-[10px] text-muted-foreground/50 lowercase tracking-normal font-medium">{t('categories.optional')}</span>
             </label>
-            <textarea 
+            <textarea
               className="w-full min-h-[120px] bg-background border border-border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              placeholder="Describe this category..."
+              placeholder={t('categories.descriptionPlaceholder')}
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
             />
           </div>
 
           <div className="pt-4 border-t border-border flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => router.back()}>{t('categories.cancel')}</Button>
             <Button type="submit" isLoading={isSaving} className="shadow-lg shadow-primary/20">
               <Save size={16} className="mr-2" />
-              Save Changes
+              {t('categories.saveChanges')}
             </Button>
           </div>
         </Card>

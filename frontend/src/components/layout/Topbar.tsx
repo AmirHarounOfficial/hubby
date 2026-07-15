@@ -19,9 +19,11 @@ import { useAuthStore } from '@/store/auth';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/i18n';
 
 export default function Topbar() {
   const router = useRouter();
+  const { t, locale, setLocale } = useI18n();
   const { user, organizations, activeOrgId, setActiveOrgId, logout } = useAuthStore();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -88,11 +90,11 @@ export default function Topbar() {
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-20">
       <div className="flex items-center gap-4">
         <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search anything..." 
-            className="bg-background/50 border border-border rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64 transition-all"
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={18} />
+          <input
+            type="text"
+            placeholder={t('topbar.search')}
+            className="bg-background/50 border border-border rounded-full ps-10 pe-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64 transition-all"
           />
         </div>
       </div>
@@ -110,8 +112,17 @@ export default function Topbar() {
           </select>
         )}
 
+        <button
+          onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium hover:bg-accent transition-colors"
+          title={t('topbar.language')}
+        >
+          <Globe size={16} className="text-muted-foreground" />
+          {locale === 'ar' ? 'EN' : 'عربي'}
+        </button>
+
         <div className="relative" ref={notificationRef}>
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 hover:bg-accent rounded-full relative transition-colors"
           >
@@ -122,10 +133,10 @@ export default function Topbar() {
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="absolute end-0 mt-2 w-80 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
               <div className="p-4 border-b border-border flex items-center justify-between bg-accent/20">
-                <h3 className="font-bold text-sm">Notifications</h3>
-                {unreadCount > 0 && <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">{unreadCount} New</span>}
+                <h3 className="font-bold text-sm">{t('topbar.notifications')}</h3>
+                {unreadCount > 0 && <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">{unreadCount} {t('topbar.new')}</span>}
               </div>
               <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                 {notifications.length > 0 ? (
@@ -154,13 +165,13 @@ export default function Topbar() {
                 ) : (
                   <div className="p-10 text-center text-muted-foreground flex flex-col items-center gap-2">
                     <Bell size={32} className="opacity-20" />
-                    <p className="text-xs">No notifications yet</p>
+                    <p className="text-xs">{t('topbar.noNotifications')}</p>
                   </div>
                 )}
               </div>
               {notifications.length > 0 && (
                 <button className="w-full py-3 text-[10px] font-bold text-primary hover:bg-accent/50 border-t border-border transition-all">
-                  View All Activity
+                  {t('topbar.viewAll')}
                 </button>
               )}
             </div>
@@ -177,15 +188,15 @@ export default function Topbar() {
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 group-hover:border-primary/50 transition-all">
               <User size={18} />
             </div>
-            <div className="text-left hidden sm:block">
-              <p className="text-xs font-bold leading-none">{user?.name || 'Guest User'}</p>
-              <p className="text-[10px] text-muted-foreground mt-1">{activeOrg?.name || 'Organization'}</p>
+            <div className="text-start hidden sm:block">
+              <p className="text-xs font-bold leading-none">{user?.name || t('topbar.guest')}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">{activeOrg?.name || t('topbar.organization')}</p>
             </div>
             <ChevronDown size={14} className={cn("text-muted-foreground transition-transform", showProfile && "rotate-180")} />
           </button>
 
           {showProfile && (
-            <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="absolute end-0 mt-2 w-56 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
               <div className="p-4 border-b border-border bg-accent/10">
                 <p className="text-xs font-bold">{user?.name}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{user?.email}</p>
@@ -196,22 +207,22 @@ export default function Topbar() {
                   className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium hover:bg-accent rounded-lg transition-all"
                 >
                   <User size={14} className="text-primary" />
-                  My Profile
+                  {t('topbar.myProfile')}
                 </button>
-                <button 
+                <button
                   onClick={() => { router.push('/settings'); setShowProfile(false); }}
                   className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium hover:bg-accent rounded-lg transition-all"
                 >
                   <Settings size={14} className="text-secondary" />
-                  Settings
+                  {t('topbar.settings')}
                 </button>
                 <div className="h-px bg-border my-2 mx-2"></div>
-                <button 
+                <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-destructive hover:bg-destructive/10 rounded-lg transition-all"
                 >
                   <LogOut size={14} />
-                  Log Out
+                  {t('topbar.logout')}
                 </button>
               </div>
             </div>

@@ -20,8 +20,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
+import { useT } from '@/i18n';
 
 export default function NewProductPage() {
+  const t = useT();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<any>({
@@ -112,7 +114,7 @@ export default function NewProductPage() {
       setFormData({ ...formData, image_url: response.data.url });
     } catch (err) {
       console.error('Upload failed', err);
-      alert('Failed to upload image.');
+      alert(t('products.form.alertUploadFailed'));
     } finally {
       setIsUploadingImage(false);
     }
@@ -146,7 +148,7 @@ export default function NewProductPage() {
       router.push('/products');
     } catch (err) {
       console.error('Failed to create product', err);
-      alert('Failed to create product. Please check the data and try again.');
+      alert(t('products.form.alertCreateFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -163,8 +165,8 @@ export default function NewProductPage() {
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Add Global Product</h1>
-            <p className="text-sm text-muted-foreground">Create a new centralized product to map across your stores.</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t('products.form.newTitle')}</h1>
+            <p className="text-sm text-muted-foreground">{t('products.form.newSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -172,12 +174,12 @@ export default function NewProductPage() {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-sm border-b border-border pb-2">Basic Information</h3>
+            <h3 className="font-bold text-sm border-b border-border pb-2">{t('products.form.basicInformation')}</h3>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Product Name</label>
-                <Input 
-                  placeholder="e.g. Premium Cotton T-Shirt" 
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.productName')}</label>
+                <Input
+                  placeholder={t('products.form.productNamePlaceholder')}
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   required
@@ -185,23 +187,23 @@ export default function NewProductPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Global SKU</label>
-                  <Input 
-                    placeholder="e.g. TS-PRM-001" 
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.globalSku')}</label>
+                  <Input
+                    placeholder={t('products.form.skuPlaceholder')}
                     value={formData.sku}
                     onChange={(e) => setFormData({...formData, sku: e.target.value})}
                     required
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Global Price</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.globalPrice')}</label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                    <Input 
+                    <Input
                       type="number"
                       step="0.01"
                       className="pl-10"
-                      placeholder="0.00" 
+                      placeholder={t('products.form.pricePlaceholder')}
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
                       required
@@ -210,22 +212,22 @@ export default function NewProductPage() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</label>
-                <textarea 
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.description')}</label>
+                <textarea
                   className="w-full min-h-[120px] bg-background border border-border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                  placeholder="Describe your product..."
+                  placeholder={t('products.form.descriptionPlaceholder')}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Category</label>
-                <select 
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.category')}</label>
+                <select
                   className="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
                   value={formData.category_id}
                   onChange={(e) => setFormData({...formData, category_id: e.target.value})}
                 >
-                  <option value="">Select a category...</option>
+                  <option value="">{t('products.form.selectCategory')}</option>
                   {renderCategoryOptions(categories)}
                 </select>
               </div>
@@ -236,9 +238,9 @@ export default function NewProductPage() {
             <div className="flex items-center justify-between border-b border-border pb-2">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <Store size={18} className="text-primary" />
-                Link to Stores
+                {t('products.form.linkToStores')}
               </h3>
-              <span className="text-[10px] text-muted-foreground font-bold uppercase">Select Channels</span>
+              <span className="text-[10px] text-muted-foreground font-bold uppercase">{t('products.form.selectChannels')}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {stores.map((store) => (
@@ -263,13 +265,13 @@ export default function NewProductPage() {
                     </div>
                   </div>
                   {selectedStores.includes(store.id) && (
-                    <span className="text-[8px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full uppercase">Syncing</span>
+                    <span className="text-[8px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full uppercase">{t('products.form.syncing')}</span>
                   )}
                 </div>
               ))}
               {stores.length === 0 && (
                 <div className="col-span-full py-6 text-center text-xs text-muted-foreground">
-                  No stores found. Go to Stores to connect your first channel.
+                  {t('products.form.noStores')}
                 </div>
               )}
             </div>
@@ -277,9 +279,9 @@ export default function NewProductPage() {
 
           <Card className="p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-2">
-              <h3 className="font-bold text-sm">Product Variants</h3>
+              <h3 className="font-bold text-sm">{t('products.form.productVariants')}</h3>
               <Button type="button" variant="ghost" size="sm" className="h-8 text-primary" onClick={addVariant}>
-                <Plus size={14} className="mr-1" /> Add Variant
+                <Plus size={14} className="mr-1" /> {t('products.form.addVariant')}
               </Button>
             </div>
             
@@ -296,18 +298,18 @@ export default function NewProductPage() {
                   
                   <div className="grid grid-cols-2 gap-4 mr-8">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Variant Name</label>
-                      <Input 
-                        placeholder="e.g. Blue / XL" 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.variantName')}</label>
+                      <Input
+                        placeholder={t('products.form.variantNamePlaceholder')}
                         value={variant.name}
                         onChange={(e) => updateVariant(index, 'name', e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Variant SKU</label>
-                      <Input 
-                        placeholder="e.g. TS-PRM-001-BL-XL" 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.variantSku')}</label>
+                      <Input
+                        placeholder={t('products.form.variantSkuPlaceholder')}
                         value={variant.sku}
                         onChange={(e) => updateVariant(index, 'sku', e.target.value)}
                         required
@@ -317,21 +319,21 @@ export default function NewProductPage() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price</label>
-                      <Input 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.price')}</label>
+                      <Input
                         type="number"
                         step="0.01"
-                        placeholder="0.00" 
+                        placeholder={t('products.form.pricePlaceholder')}
                         value={variant.price}
                         onChange={(e) => updateVariant(index, 'price', e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Stock</label>
-                      <Input 
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.stock')}</label>
+                      <Input
                         type="number"
-                        placeholder="0" 
+                        placeholder={t('products.form.zeroPlaceholder')}
                         value={variant.stock}
                         onChange={(e) => updateVariant(index, 'stock', e.target.value)}
                         required
@@ -344,8 +346,8 @@ export default function NewProductPage() {
               {formData.variants.length === 0 && (
                 <div className="text-center py-8 bg-accent/10 rounded-2xl border border-dashed border-border">
                   <Layout size={32} className="text-muted-foreground/30 mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground">This product currently has no variants.</p>
-                  <p className="text-[10px] text-muted-foreground/60">Add variants for different sizes, colors, or materials.</p>
+                  <p className="text-xs text-muted-foreground">{t('products.form.noVariantsTitle')}</p>
+                  <p className="text-[10px] text-muted-foreground/60">{t('products.form.noVariantsHint')}</p>
                 </div>
               )}
             </div>
@@ -354,7 +356,7 @@ export default function NewProductPage() {
 
         <div className="space-y-6">
           <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-sm border-b border-border pb-2">Product Image</h3>
+            <h3 className="font-bold text-sm border-b border-border pb-2">{t('products.form.productImage')}</h3>
             <input 
               type="file" 
               className="hidden" 
@@ -375,36 +377,36 @@ export default function NewProductPage() {
                 <>
                   <img src={formData.image_url} alt="Preview" className="object-cover w-full h-full" />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-white text-xs font-bold uppercase tracking-widest">Change Image</span>
+                    <span className="text-white text-xs font-bold uppercase tracking-widest">{t('products.form.changeImage')}</span>
                   </div>
                 </>
               ) : (
                 <>
                   <ImageIcon size={32} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                  <span className="text-xs font-medium text-muted-foreground">Upload Image</span>
+                  <span className="text-xs font-medium text-muted-foreground">{t('products.form.uploadImage')}</span>
                 </>
               )}
             </div>
-            <p className="text-[10px] text-muted-foreground text-center">Max size: 2MB. Format: JPG, PNG, WEBP.</p>
+            <p className="text-[10px] text-muted-foreground text-center">{t('products.form.imageHintNew')}</p>
           </Card>
 
           <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-sm border-b border-border pb-2">Inventory</h3>
+            <h3 className="font-bold text-sm border-b border-border pb-2">{t('products.form.inventory')}</h3>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Opening Stock</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('products.form.totalOpeningStock')}</label>
               <div className="relative">
                 <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                <Input 
+                <Input
                   type="number"
                   className="pl-10"
-                  placeholder="0" 
+                  placeholder={t('products.form.zeroPlaceholder')}
                   value={formData.stock}
                   onChange={(e) => setFormData({...formData, stock: e.target.value})}
                   required
                 />
               </div>
               <p className="text-[10px] text-muted-foreground mt-1">
-                Note: Stock will be distributed among variants if they exist.
+                {t('products.form.stockDistributeNote')}
               </p>
             </div>
           </Card>
@@ -416,7 +418,7 @@ export default function NewProductPage() {
               isLoading={isLoading}
             >
               <Save size={18} className="mr-2" />
-              Create Product
+              {t('products.form.createProduct')}
             </Button>
             <Button 
               type="button" 
@@ -424,7 +426,7 @@ export default function NewProductPage() {
               className="w-full"
               onClick={() => router.push('/products')}
             >
-              Discard Changes
+              {t('products.form.discardChanges')}
             </Button>
           </div>
         </div>
