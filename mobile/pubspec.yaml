@@ -50,6 +50,31 @@ dev_dependencies:
     sdk: flutter
   bloc_test: ^10.0.0
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
+
+# Adaptive launcher icon (green square + teal mark). Regenerate with:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/brand/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#4dd64d"
+  adaptive_icon_foreground: "assets/brand/icon_foreground.png"
+
+# Native splash (deep-teal brand background + white wordmark). Regenerate with:
+#   dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0B5A5C"
+  image: assets/brand/splash_logo.png
+  android: true
+  ios: false
+  web: false
+  fullscreen: true
+  android_12:
+    color: "#0B5A5C"
+    image: assets/brand/splash_android12.png
 
 flutter:
   uses-material-design: true
