@@ -141,7 +141,7 @@ export default function StoresPage() {
         <div className="flex-1 text-center md:text-left">
           <h3 className="text-lg font-bold">Master Store</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Your master store is the central inventory source. When stock changes there, HubbyGlobal automatically
+            Your master store is the central inventory source. When stock changes there, Hubby automatically
             pushes the update to every other connected store.
           </p>
         </div>

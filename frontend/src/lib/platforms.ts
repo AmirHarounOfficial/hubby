@@ -1,7 +1,7 @@
 import { ShoppingBag, Globe, Zap, Store, Package, Sun, Tag, type LucideIcon } from 'lucide-react';
 
 /**
- * Single source of truth for the e-commerce platforms HubbyGlobal connects to.
+ * Single source of truth for the e-commerce platforms Hubby connects to.
  * Add a platform here and it appears everywhere (onboarding, stores, badges).
  */
 export type PlatformId =

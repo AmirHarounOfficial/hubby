@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HubbyGlobal — Command every store from one universe",
+  title: "Hubby — Command every store from one place",
   description:
-    "Unify orders, inventory and products across Shopify, Salla, Zid and WooCommerce in a single synchronised command center.",
+    "Unify orders, inventory and products across Shopify, Salla, Amazon, Noon, Zid, WooCommerce and Trendyol in a single synchronised command center.",
+  icons: {
+    icon: "/brand/icon.svg",
+    shortcut: "/brand/icon.svg",
+    apple: "/brand/icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -14,17 +19,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <head>
-        {/* Fonts are loaded at runtime (browser-side), NOT at build time, so the
-            production `next build` never fails on a Google Fonts network fetch.
-            The CSS variables they back are defined in globals.css. */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+      {/* Brand fonts (Satoshi / Alexandria) are self-hosted via @font-face in
+          globals.css — no build-time or runtime network fetch. */}
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

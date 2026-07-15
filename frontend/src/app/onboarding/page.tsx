@@ -102,7 +102,7 @@ export default function OnboardingPage() {
               <div className="bg-background border border-border p-4 rounded-xl text-left flex items-start gap-3">
                 <Zap size={20} className="text-warning mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground">
-                  By clicking connect, you'll be redirected to {platform?.name} to approve HubbyGlobal.
+                  By clicking connect, you'll be redirected to {platform?.name} to approve Hubby.
                 </p>
               </div>
               <div className="flex gap-4">

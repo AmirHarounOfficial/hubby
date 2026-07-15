@@ -73,8 +73,8 @@ export default function GradientBackground() {
       uTime: { value: 0 },
       uScroll: { value: 0 },
       uRes: { value: new THREE.Vector2(size.width, size.height) },
-      uColorA: { value: new THREE.Color('#4F46E5') },
-      uColorB: { value: new THREE.Color('#10B981') },
+      uColorA: { value: new THREE.Color('#0B5A5C') },
+      uColorB: { value: new THREE.Color('#4FD34A') },
       uBase: { value: new THREE.Color('#070A16') },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

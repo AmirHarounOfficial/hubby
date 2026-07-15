@@ -22,12 +22,12 @@ gsap.registerPlugin(ScrollTrigger);
  *   guarantees we never trap the user behind the loader.
  */
 const FACES = [
-  { Icon: ShoppingBag, color: '#818CF8' },
-  { Icon: ShoppingCart, color: '#34D399' },
-  { Icon: Store, color: '#A5B4FC' },
-  { Icon: Tag, color: '#FBBF24' },
-  { Icon: Coins, color: '#FCD34D' },
-  { Icon: Package, color: '#6EE7B7' },
+  { Icon: ShoppingBag, color: '#4FD34A' },
+  { Icon: ShoppingCart, color: '#53D948' },
+  { Icon: Store, color: '#22D3EE' },
+  { Icon: Tag, color: '#D9A441' },
+  { Icon: Coins, color: '#C7FF46' },
+  { Icon: Package, color: '#86F267' },
 ];
 
 export default function Preloader() {
@@ -133,7 +133,7 @@ export default function Preloader() {
         </div>
 
         <div className="preloader__meta">
-          <span className="preloader__brand">HubbyGlobal</span>
+          <span className="preloader__brand">Hubby</span>
           <div className="preloader__bar">
             <div ref={barRef} className="preloader__bar-fill" />
           </div>

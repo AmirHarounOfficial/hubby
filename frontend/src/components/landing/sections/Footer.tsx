@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Zap } from 'lucide-react';
 import { useI18n } from '../i18n';
+import { Logo } from '@/components/ui/Logo';
 
 export default function Footer() {
   const { t } = useI18n();
@@ -10,11 +10,8 @@ export default function Footer() {
     <footer className="relative border-t border-white/10 bg-[#070A16]/80 px-6 py-20 backdrop-blur-xl">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-12 md:grid-cols-5">
         <div className="col-span-2 space-y-5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary">
-              <Zap size={18} className="text-white" />
-            </span>
-            <span className="text-lg font-semibold">HubbyGlobal</span>
+          <div className="flex items-center">
+            <Logo variant="dark" className="h-8 w-auto" />
           </div>
           <p className="max-w-xs text-sm leading-relaxed text-white/50">
             {t.footer.tagline}

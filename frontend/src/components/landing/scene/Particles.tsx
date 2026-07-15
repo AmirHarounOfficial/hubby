@@ -45,7 +45,7 @@ export default function Particles({ count = 1400 }: { count?: number }) {
       <pointsMaterial
         size={0.025}
         sizeAttenuation
-        color="#A5B4FC"
+        color="#22D3EE"
         transparent
         opacity={0.7}
         depthWrite={false}

@@ -16,8 +16,8 @@ import GradientBackground from './GradientBackground';
 import Particles from './Particles';
 import ChoreographedModel from './ChoreographedModel';
 
-const COLOR_A = new THREE.Color('#6366F1'); // indigo
-const COLOR_B = new THREE.Color('#10B981'); // emerald
+const COLOR_A = new THREE.Color('#0B5A5C'); // indigo
+const COLOR_B = new THREE.Color('#4FD34A'); // emerald
 const tmpColor = new THREE.Color();
 
 type ShapeKind = 'coin' | 'box' | 'ring' | 'shard';
@@ -159,15 +159,15 @@ export default function Scene() {
       <hemisphereLight intensity={0.6} color="#cdd6ff" groundColor="#0a0f1f" />
       <directionalLight position={[5, 6, 4]} intensity={1.8} color="#ffffff" />
       <directionalLight position={[0, 1, 6]} intensity={1.1} color="#dfe6ff" />
-      <pointLight position={[-6, -2, 2]} intensity={60} distance={20} color="#4F46E5" />
-      <pointLight position={[6, 3, -2]} intensity={50} distance={20} color="#10B981" />
+      <pointLight position={[-6, -2, 2]} intensity={60} distance={20} color="#0B5A5C" />
+      <pointLight position={[6, 3, -2]} intensity={50} distance={20} color="#4FD34A" />
 
       {/* Local image-based lighting (rendered offline — no network/HDR fetch)
           so the glb PBR materials get real reflections + soft fill. */}
       <Environment resolution={256} frames={1}>
         <Lightformer intensity={2.2} position={[0, 2, 5]} scale={[8, 8, 1]} color="#ffffff" />
-        <Lightformer intensity={1.4} position={[-5, 1, 2]} scale={[5, 5, 1]} color="#818CF8" />
-        <Lightformer intensity={1.4} position={[5, -1, 2]} scale={[5, 5, 1]} color="#34D399" />
+        <Lightformer intensity={1.4} position={[-5, 1, 2]} scale={[5, 5, 1]} color="#22D3EE" />
+        <Lightformer intensity={1.4} position={[5, -1, 2]} scale={[5, 5, 1]} color="#53D948" />
         <Lightformer intensity={1.0} position={[0, -4, 3]} scale={[6, 3, 1]} color="#a78bfa" />
       </Environment>
 

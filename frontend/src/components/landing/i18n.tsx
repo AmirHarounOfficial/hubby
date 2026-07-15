@@ -28,7 +28,7 @@ const en = {
   manifesto: {
     eyebrow: 'The problem',
     text:
-      'Selling everywhere shouldn’t mean managing everywhere. Every platform speaks a different language, every dashboard tells half the story. HubbyGlobal collapses that chaos into a single source of truth — where one move ripples across every store, instantly.',
+      'Selling everywhere shouldn’t mean managing everywhere. Every platform speaks a different language, every dashboard tells half the story. Hubby collapses that chaos into a single source of truth — where one move ripples across every store, instantly.',
   },
   showcase: {
     beats: [
@@ -122,7 +122,7 @@ const en = {
       { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
       { title: 'Legal', links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy'] },
     ],
-    copyright: '© 2026 HubbyGlobal. All rights reserved.',
+    copyright: '© 2026 Hubby. All rights reserved.',
     social: ['Twitter', 'LinkedIn', 'GitHub'],
   },
   auth: {
@@ -157,7 +157,7 @@ const en = {
         'Invite your team with role-based access',
       ],
       title: 'Create your account',
-      subtitle: 'Join the merchants scaling with HubbyGlobal.',
+      subtitle: 'Join the merchants scaling with Hubby.',
       name: 'Full Name',
       namePlaceholder: 'John Doe',
       org: 'Organization Name',
@@ -216,7 +216,7 @@ const ar: Dict = {
   manifesto: {
     eyebrow: 'المشكلة',
     text:
-      'البيع في كل مكان لا يعني إدارته في كل مكان. كل منصّة تتحدّث بلغة مختلفة، وكل لوحة تحكّم تروي نصف الحكاية. يجمع HubbyGlobal هذه الفوضى في مصدرٍ واحد للحقيقة — حيث تنعكس حركةٌ واحدة على كل متاجرك فورًا.',
+      'البيع في كل مكان لا يعني إدارته في كل مكان. كل منصّة تتحدّث بلغة مختلفة، وكل لوحة تحكّم تروي نصف الحكاية. يجمع Hubby هذه الفوضى في مصدرٍ واحد للحقيقة — حيث تنعكس حركةٌ واحدة على كل متاجرك فورًا.',
   },
   showcase: {
     beats: [
@@ -305,7 +305,7 @@ const ar: Dict = {
       { title: 'الشركة', links: ['من نحن', 'المدوّنة', 'الوظائف', 'تواصل معنا'] },
       { title: 'قانوني', links: ['سياسة الخصوصية', 'شروط الخدمة', 'سياسة الكوكيز'] },
     ],
-    copyright: '© ٢٠٢٦ HubbyGlobal. جميع الحقوق محفوظة.',
+    copyright: '© ٢٠٢٦ Hubby. جميع الحقوق محفوظة.',
     social: ['تويتر', 'لينكدإن', 'جِت‑هَب'],
   },
   auth: {
@@ -338,7 +338,7 @@ const ar: Dict = {
         'ادعُ فريقك بصلاحيات حسب الدور',
       ],
       title: 'أنشئ حسابك',
-      subtitle: 'انضم إلى التجار الذين ينمون مع HubbyGlobal.',
+      subtitle: 'انضم إلى التجار الذين ينمون مع Hubby.',
       name: 'الاسم الكامل',
       namePlaceholder: 'محمد أحمد',
       org: 'اسم المنشأة',

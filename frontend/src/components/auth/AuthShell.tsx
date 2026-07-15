@@ -3,12 +3,13 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Zap, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import Cursor from '../landing/Cursor';
 import LanguageSwitcher from '../landing/LanguageSwitcher';
 import { useI18n } from '../landing/i18n';
+import { Logo } from '../ui/Logo';
 
 // Three.js stays client-only.
 const AuthScene = dynamic(() => import('./AuthScene'), { ssr: false });
@@ -29,7 +30,7 @@ export default function AuthShell({
 }) {
   const { t, dir } = useI18n();
   const root = useRef<HTMLDivElement>(null);
-  const accentColor = new THREE.Color(accent === 'secondary' ? '#10B981' : '#6366F1');
+  const accentColor = new THREE.Color(accent === 'secondary' ? '#4FD34A' : '#0B5A5C');
   const copy = t.auth[screen];
 
   useLayoutEffect(() => {
@@ -68,11 +69,8 @@ export default function AuthShell({
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* Brand panel (desktop only). */}
         <aside className="relative hidden flex-col justify-between p-12 lg:flex">
-          <Link href="/" data-cursor className="flex w-fit items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/30">
-              <Zap size={18} className="text-white" />
-            </span>
-            <span className="text-lg font-semibold tracking-tight">HubbyGlobal</span>
+          <Link href="/" data-cursor className="flex w-fit items-center">
+            <Logo variant="dark" className="h-9 w-auto" />
           </Link>
 
           <div className="max-w-md">
@@ -110,11 +108,8 @@ export default function AuthShell({
         <main className="flex items-center justify-center p-6 sm:p-10">
           <div data-auth-rise className="w-full max-w-md">
             {/* Compact brand mark for mobile, where the panel is hidden. */}
-            <Link href="/" data-cursor className="mb-8 flex w-fit items-center gap-2.5 lg:hidden">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary">
-                <Zap size={18} className="text-white" />
-              </span>
-              <span className="text-lg font-semibold">HubbyGlobal</span>
+            <Link href="/" data-cursor className="mb-8 flex w-fit items-center lg:hidden">
+              <Logo variant="dark" className="h-8 w-auto" />
             </Link>
 
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-10">

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_palette.dart';
 
-/// World-class light theme for HubbyGlobal.
+/// World-class light theme for Hubby.
 ///
-/// Plus Jakarta Sans for headings (distinctive, premium), Inter for body
-/// (Swiss-clean for dense data), Cairo for Arabic. Soft layered elevation,
-/// tabular figures for numerics, and an 18px radius language throughout.
+/// Satoshi for Latin (the Hubby brand face), Alexandria for Arabic — both
+/// self-bundled (see pubspec fonts). Soft layered elevation, tabular figures
+/// for numerics, and an 18px radius language throughout.
+const String _kFontLatin = 'Satoshi';
+const String _kFontArabic = 'Alexandria';
 class AppTheme {
   static ThemeData light(String localeCode) {
     final base = ThemeData(
@@ -161,16 +162,16 @@ class AppTheme {
       );
 
   static TextStyle _heading(String localeCode, double size, FontWeight weight) {
-    final fn = localeCode == 'ar' ? GoogleFonts.cairo : GoogleFonts.inter;
-    return fn(fontSize: size, fontWeight: weight, letterSpacing: -0.2);
+    final family = localeCode == 'ar' ? _kFontArabic : _kFontLatin;
+    return TextStyle(fontFamily: family, fontSize: size, fontWeight: weight, letterSpacing: -0.2);
   }
 
-  /// Inter for Latin (loads reliably + excellent for dense data), Cairo for
-  /// Arabic. Premium hierarchy comes from weight + tight tracking, not a second
-  /// runtime-fetched family.
+  /// Satoshi for Latin (the Hubby brand face), Alexandria for Arabic — both
+  /// bundled, so there's no runtime font fetch. Premium hierarchy comes from
+  /// weight + tight tracking.
   static TextTheme fontFor(String localeCode, TextTheme base) {
-    if (localeCode == 'ar') return GoogleFonts.cairoTextTheme(base);
-    final t = GoogleFonts.interTextTheme(base);
+    if (localeCode == 'ar') return base.apply(fontFamily: _kFontArabic);
+    final t = base.apply(fontFamily: _kFontLatin);
     TextStyle? d(TextStyle? s) => s?.copyWith(letterSpacing: -0.4, fontWeight: FontWeight.w700);
     return t.copyWith(
       displayLarge: d(t.displayLarge),
@@ -187,7 +188,8 @@ class AppTheme {
 /// Typographic helpers — tabular figures keep KPI/price columns from shifting.
 class AppText {
   static TextStyle number({double size = 22, FontWeight weight = FontWeight.w700, Color? color}) =>
-      GoogleFonts.inter(
+      TextStyle(
+        fontFamily: _kFontLatin,
         fontSize: size,
         fontWeight: weight,
         color: color,

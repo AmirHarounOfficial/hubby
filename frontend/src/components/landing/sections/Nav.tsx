@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Magnetic from '../Magnetic';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { useI18n } from '../i18n';
+import { Logo } from '@/components/ui/Logo';
 
 export default function Nav() {
   const { t } = useI18n();
@@ -36,11 +36,8 @@ export default function Nav() {
     >
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Magnetic strength={0.3}>
-          <Link href="#top" className="flex items-center gap-2.5" data-cursor>
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/30">
-              <Zap size={18} className="text-white" />
-            </span>
-            <span className="text-lg font-semibold tracking-tight">HubbyGlobal</span>
+          <Link href="#top" className="flex items-center" data-cursor>
+            <Logo variant="dark" className="h-8 w-auto" />
           </Link>
         </Magnetic>
 

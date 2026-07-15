@@ -14,8 +14,8 @@ import { bindPointer, lerp, pointer } from '../landing/state';
 import GradientBackground from '../landing/scene/GradientBackground';
 import Particles from '../landing/scene/Particles';
 
-const COLOR_A = new THREE.Color('#6366F1');
-const COLOR_B = new THREE.Color('#10B981');
+const COLOR_A = new THREE.Color('#0B5A5C');
+const COLOR_B = new THREE.Color('#4FD34A');
 
 /** Small gold coin accent. */
 function Coin({
@@ -76,13 +76,13 @@ function Content({ accent }: { accent: THREE.Color }) {
       <ambientLight intensity={0.5} />
       <hemisphereLight intensity={0.6} color="#cdd6ff" groundColor="#0a0f1f" />
       <directionalLight position={[5, 6, 4]} intensity={1.6} color="#ffffff" />
-      <pointLight position={[-6, -2, 2]} intensity={50} distance={20} color="#4F46E5" />
-      <pointLight position={[6, 3, -2]} intensity={45} distance={20} color="#10B981" />
+      <pointLight position={[-6, -2, 2]} intensity={50} distance={20} color="#0B5A5C" />
+      <pointLight position={[6, 3, -2]} intensity={45} distance={20} color="#4FD34A" />
 
       <Environment resolution={256} frames={1}>
         <Lightformer intensity={2} position={[0, 2, 5]} scale={[8, 8, 1]} color="#ffffff" />
-        <Lightformer intensity={1.3} position={[-5, 1, 2]} scale={[5, 5, 1]} color="#818CF8" />
-        <Lightformer intensity={1.3} position={[5, -1, 2]} scale={[5, 5, 1]} color="#34D399" />
+        <Lightformer intensity={1.3} position={[-5, 1, 2]} scale={[5, 5, 1]} color="#22D3EE" />
+        <Lightformer intensity={1.3} position={[5, -1, 2]} scale={[5, 5, 1]} color="#53D948" />
       </Environment>
 
       {/* Visual cluster weighted to the left so it sits behind the brand panel

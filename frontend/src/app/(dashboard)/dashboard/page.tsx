@@ -94,7 +94,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Welcome back to HubbyGlobal dashboard.</p>
+          <p className="text-muted-foreground text-sm">Welcome back to Hubby dashboard.</p>
         </div>
         <button 
           onClick={handleSyncAll}
@@ -156,17 +156,17 @@ export default function DashboardPage() {
               <AreaChart data={timeline}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#0B5A5C" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#0B5A5C" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
-                <XAxis dataKey="date" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#DCE5E8" />
+                <XAxis dataKey="date" stroke="#60727A" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="#60727A" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #DCE5E8', borderRadius: '12px' }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#4F46E5" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                <Area type="monotone" dataKey="revenue" stroke="#0B5A5C" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
                 />
-                <Bar dataKey="orders" fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="orders" fill="#4FD34A" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

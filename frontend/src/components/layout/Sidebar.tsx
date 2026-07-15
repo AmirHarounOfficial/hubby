@@ -19,6 +19,7 @@ import {
   Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/ui/Logo';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
@@ -44,7 +45,9 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsO
     )}>
       <div className="p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          {isOpen && <h1 className="text-xl font-bold gradient-text">HubbyGlobal</h1>}
+          {isOpen
+            ? <Logo variant="color" className="h-7 w-auto" />
+            : <Logo variant="icon" className="h-8 w-8" />}
           <button 
             onClick={() => setIsOpen(!isOpen)}
             className="p-2 hover:bg-accent rounded-lg"

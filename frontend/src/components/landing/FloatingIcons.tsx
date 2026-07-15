@@ -42,9 +42,9 @@ type IconItem = {
 };
 
 const ITEMS: IconItem[] = [
-  { Icon: ShoppingBag, top: '14%', left: '8%', size: 46, depth: 1.4, dur: 7, rotate: 12, color: '#818CF8', opacity: 0.22 },
-  { Icon: ShoppingCart, top: '70%', left: '12%', size: 52, depth: 1.8, dur: 9, rotate: -14, color: '#34D399', opacity: 0.2 },
-  { Icon: Store, top: '24%', left: '84%', size: 50, depth: 1.6, dur: 8, rotate: -8, color: '#A5B4FC', opacity: 0.22 },
+  { Icon: ShoppingBag, top: '14%', left: '8%', size: 46, depth: 1.4, dur: 7, rotate: 12, color: '#22D3EE', opacity: 0.22 },
+  { Icon: ShoppingCart, top: '70%', left: '12%', size: 52, depth: 1.8, dur: 9, rotate: -14, color: '#53D948', opacity: 0.2 },
+  { Icon: Store, top: '24%', left: '84%', size: 50, depth: 1.6, dur: 8, rotate: -8, color: '#22D3EE', opacity: 0.22 },
   { Icon: Package, top: '78%', left: '80%', size: 44, depth: 2.0, dur: 10, rotate: 16, color: '#6EE7B7', opacity: 0.18 },
   { Icon: Tag, top: '46%', left: '4%', size: 38, depth: 1.2, dur: 6.5, rotate: 20, color: '#FBBF24', opacity: 0.2 },
   { Icon: CreditCard, top: '8%', left: '52%', size: 40, depth: 1.0, dur: 7.5, rotate: -10, color: '#C7D2FE', opacity: 0.16 },

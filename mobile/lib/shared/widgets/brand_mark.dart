@@ -1,31 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import '../../core/theme/app_palette.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+/// The Hubby wordmark (deep-teal + brand green), drawn from the brand SVG.
+/// [size] drives the height; width follows the artwork's aspect ratio.
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.size = 40});
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          height: size, width: size,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppPalette.primary, AppPalette.secondary],
-              begin: Alignment.topLeft, end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(size * 0.3),
-          ),
-          child: Icon(LucideIcons.zap, color: Colors.white, size: size * 0.5),
-        ),
-        const SizedBox(width: 10),
-        const Text('Hubby',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: -0.4)),
-      ],
+    return SvgPicture.asset(
+      'assets/brand/logo.svg',
+      height: size,
+      fit: BoxFit.contain,
+      semanticsLabel: 'Hubby',
     );
   }
 }
