@@ -5,11 +5,7 @@ export const metadata: Metadata = {
   title: "Hubby — Command every store from one place",
   description:
     "Unify orders, inventory and products across Shopify, Salla, Amazon, Noon, Zid, WooCommerce and Trendyol in a single synchronised command center.",
-  icons: {
-    icon: "/brand/icon.svg",
-    shortcut: "/brand/icon.svg",
-    apple: "/brand/icon.svg",
-  },
+  // Favicons come from the app/ file conventions (icon.svg, apple-icon.png, favicon.ico).
 };
 
 export default function RootLayout({
