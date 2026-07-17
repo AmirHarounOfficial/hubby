@@ -68,7 +68,7 @@ export default function Capabilities() {
   }));
 
   return (
-    <section id="capabilities" ref={section} className="relative h-[100svh] overflow-hidden">
+    <section id="capabilities" ref={section} className="relative h-[100svh] overflow-hidden bg-white text-[#183238]">
       <div className="pointer-events-none absolute start-6 top-24 z-10 sm:start-12">
         <p className="text-sm font-medium uppercase tracking-[0.3em] text-secondary">
           {t.capabilities.eyebrow}
@@ -85,22 +85,22 @@ export default function Capabilities() {
           <article
             key={i}
             data-cursor
-            className="group relative flex h-[60vh] w-[78vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-10 backdrop-blur-md transition-colors hover:border-white/25 sm:w-[44vw] lg:w-[32vw]"
+            className="group relative flex h-[60vh] w-[78vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border border-[#DCE5E8] bg-[#F8FAFB] p-10 shadow-sm transition-colors hover:bg-[#EEF2F4] sm:w-[44vw] lg:w-[32vw]"
           >
             <div
               className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.accent} to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
             />
             <div className="relative flex items-center justify-between">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#DCE5E8] bg-white text-[#183238]">
                 <card.icon size={26} />
               </span>
-              <span className="font-mono text-sm text-white/30">
+              <span className="font-mono text-sm text-[#98A7AD]">
                 {String(i + 1).padStart(2, '0')}
               </span>
             </div>
             <div className="relative">
               <h3 className="text-2xl font-semibold tracking-tight sm:text-3xl">{card.title}</h3>
-              <p className="mt-4 text-base leading-relaxed text-white/55">{card.desc}</p>
+              <p className="mt-4 text-base leading-relaxed text-[#60727A]">{card.desc}</p>
             </div>
           </article>
         ))}

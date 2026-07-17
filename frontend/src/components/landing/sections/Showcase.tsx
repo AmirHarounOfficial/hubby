@@ -43,12 +43,12 @@ export default function Showcase() {
   }, []);
 
   return (
-    <section ref={section} className="relative px-6 py-32">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 lg:grid-cols-4">
+    <section ref={section} className="relative bg-white px-6 py-32 text-[#183238]">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px overflow-hidden rounded-3xl border border-[#DCE5E8] bg-[#DCE5E8] lg:grid-cols-4">
         {STATS.map((s) => (
           <Reveal
             key={s.label}
-            className="flex flex-col items-center justify-center gap-3 bg-[#070A16] p-10 text-center"
+            className="flex flex-col items-center justify-center gap-3 bg-white p-10 text-center"
           >
             <p className="text-5xl font-semibold tracking-tight sm:text-6xl">
               <span data-counter={s.value} data-decimals={s.decimals ?? 0}>
@@ -56,7 +56,7 @@ export default function Showcase() {
               </span>
               <span className="gradient-text">{s.suffix}</span>
             </p>
-            <p className="text-sm text-white/50">{s.label}</p>
+            <p className="text-sm text-[#60727A]">{s.label}</p>
           </Reveal>
         ))}
       </div>

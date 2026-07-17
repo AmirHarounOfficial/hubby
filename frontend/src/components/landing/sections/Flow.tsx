@@ -38,7 +38,7 @@ export default function Flow() {
   }, []);
 
   return (
-    <section id="flow" ref={section} className="relative px-6 py-40">
+    <section id="flow" ref={section} className="relative bg-white px-6 py-40 text-[#183238]">
       <div className="mx-auto max-w-5xl">
         <p className="mb-4 text-sm font-medium uppercase tracking-[0.3em] text-secondary">
           {t.flow.eyebrow}
@@ -51,7 +51,7 @@ export default function Flow() {
 
         <div className="relative mt-24 ps-12 sm:ps-20">
           {/* Track + animated progress line. */}
-          <div className="absolute start-[1.15rem] top-2 h-[calc(100%-1rem)] w-px bg-white/10 sm:start-[1.65rem]" />
+          <div className="absolute start-[1.15rem] top-2 h-[calc(100%-1rem)] w-px bg-[#DCE5E8] sm:start-[1.65rem]" />
           <div
             ref={line}
             className="absolute start-[1.15rem] top-2 h-[calc(100%-1rem)] w-px origin-top bg-gradient-to-b from-primary to-secondary sm:start-[1.65rem]"
@@ -60,11 +60,11 @@ export default function Flow() {
           <div className="space-y-24">
             {steps.map((s, i) => (
               <Reveal key={i} className="relative">
-                <span className="absolute -start-12 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-white/20 bg-[#070A16] font-mono text-xs text-secondary sm:-start-20 rtl:translate-x-1/2">
+                <span className="absolute -start-12 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-[#DCE5E8] bg-white font-mono text-xs text-secondary sm:-start-20 rtl:translate-x-1/2">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <h3 className="text-2xl font-semibold tracking-tight sm:text-4xl">{s.title}</h3>
-                <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/55">{s.desc}</p>
+                <p className="mt-4 max-w-xl text-lg leading-relaxed text-[#60727A]">{s.desc}</p>
               </Reveal>
             ))}
           </div>

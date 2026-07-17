@@ -120,6 +120,9 @@ export default function Hero() {
           <span className="h-2 w-1 animate-bounce rounded-full bg-white/60" />
         </span>
       </div>
+
+      {/* Blend the dark, canvas-backed hero into the white sections below. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-white" />
     </section>
   );
 }

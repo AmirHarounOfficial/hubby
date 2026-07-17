@@ -11,9 +11,9 @@ import { useI18n } from '../i18n';
 export default function CTA() {
   const { t, locale } = useI18n();
   return (
-    <section className="relative px-6 py-40">
-      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-primary/20 via-white/[0.03] to-secondary/20 px-8 py-24 text-center backdrop-blur-xl sm:px-16">
-        <div className="pointer-events-none absolute -top-1/2 left-1/2 h-[120%] w-[60%] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
+    <section className="relative bg-white px-6 py-40 text-[#183238]">
+      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-secondary px-8 py-24 text-center text-white shadow-sm sm:px-16">
+        <div className="pointer-events-none absolute -top-1/2 left-1/2 h-[120%] w-[60%] -translate-x-1/2 rounded-full bg-white/20 blur-[120px]" />
 
         <p className="relative mb-6 text-sm font-medium uppercase tracking-[0.3em] text-secondary">
           {t.cta.eyebrow}
