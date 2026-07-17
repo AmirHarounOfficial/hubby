@@ -121,8 +121,8 @@ export default function Hero() {
         </span>
       </div>
 
-      {/* Blend the dark, canvas-backed hero into the white sections below. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-white" />
+      {/* Blend the dark, canvas-backed hero into the light story canvas below. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-[#F8FAFB]" />
     </section>
   );
 }

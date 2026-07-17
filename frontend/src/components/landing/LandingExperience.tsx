@@ -62,7 +62,7 @@ function LandingInner() {
       // `overflow-x-clip` contains the vw-based animated tracks so phones never
       // get accidental horizontal scroll/zoom. `clip` (not `hidden`) avoids
       // creating a scroll container that would break the GSAP pins / Lenis.
-      className="landing-root relative overflow-x-clip bg-[#070A16] text-white selection:bg-primary/40"
+      className="landing-root relative overflow-x-clip bg-[#051E1D] text-white selection:bg-primary/40"
     >
       <Preloader />
       <Cursor />
@@ -79,11 +79,26 @@ function LandingInner() {
         <Nav />
         <main className="relative z-10">
           <Hero />
-          <Manifesto />
-          <ShowcaseAct />
-          <Capabilities />
-          <Flow />
-          <Showcase />
+
+          {/* One continuous, branded-light canvas ties the story sections
+              together (instead of stacked flat-white blocks) — soft teal/green
+              glows echo the hero's lighting so light and dark feel like one
+              designed world. */}
+          <div className="relative bg-[#F8FAFB]">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -left-[12%] top-[6%] h-[42rem] w-[42rem] rounded-full bg-primary/[0.06] blur-[130px]" />
+              <div className="absolute -right-[10%] top-[40%] h-[40rem] w-[40rem] rounded-full bg-secondary/[0.09] blur-[140px]" />
+              <div className="absolute left-[28%] bottom-[8%] h-[34rem] w-[34rem] rounded-full bg-primary/[0.05] blur-[130px]" />
+            </div>
+            <div className="relative">
+              <Manifesto />
+              <ShowcaseAct />
+              <Capabilities />
+              <Flow />
+              <Showcase />
+            </div>
+          </div>
+
           <CTA />
         </main>
         <Footer />

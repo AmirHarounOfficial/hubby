@@ -43,7 +43,7 @@ export default function Showcase() {
   }, []);
 
   return (
-    <section ref={section} className="relative bg-white px-6 py-32 text-[#183238]">
+    <section ref={section} className="relative px-6 py-32 text-[#183238]">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px overflow-hidden rounded-3xl border border-[#DCE5E8] bg-[#DCE5E8] lg:grid-cols-4">
         {STATS.map((s) => (
           <Reveal

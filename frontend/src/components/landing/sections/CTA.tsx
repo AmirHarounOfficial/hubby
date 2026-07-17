@@ -11,8 +11,8 @@ import { useI18n } from '../i18n';
 export default function CTA() {
   const { t, locale } = useI18n();
   return (
-    <section className="relative bg-white px-6 py-40 text-[#183238]">
-      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-secondary px-8 py-24 text-center text-white shadow-sm sm:px-16">
+    <section className="relative bg-gradient-to-b from-[#F8FAFB] via-[#0B2B2A] to-[#051E1D] px-6 py-40 text-white">
+      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-secondary px-8 py-24 text-center text-white shadow-[0_40px_120px_-40px_rgba(11,90,92,0.7)] sm:px-16">
         <div className="pointer-events-none absolute -top-1/2 left-1/2 h-[120%] w-[60%] -translate-x-1/2 rounded-full bg-white/20 blur-[120px]" />
 
         <p className="relative mb-6 text-sm font-medium uppercase tracking-[0.3em] text-secondary">

@@ -41,7 +41,7 @@ export default function Manifesto() {
   }, [t.manifesto.text]);
 
   return (
-    <section id="manifesto" ref={section} className="relative flex min-h-[100svh] items-center bg-white px-6 text-[#183238]">
+    <section id="manifesto" ref={section} className="relative flex min-h-[100svh] items-center px-6 text-[#183238]">
       <div className="mx-auto max-w-5xl">
         <p className="mb-10 text-sm font-medium uppercase tracking-[0.3em] text-secondary">
           {t.manifesto.eyebrow}

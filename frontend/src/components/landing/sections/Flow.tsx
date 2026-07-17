@@ -38,7 +38,7 @@ export default function Flow() {
   }, []);
 
   return (
-    <section id="flow" ref={section} className="relative bg-white px-6 py-40 text-[#183238]">
+    <section id="flow" ref={section} className="relative px-6 py-40 text-[#183238]">
       <div className="mx-auto max-w-5xl">
         <p className="mb-4 text-sm font-medium uppercase tracking-[0.3em] text-secondary">
           {t.flow.eyebrow}

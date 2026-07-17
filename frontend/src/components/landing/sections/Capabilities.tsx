@@ -68,7 +68,7 @@ export default function Capabilities() {
   }));
 
   return (
-    <section id="capabilities" ref={section} className="relative h-[100svh] overflow-hidden bg-white text-[#183238]">
+    <section id="capabilities" ref={section} className="relative h-[100svh] overflow-hidden text-[#183238]">
       <div className="pointer-events-none absolute start-6 top-24 z-10 sm:start-12">
         <p className="text-sm font-medium uppercase tracking-[0.3em] text-secondary">
           {t.capabilities.eyebrow}
@@ -85,7 +85,7 @@ export default function Capabilities() {
           <article
             key={i}
             data-cursor
-            className="group relative flex h-[60vh] w-[78vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border border-[#DCE5E8] bg-[#F8FAFB] p-10 shadow-sm transition-colors hover:bg-[#EEF2F4] sm:w-[44vw] lg:w-[32vw]"
+            className="group relative flex h-[60vh] w-[78vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border border-[#DCE5E8] bg-white p-10 shadow-[0_1px_2px_rgba(24,50,56,0.04),0_18px_40px_-24px_rgba(24,50,56,0.25)] transition-all hover:-translate-y-1 hover:shadow-[0_1px_2px_rgba(24,50,56,0.04),0_28px_60px_-28px_rgba(11,90,92,0.35)] sm:w-[44vw] lg:w-[32vw]"
           >
             <div
               className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.accent} to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
