@@ -55,7 +55,7 @@ export default function Hero() {
       <div ref={fade} className="mx-auto max-w-5xl text-center">
         <div
           data-hero-fade
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur-sm"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/55 px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-[#0B5A5C] shadow-sm backdrop-blur-md"
         >
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-75" />
@@ -78,7 +78,7 @@ export default function Hero() {
 
         <p
           data-hero-fade
-          className="mx-auto mt-8 max-w-2xl text-balance text-lg leading-relaxed text-white/60 sm:text-xl"
+          className="mx-auto mt-8 max-w-2xl text-balance text-lg leading-relaxed text-[#5C6E74] sm:text-xl"
         >
           {t.hero.subtitle}
         </p>
@@ -92,7 +92,7 @@ export default function Hero() {
               href="/register"
               data-cursor
               data-cursor-label="Launch"
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-[#070A16] transition-transform hover:scale-[1.03]"
+              className="group inline-flex items-center gap-2 rounded-full bg-[#0B5A5C] px-8 py-4 text-base font-semibold text-white shadow-[0_16px_34px_-14px_rgba(11,90,92,.8)] transition-transform hover:scale-[1.03]"
             >
               {t.hero.cta1}
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
@@ -102,7 +102,7 @@ export default function Hero() {
             <a
               href="#manifesto"
               data-cursor
-              className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-8 py-4 text-base font-medium text-white/80 backdrop-blur-sm transition-colors hover:bg-white/10"
+              className="inline-flex items-center rounded-full border border-[rgba(11,90,92,.18)] bg-white/60 px-8 py-4 text-base font-medium text-[#122E33] shadow-sm backdrop-blur-md transition-colors hover:bg-white/85"
             >
               {t.hero.cta2}
             </a>
@@ -113,16 +113,13 @@ export default function Hero() {
       {/* Scroll cue */}
       <div
         data-hero-fade
-        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-white/40"
+        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#5C6E74]"
       >
         {t.hero.scroll}
-        <span className="flex h-10 w-6 justify-center rounded-full border border-white/20 p-1.5">
-          <span className="h-2 w-1 animate-bounce rounded-full bg-white/60" />
+        <span className="flex h-10 w-6 justify-center rounded-full border border-[rgba(11,90,92,.25)] p-1.5">
+          <span className="h-2 w-1 animate-bounce rounded-full bg-[#0B5A5C]/70" />
         </span>
       </div>
-
-      {/* Blend the dark, canvas-backed hero into the light story canvas below. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-[#F8FAFB]" />
     </section>
   );
 }

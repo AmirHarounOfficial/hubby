@@ -52,7 +52,7 @@ function CommerceShape({
               metalness={0.75}
               roughness={0.22}
               emissive={color}
-              emissiveIntensity={0.3}
+              emissiveIntensity={0.06}
             />
           </mesh>
         )}
@@ -64,7 +64,7 @@ function CommerceShape({
               metalness={0.3}
               roughness={0.4}
               emissive={color}
-              emissiveIntensity={0.22}
+              emissiveIntensity={0.06}
               flatShading
             />
           </mesh>
@@ -77,7 +77,7 @@ function CommerceShape({
               metalness={0.6}
               roughness={0.3}
               emissive={color}
-              emissiveIntensity={0.22}
+              emissiveIntensity={0.06}
             />
           </mesh>
         )}
@@ -88,7 +88,7 @@ function CommerceShape({
               roughness={0.15}
               metalness={0.35}
               emissive={color}
-              emissiveIntensity={0.25}
+              emissiveIntensity={0.06}
               flatShading
             />
           </Octahedron>
@@ -155,12 +155,12 @@ export default function Scene() {
 
       {/* Cinematic lighting: ambient + hemisphere fill + key + coloured rims,
           plus a front fill so models facing the camera never read as silhouettes. */}
-      <ambientLight intensity={0.5} />
-      <hemisphereLight intensity={0.6} color="#cdd6ff" groundColor="#0a0f1f" />
-      <directionalLight position={[5, 6, 4]} intensity={1.8} color="#ffffff" />
-      <directionalLight position={[0, 1, 6]} intensity={1.1} color="#dfe6ff" />
-      <pointLight position={[-6, -2, 2]} intensity={60} distance={20} color="#0B5A5C" />
-      <pointLight position={[6, 3, -2]} intensity={50} distance={20} color="#4FD34A" />
+      <ambientLight intensity={0.9} />
+      <hemisphereLight intensity={0.85} color="#ffffff" groundColor="#dfeae8" />
+      <directionalLight position={[5, 6, 4]} intensity={2.0} color="#ffffff" />
+      <directionalLight position={[0, 1, 6]} intensity={1.1} color="#eef4f3" />
+      <pointLight position={[-6, -2, 2]} intensity={22} distance={20} color="#0B5A5C" />
+      <pointLight position={[6, 3, -2]} intensity={20} distance={20} color="#4FD34A" />
 
       {/* Local image-based lighting (rendered offline — no network/HDR fetch)
           so the glb PBR materials get real reflections + soft fill. */}
@@ -177,18 +177,18 @@ export default function Scene() {
           <MeshDistortMaterial
             ref={distort as never}
             color={COLOR_A}
-            roughness={0.18}
-            metalness={0.45}
+            roughness={0.1}
+            metalness={0.35}
             distort={0.35}
             speed={1.6}
-            emissive="#1E1B4B"
-            emissiveIntensity={0.4}
+            emissive="#0B5A5C"
+            emissiveIntensity={0.05}
           />
         </Icosahedron>
 
         {/* Wireframe shell wrapping it for a "tech" read. */}
         <Icosahedron args={[1.9, 1]}>
-          <meshBasicMaterial color="#3B3F82" wireframe transparent opacity={0.18} />
+          <meshBasicMaterial color="#0B5A5C" wireframe transparent opacity={0.1} />
         </Icosahedron>
 
         {/* Gold coins ride with the centerpiece (recede together). */}
