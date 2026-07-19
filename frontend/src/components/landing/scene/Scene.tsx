@@ -34,7 +34,7 @@ const CORE_GREEN = '#4FD34A';
 
 export default function Scene() {
   const { camera } = useThree();
-  const glow = useMemo(makeGlow, []);
+  const glow = useMemo(() => makeGlow(), []);
 
   const rig = useMemo(() => {
     const group = new THREE.Group();
