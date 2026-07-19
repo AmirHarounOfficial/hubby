@@ -1,232 +1,187 @@
 'use client';
 
-import React, { Suspense, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import {
-  Environment,
-  Float,
-  Icosahedron,
-  Lightformer,
-  MeshDistortMaterial,
-  Octahedron,
-} from '@react-three/drei';
 import * as THREE from 'three';
-import { beatEls, coverage, lerp, pointer, scroll } from '../state';
+import { lerp, pointer, scroll } from '../state';
 import GradientBackground from './GradientBackground';
-import Particles from './Particles';
-import ChoreographedModel from './ChoreographedModel';
-
-const COLOR_A = new THREE.Color('#0B5A5C'); // indigo
-const COLOR_B = new THREE.Color('#4FD34A'); // emerald
-const tmpColor = new THREE.Color();
-
-type ShapeKind = 'coin' | 'box' | 'ring' | 'shard';
 
 /**
- * A drifting commerce object orbiting the centerpiece. Coins read as money/
- * selling, boxes as packages/orders, rings + shards add variety. Each floats
- * and tumbles on its own via drei's <Float>.
+ * The commerce constellation: a luminous Hubby core with the merchant's sales
+ * channels orbiting it in 3D, linked by connection lines with data streaming
+ * inward — the product's promise ("every store, one orbit") rendered as the hero.
  */
-function CommerceShape({
-  kind,
-  position,
-  scale = 1,
-  color,
-  speed = 1,
-}: {
-  kind: ShapeKind;
-  position: [number, number, number];
-  scale?: number;
-  color: string;
-  speed?: number;
-}) {
-  return (
-    <Float speed={speed * 1.4} rotationIntensity={1.1} floatIntensity={1.6}>
-      <group position={position} scale={scale}>
-        {kind === 'coin' && (
-          // A thick disc tilted toward the camera — catches the key light like a coin.
-          <mesh rotation={[Math.PI / 2.2, 0, 0]}>
-            <cylinderGeometry args={[1, 1, 0.22, 48]} />
-            <meshStandardMaterial
-              color={color}
-              metalness={0.75}
-              roughness={0.22}
-              emissive={color}
-              emissiveIntensity={0.06}
-            />
-          </mesh>
-        )}
-        {kind === 'box' && (
-          <mesh>
-            <boxGeometry args={[1.4, 1.4, 1.4]} />
-            <meshStandardMaterial
-              color={color}
-              metalness={0.3}
-              roughness={0.4}
-              emissive={color}
-              emissiveIntensity={0.06}
-              flatShading
-            />
-          </mesh>
-        )}
-        {kind === 'ring' && (
-          <mesh>
-            <torusGeometry args={[0.85, 0.3, 22, 48]} />
-            <meshStandardMaterial
-              color={color}
-              metalness={0.6}
-              roughness={0.3}
-              emissive={color}
-              emissiveIntensity={0.06}
-            />
-          </mesh>
-        )}
-        {kind === 'shard' && (
-          <Octahedron args={[1, 0]}>
-            <meshStandardMaterial
-              color={color}
-              roughness={0.15}
-              metalness={0.35}
-              emissive={color}
-              emissiveIntensity={0.06}
-              flatShading
-            />
-          </Octahedron>
-        )}
-      </group>
-    </Float>
-  );
+
+// Soft radial disc used for the core, channel nodes and particles.
+function makeGlow() {
+  const s = 128;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = s;
+  const ctx = cv.getContext('2d')!;
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.35, 'rgba(255,255,255,0.85)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(cv);
 }
 
+// Channel brand hues (Shopify, Salla, Amazon, Noon, WooCommerce, Zid, Trendyol).
+const CHANNELS = ['#5AC85A', '#0EA5A5', '#F6A623', '#E6B800', '#8B5CF6', '#F97316', '#F2712A'];
+const CORE_TEAL = '#0B5A5C';
+const CORE_GREEN = '#4FD34A';
+
 export default function Scene() {
-  const coreGroup = useRef<THREE.Group>(null);
-  const blob = useRef<THREE.Mesh>(null);
-  const distort = useRef<{ distort: number; color: THREE.Color }>(null);
   const { camera } = useThree();
+  const glow = useMemo(makeGlow, []);
+
+  const rig = useMemo(() => {
+    const group = new THREE.Group();
+    const N = CHANNELS.length;
+
+    const sprite = (color: string, scale: number, opacity = 1) => {
+      const s = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glow,
+          color: new THREE.Color(color),
+          transparent: true,
+          opacity,
+          depthWrite: false,
+        }),
+      );
+      s.scale.setScalar(scale);
+      group.add(s);
+      return s;
+    };
+
+    // Orbiting channel nodes.
+    const nodes = CHANNELS.map((c, i) => {
+      const node = {
+        sp: sprite(c, 0.62),
+        color: new THREE.Color(c),
+        r: 2.95 + ((i * 13) % 7) / 7 * 1.7,
+        inc: (i / N) * Math.PI * 0.95 - 0.48,
+        ph: (i / N) * Math.PI * 2,
+        spd: 0.09 + ((i * 7) % 5) / 5 * 0.09,
+      };
+      return node;
+    });
+
+    // Luminous Hubby core (layered soft discs).
+    sprite(CORE_GREEN, 3.6, 0.1);
+    sprite(CORE_TEAL, 1.6, 0.98);
+    sprite(CORE_GREEN, 0.78, 0.95);
+
+    // Connection lines: each channel → core.
+    const lgeo = new THREE.BufferGeometry();
+    const lpos = new Float32Array(N * 2 * 3);
+    const lcol = new Float32Array(N * 2 * 3);
+    const teal = new THREE.Color(CORE_TEAL);
+    nodes.forEach((n, i) => {
+      n.color.toArray(lcol, i * 6);
+      teal.toArray(lcol, i * 6 + 3);
+    });
+    lgeo.setAttribute('position', new THREE.BufferAttribute(lpos, 3));
+    lgeo.setAttribute('color', new THREE.BufferAttribute(lcol, 3));
+    const lines = new THREE.LineSegments(
+      lgeo,
+      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.18, depthWrite: false }),
+    );
+    group.add(lines);
+
+    // Particles streaming inward along the lines.
+    const P = 90;
+    const pgeo = new THREE.BufferGeometry();
+    const ppos = new Float32Array(P * 3);
+    const pcol = new Float32Array(P * 3);
+    const parts = Array.from({ length: P }, (_, k) => {
+      const n = k % N;
+      nodes[n].color.toArray(pcol, k * 3);
+      return { n, t: Math.random(), spd: 0.15 + Math.random() * 0.22 };
+    });
+    pgeo.setAttribute('position', new THREE.BufferAttribute(ppos, 3));
+    pgeo.setAttribute('color', new THREE.BufferAttribute(pcol, 3));
+    const points = new THREE.Points(
+      pgeo,
+      new THREE.PointsMaterial({
+        map: glow,
+        size: 0.16,
+        vertexColors: true,
+        transparent: true,
+        depthWrite: false,
+        sizeAttenuation: true,
+      }),
+    );
+    group.add(points);
+
+    return {
+      group,
+      nodes,
+      parts,
+      lattr: lgeo.attributes.position as THREE.BufferAttribute,
+      pattr: pgeo.attributes.position as THREE.BufferAttribute,
+      pcolAttr: pgeo.attributes.color as THREE.BufferAttribute,
+    };
+  }, [glow]);
+
+  const orbit = (nd: (typeof rig.nodes)[number], t: number) => {
+    const a = nd.ph + t * nd.spd;
+    return new THREE.Vector3(
+      Math.cos(a) * nd.r,
+      Math.sin(a) * nd.r * 0.5 * Math.sin(nd.inc * 2.0) + Math.sin(nd.inc) * 1.05,
+      Math.sin(a) * nd.r * Math.cos(nd.inc),
+    );
+  };
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
 
-    // Smooth the raw pointer into the shared singleton everything else reads.
+    // Pointer parallax + gentle scroll dolly.
     pointer.sx = lerp(pointer.sx, pointer.x, 0.05);
     pointer.sy = lerp(pointer.sy, pointer.y, 0.05);
-
-    // Camera gently follows the pointer for a parallax "looking around" feel,
-    // and dollies in slightly as the page scrolls.
-    camera.position.x = lerp(camera.position.x, pointer.sx * 1.1, 0.05);
-    camera.position.y = lerp(camera.position.y, pointer.sy * 0.8, 0.05);
-    camera.position.z = lerp(camera.position.z, 8 - scroll.progress * 1.8, 0.05);
+    camera.position.x = lerp(camera.position.x, pointer.sx * 1.0, 0.05);
+    camera.position.y = lerp(camera.position.y, pointer.sy * 0.6, 0.05);
+    camera.position.z = lerp(camera.position.z, 8 - scroll.progress * 1.4, 0.05);
     camera.lookAt(0, 0, 0);
 
-    // Centerpiece: spins idly, then recedes up + back while the showcase act
-    // runs so the choreographed shapes own the stage.
-    const recede = coverage(beatEls.__showcase);
-    const c = coreGroup.current;
-    if (c) {
-      c.rotation.y = scroll.progress * Math.PI * 1.2 + t * 0.05;
-      c.rotation.x = Math.sin(t * 0.2) * 0.1;
-      c.scale.setScalar(lerp(1, 0.34, recede));
-      // Recede to top-centre and far back so it clears the side shapes.
-      c.position.set(
-        0,
-        lerp(0, 2.8, recede) + Math.sin(t * 0.4) * 0.1,
-        lerp(0, -4, recede),
-      );
-    }
+    rig.group.rotation.y = t * 0.08;
 
-    const b = blob.current;
-    if (b) {
-      const s = 1.2 + Math.sin(t * 0.8) * 0.04 + scroll.velocity * 0.0006;
-      b.scale.setScalar(s);
-      b.rotation.z = t * 0.1;
+    const N = rig.nodes.length;
+    for (let i = 0; i < N; i++) {
+      const p = orbit(rig.nodes[i], t);
+      rig.nodes[i].sp.position.copy(p);
+      rig.lattr.array[i * 6] = p.x;
+      rig.lattr.array[i * 6 + 1] = p.y;
+      rig.lattr.array[i * 6 + 2] = p.z;
+      rig.lattr.array[i * 6 + 3] = 0;
+      rig.lattr.array[i * 6 + 4] = 0;
+      rig.lattr.array[i * 6 + 5] = 0;
     }
+    rig.lattr.needsUpdate = true;
 
-    // Drift the blob colour between the two brand hues across the scroll.
-    if (distort.current) {
-      tmpColor.copy(COLOR_A).lerp(COLOR_B, (Math.sin(scroll.progress * Math.PI * 2) + 1) / 2);
-      distort.current.color.lerp(tmpColor, 0.04);
-      distort.current.distort = 0.35 + Math.min(scroll.velocity * 0.0008, 0.25);
+    for (let k = 0; k < rig.parts.length; k++) {
+      const pt = rig.parts[k];
+      pt.t -= pt.spd * delta;
+      if (pt.t < 0) {
+        pt.t = 1;
+        pt.n = (pt.n + 3) % N;
+        rig.nodes[pt.n].color.toArray(rig.pcolAttr.array as unknown as number[], k * 3);
+        rig.pcolAttr.needsUpdate = true;
+      }
+      const p = orbit(rig.nodes[pt.n], t).multiplyScalar(pt.t);
+      rig.pattr.array[k * 3] = p.x;
+      rig.pattr.array[k * 3 + 1] = p.y;
+      rig.pattr.array[k * 3 + 2] = p.z;
     }
+    rig.pattr.needsUpdate = true;
   });
 
   return (
     <>
       <GradientBackground />
-
-      {/* Cinematic lighting: ambient + hemisphere fill + key + coloured rims,
-          plus a front fill so models facing the camera never read as silhouettes. */}
       <ambientLight intensity={0.9} />
-      <hemisphereLight intensity={0.85} color="#ffffff" groundColor="#dfeae8" />
-      <directionalLight position={[5, 6, 4]} intensity={2.0} color="#ffffff" />
-      <directionalLight position={[0, 1, 6]} intensity={1.1} color="#eef4f3" />
-      <pointLight position={[-6, -2, 2]} intensity={22} distance={20} color="#0B5A5C" />
-      <pointLight position={[6, 3, -2]} intensity={20} distance={20} color="#4FD34A" />
-
-      {/* Local image-based lighting (rendered offline — no network/HDR fetch)
-          so the glb PBR materials get real reflections + soft fill. */}
-      <Environment resolution={256} frames={1}>
-        <Lightformer intensity={2.2} position={[0, 2, 5]} scale={[8, 8, 1]} color="#ffffff" />
-        <Lightformer intensity={1.4} position={[-5, 1, 2]} scale={[5, 5, 1]} color="#22D3EE" />
-        <Lightformer intensity={1.4} position={[5, -1, 2]} scale={[5, 5, 1]} color="#53D948" />
-        <Lightformer intensity={1.0} position={[0, -4, 3]} scale={[6, 3, 1]} color="#a78bfa" />
-      </Environment>
-
-      <group ref={coreGroup}>
-        {/* Central morphing blob. */}
-        <Icosahedron ref={blob} args={[1, 12]}>
-          <MeshDistortMaterial
-            ref={distort as never}
-            color={COLOR_A}
-            roughness={0.1}
-            metalness={0.35}
-            distort={0.35}
-            speed={1.6}
-            emissive="#0B5A5C"
-            emissiveIntensity={0.05}
-          />
-        </Icosahedron>
-
-        {/* Wireframe shell wrapping it for a "tech" read. */}
-        <Icosahedron args={[1.9, 1]}>
-          <meshBasicMaterial color="#0B5A5C" wireframe transparent opacity={0.1} />
-        </Icosahedron>
-
-        {/* Gold coins ride with the centerpiece (recede together). */}
-        <CommerceShape kind="coin" position={[2.0, 1.7, 0.2]} scale={0.32} color="#FBBF24" speed={1.2} />
-        <CommerceShape kind="coin" position={[-2.2, -1.6, 0.2]} scale={0.26} color="#FFD66B" speed={0.95} />
-      </group>
-
-      {/* Scroll-choreographed commerce shapes — each driven by its section's
-          beat, sweeping up its side of the screen as you scroll. */}
-      <Suspense fallback={null}>
-        <ChoreographedModel
-          id="shop"
-          url="/models/2nd__low_poly_shop.glb"
-          side="left"
-          targetSize={1.8}
-          rotation={[0, 0.5, 0]}
-        />
-        <ChoreographedModel
-          id="cart"
-          url="/models/shopping_cart.glb"
-          side="right"
-          targetSize={2.0}
-        />
-        <ChoreographedModel
-          id="bag"
-          url="/models/designer_shopping_bag.glb"
-          side="left"
-          targetSize={1.7}
-        />
-        <ChoreographedModel
-          id="vsbag"
-          url="/models/victoria_secret_shopping_bag.glb"
-          side="right"
-          targetSize={1.6}
-        />
-      </Suspense>
-
-      <Particles />
+      <primitive object={rig.group} />
     </>
   );
 }

@@ -16,11 +16,10 @@ const en = {
     start: 'Start free',
   },
   hero: {
-    badge: 'Shopify · Salla · Amazon · Noon · Zid · WooCommerce · Trendyol',
-    title1: 'Command every store',
-    title2: 'from one universe.',
-    subtitle:
-      'Orders, inventory and products from every channel — unified, synchronised and alive in a single command center.',
+    badge: 'One hub · every channel',
+    title1: 'Every store,',
+    title2: 'one orbit.',
+    subtitle: 'Every channel, pulled into a single living command center.',
     cta1: 'Start free trial',
     cta2: 'See how it flows',
     scroll: 'Scroll',
@@ -204,11 +203,10 @@ const ar: Dict = {
     start: 'ابدأ مجانًا',
   },
   hero: {
-    badge: 'سلة · شوبيفاي · أمازون · نون · زد · ووكومرس · ترينديول',
-    title1: 'تحكّم في كل متاجرك',
-    title2: 'من كونٍ واحد.',
-    subtitle:
-      'الطلبات والمخزون والمنتجات من كل قناة — موحّدة ومتزامنة وحيّة في مركز تحكّم واحد.',
+    badge: 'مركز واحد · كل قناة',
+    title1: 'كل متجر،',
+    title2: 'في مدارٍ واحد.',
+    subtitle: 'كل قناة، مجموعة في مركز قيادة واحد حيّ.',
     cta1: 'ابدأ تجربتك المجانية',
     cta2: 'اكتشف آلية العمل',
     scroll: 'مرّر للأسفل',

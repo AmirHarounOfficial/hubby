@@ -52,7 +52,18 @@ export default function Hero() {
       // would push the badge up under the fixed navbar); center on larger screens.
       className="relative flex min-h-[100svh] items-start justify-center px-6 pt-28 pb-20 sm:items-center sm:pt-24"
     >
-      <div ref={fade} className="mx-auto max-w-5xl text-center">
+      {/* Soft light halo behind the copy — keeps text crisp and calms the
+          busiest part of the constellation without a hard box. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[46%] h-[62vh] w-[min(780px,94vw)] -translate-x-1/2 -translate-y-1/2"
+        style={{
+          background:
+            'radial-gradient(50% 50% at 50% 50%, rgba(244,248,247,0.82), rgba(244,248,247,0.35) 46%, rgba(244,248,247,0) 74%)',
+        }}
+      />
+
+      <div ref={fade} className="relative mx-auto max-w-5xl text-center">
         <div
           data-hero-fade
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/55 px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-[#0B5A5C] shadow-sm backdrop-blur-md"
