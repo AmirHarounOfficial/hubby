@@ -3,6 +3,8 @@
 Researched: Linnworks, Sellerboard, Rithum (ChannelAdvisor + CommerceHub + Dsco).
 Hubby's current state below is taken from the codebase (routes, services, migrations), not marketing.
 
+> 🇪🇬 نسخة بالمصري: [COMPETITIVE_STRATEGY.ar.md](COMPETITIVE_STRATEGY.ar.md)
+
 ---
 
 ## 0. The one-sentence strategy
