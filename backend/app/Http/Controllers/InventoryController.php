@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\InventoryLog;
+use App\Jobs\PushInventoryJob;
 use Illuminate\Support\Facades\DB;
 
 class InventoryController extends Controller
@@ -32,14 +34,16 @@ class InventoryController extends Controller
         $organizationId = $request->header('X-Organization-Id');
         $product = Product::where('organization_id', $organizationId)->findOrFail($request->product_id);
 
-        DB::transaction(function () use ($product, $request) {
+        $adjustedVariant = null;
+
+        DB::transaction(function () use ($product, $request, &$adjustedVariant) {
             if ($request->variant_id) {
-                $variant = \App\Models\ProductVariant::where('product_id', $product->id)->findOrFail($request->variant_id);
-                $variant->increment('stock', $request->change);
+                $adjustedVariant = ProductVariant::where('product_id', $product->id)->findOrFail($request->variant_id);
+                $adjustedVariant->increment('stock', $request->change);
             } else {
                 $product->increment('stock', $request->change);
             }
-            
+
             InventoryLog::create([
                 'product_id' => $product->id,
                 'product_variant_id' => $request->variant_id,
@@ -49,8 +53,17 @@ class InventoryController extends Controller
             ]);
         });
 
-        // TODO: Dispatch job to push new inventory to all connected stores
-        
+        // Propagate the new level to every connected channel (defect #4: this used to be a TODO,
+        // so manual adjustments never left the dashboard). Channels are addressed by variant SKU,
+        // so a product-level adjustment fans out to all of the product's variants.
+        $variants = $adjustedVariant
+            ? collect([$adjustedVariant->fresh()])
+            : $product->variants()->get();
+
+        foreach ($variants as $variant) {
+            PushInventoryJob::dispatch($variant);
+        }
+
         return response()->json(['message' => 'Inventory adjusted successfully']);
     }
 
