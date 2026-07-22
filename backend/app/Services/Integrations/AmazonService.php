@@ -4,8 +4,10 @@ namespace App\Services\Integrations;
 
 use App\Models\Store;
 use App\Models\Integration;
+use App\Services\Integrations\Support\AwsSignatureV4;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Amazon Selling Partner API (SP-API) integration.
@@ -14,9 +16,9 @@ use Illuminate\Support\Facades\Log;
  * the code at Amazon's token endpoint for a refresh token, and call SP-API with
  * a short-lived access token in the `x-amz-access-token` header.
  *
- * NOTE: production SP-API calls also require AWS SigV4 request signing with the
- * app's IAM role. That signing belongs in getHttpClient() once AWS credentials
- * are provisioned; the request shapes below are otherwise correct.
+ * When AWS IAM credentials are configured, every request is additionally SigV4-signed
+ * (getHttpClient() → AwsSignatureV4). Without them we fall back to the LWA token alone,
+ * which the newer SP-API auth model accepts.
  */
 class AmazonService extends BaseIntegrationService
 {
@@ -24,6 +26,16 @@ class AmazonService extends BaseIntegrationService
     {
         // na | eu | fe — selects the SP-API host.
         return config('services.amazon.region', 'na');
+    }
+
+    /** SP-API host region → AWS signing region. */
+    private function signingRegion(): string
+    {
+        return match ($this->region()) {
+            'eu' => 'eu-west-1',
+            'fe' => 'us-west-2',
+            default => 'us-east-1',
+        };
     }
 
     private function endpoint(): string
@@ -78,9 +90,39 @@ class AmazonService extends BaseIntegrationService
 
     protected function getHttpClient(Integration $integration)
     {
-        return Http::withHeaders([
+        $client = Http::withHeaders([
             'x-amz-access-token' => $integration->access_token,
         ]);
+
+        $signer = $this->signer();
+        if ($signer === null) {
+            return $client;
+        }
+
+        // Sign at send time: SigV4 covers the fully-built request (method, path, query, headers,
+        // body), none of which exist yet here.
+        return $client->withRequestMiddleware(
+            fn (RequestInterface $request) => $signer->sign($request, now())
+        );
+    }
+
+    /** Build the SigV4 signer, or null when IAM credentials aren't provisioned. */
+    private function signer(): ?AwsSignatureV4
+    {
+        $accessKey = config('services.amazon.aws_access_key_id');
+        $secretKey = config('services.amazon.aws_secret_access_key');
+
+        if (! $accessKey || ! $secretKey) {
+            return null;
+        }
+
+        return new AwsSignatureV4(
+            accessKey: $accessKey,
+            secretKey: $secretKey,
+            region: $this->signingRegion(),
+            service: 'execute-api',
+            sessionToken: config('services.amazon.aws_session_token'),
+        );
     }
 
     public function fetchOrders(Store $store, array $params = []): array

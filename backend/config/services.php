@@ -74,6 +74,12 @@ return [
         'marketplace_id' => env('AMAZON_MARKETPLACE_ID'),
         'region' => env('AMAZON_REGION', 'na'),
         'webhook_secret' => env('AMAZON_WEBHOOK_SECRET'),
+        // AWS IAM credentials for SP-API SigV4 request signing. When absent, calls fall back to
+        // the LWA access token alone (the newer SP-API auth model); when present, every request
+        // is additionally SigV4-signed for accounts/regions that still require it.
+        'aws_access_key_id' => env('AMAZON_AWS_ACCESS_KEY_ID'),
+        'aws_secret_access_key' => env('AMAZON_AWS_SECRET_ACCESS_KEY'),
+        'aws_session_token' => env('AMAZON_AWS_SESSION_TOKEN'),
     ],
 
     // noon Seller (Partner) API — OAuth2 client creds (hosts are env-driven).
