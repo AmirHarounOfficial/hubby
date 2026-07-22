@@ -45,10 +45,6 @@ class ResolvedCost
     /** Total base-currency cost for a quantity, as an exact 4 dp string. */
     public function totalFor(int $quantity): string
     {
-        $scaled = (int) round(((float) $this->landedUnitCostBase) * 10000) * $quantity;
-        $sign = $scaled < 0 ? '-' : '';
-        $abs = abs($scaled);
-
-        return sprintf('%s%d.%04d', $sign, intdiv($abs, 10000), $abs % 10000);
+        return Money::multiply($this->landedUnitCostBase, $quantity);
     }
 }

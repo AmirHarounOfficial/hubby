@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Profit\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,9 +31,6 @@ class ProductCost extends Model
     ];
 
     public const SOURCES = ['manual', 'import', 'purchase_order', 'api', 'estimated'];
-
-    /** Money is stored at 4 dp; 10^4 is the integer scaling factor for exact arithmetic. */
-    private const SCALE = 10000;
 
     /** Per-unit landed cost components, summed into `landed_unit_cost`. */
     public const COST_COMPONENTS = [
@@ -82,31 +80,12 @@ class ProductCost extends Model
         'fx_rate_to_base' => 'decimal:8',
     ];
 
-    /**
-     * Sum of the per-unit components. Kept in sync by ProductCostObserver.
-     *
-     * Exact fixed-point addition at 4 dp with no ext-bcmath dependency: scale each component to
-     * integer minor units, sum as integers, then format back. A decimal(15,4) value scales to at
-     * most ~1e15, comfortably inside a 64-bit int, so no precision is lost and nothing here
-     * touches float arithmetic on the way out.
-     */
+    /** Sum of the per-unit components. Kept in sync by ProductCostObserver. */
     public function computeLandedUnitCost(): string
     {
-        $scaled = 0;
-        foreach (self::COST_COMPONENTS as $component) {
-            $scaled += (int) round(((float) ($this->{$component} ?? 0)) * self::SCALE);
-        }
-
-        return self::formatScaled($scaled);
-    }
-
-    /** Render integer minor units back to a fixed 4 dp decimal string. */
-    private static function formatScaled(int $scaled): string
-    {
-        $sign = $scaled < 0 ? '-' : '';
-        $abs = abs($scaled);
-
-        return sprintf('%s%d.%04d', $sign, intdiv($abs, self::SCALE), $abs % self::SCALE);
+        return Money::sum(
+            ...array_map(fn (string $component) => $this->{$component} ?? 0, self::COST_COMPONENTS)
+        );
     }
 
     public function organization(): BelongsTo

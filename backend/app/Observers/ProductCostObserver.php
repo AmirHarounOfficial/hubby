@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\ProductCost;
+use App\Services\Profit\Money;
 
 /**
  * Keeps derived cost fields correct (spec 01 §5.1).
@@ -44,13 +45,9 @@ class ProductCostObserver
             ->update(['valid_to' => $cost->valid_from]);
     }
 
-    /** Exact 4 dp conversion via integer minor units — no float drift, no ext-bcmath. */
+    /** Exact 4 dp conversion at the stored rate. */
     private function toBase(string|float|int|null $amount, string|float|int $rate): string
     {
-        $scaled = (int) round(((float) $amount) * (float) $rate * 10000);
-        $sign = $scaled < 0 ? '-' : '';
-        $abs = abs($scaled);
-
-        return sprintf('%s%d.%04d', $sign, intdiv($abs, 10000), $abs % 10000);
+        return Money::scale($amount, $rate);
     }
 }

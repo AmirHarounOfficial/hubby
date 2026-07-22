@@ -219,13 +219,9 @@ class FifoLedger
         );
     }
 
-    /** Exact 4 dp multiplication via integer minor units — no float drift, no ext-bcmath. */
+    /** amount × qty, exact at 4 dp. */
     private function multiply(string|float|int|null $unitCostBase, int $qty): string
     {
-        $scaled = (int) round(((float) $unitCostBase) * 10000) * $qty;
-        $sign = $scaled < 0 ? '-' : '';
-        $abs = abs($scaled);
-
-        return sprintf('%s%d.%04d', $sign, intdiv($abs, 10000), $abs % 10000);
+        return Money::multiply($unitCostBase, $qty);
     }
 }
