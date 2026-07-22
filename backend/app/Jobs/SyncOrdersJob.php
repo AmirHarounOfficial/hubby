@@ -18,14 +18,24 @@ class SyncOrdersJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $store;
+    public ?Store $store;
+
+    /**
+     * When set, only the order with this platform id is synced — the webhook
+     * path, where re-pulling the store's whole order history would be wasteful.
+     */
+    public ?string $externalId;
 
     /**
      * Create a new job instance.
+     *
+     * With no store the job fans out to one instance per store (the scheduler
+     * path). With a store and no external id it syncs that store's orders.
      */
-    public function __construct(Store $store = null)
+    public function __construct(?Store $store = null, ?string $externalId = null)
     {
         $this->store = $store;
+        $this->externalId = $externalId;
     }
 
     /**
@@ -45,17 +55,26 @@ class SyncOrdersJob implements ShouldQueue
 
         try {
             $service = $this->getService();
-            $orders = $service->fetchOrders($this->store);
+            $orders = $service->fetchOrders($this->store, $this->fetchParams());
+            $synced = 0;
 
             foreach ($orders as $orderData) {
                 $mappedData = $this->mapOrderData($orderData);
-                
+
+                // Platforms we can't narrow server-side return the full page, so
+                // filter down to the webhook's order here.
+                if ($this->externalId !== null && ($mappedData['external_id'] ?? null) !== $this->externalId) {
+                    continue;
+                }
+
+                $synced++;
+
                 $order = Order::updateOrCreate(
                     [
+                        'store_id' => $this->store->id,
                         'external_id' => $mappedData['external_id'],
                     ],
                     [
-                        'store_id' => $this->store->id,
                         'status' => $mappedData['status'],
                         'total' => $mappedData['total'],
                         'currency' => $mappedData['currency'],
@@ -73,7 +92,7 @@ class SyncOrdersJob implements ShouldQueue
                             'external_id' => $itemData['external_id'] ?? null,
                         ],
                         [
-                            'product_name' => $itemData['name'],
+                            'name' => $itemData['name'],
                             'sku' => $itemData['sku'] ?? null,
                             'quantity' => $itemData['quantity'],
                             'price' => $itemData['price'],
@@ -83,7 +102,17 @@ class SyncOrdersJob implements ShouldQueue
             }
 
             $log->update(['status' => 'success']);
-            
+
+            if ($this->externalId !== null) {
+                // Webhook-driven single-order sync: no notification (these fire
+                // per order and would drown the merchant's feed).
+                if ($synced === 0) {
+                    Log::warning("SyncOrdersJob: order {$this->externalId} not returned by {$this->store->platform} for store {$this->store->id}.");
+                }
+
+                return;
+            }
+
             \App\Models\Notification::create([
                 'organization_id' => $this->store->organization_id,
                 'title' => 'Sync Complete',
@@ -106,6 +135,25 @@ class SyncOrdersJob implements ShouldQueue
     protected function getService()
     {
         return IntegrationFactory::make($this->store->platform);
+    }
+
+    /**
+     * Query params narrowing the fetch to a single order, where the platform
+     * supports it. Others fall back to a normal fetch plus a local filter.
+     *
+     * @return array<string, mixed>
+     */
+    protected function fetchParams(): array
+    {
+        if ($this->externalId === null) {
+            return [];
+        }
+
+        return match ($this->store->platform) {
+            // status=any is required — Shopify's order list defaults to open only.
+            'shopify' => ['ids' => $this->externalId, 'status' => 'any'],
+            default => [],
+        };
     }
 
     protected function mapOrderData(array $data): array

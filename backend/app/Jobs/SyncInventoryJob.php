@@ -19,12 +19,16 @@ class SyncInventoryJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $store;
+    public ?Store $store;
 
     /**
      * Create a new job instance.
+     *
+     * Inventory reconciles by SKU across a store's whole catalog, so there is
+     * no single-item variant of this job — callers pass the affected store.
+     * With no store the job fans out to one instance per store (scheduler path).
      */
-    public function __construct(Store $store = null)
+    public function __construct(?Store $store = null)
     {
         $this->store = $store;
     }
