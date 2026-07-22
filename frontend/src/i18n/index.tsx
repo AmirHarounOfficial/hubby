@@ -11,8 +11,9 @@ type I18nCtx = {
   dir: 'ltr' | 'rtl';
   setLocale: (l: Locale) => void;
   /** Translate a dot-path key (e.g. `t('orders.title')`). Falls back to
-   *  English, then to the key itself, so a missing translation never crashes. */
-  t: (key: string) => string;
+   *  English, then to the key itself, so a missing translation never crashes.
+   *  Optional `vars` replace `{{name}}` placeholders in the string. */
+  t: (key: string, vars?: Record<string, string | number>) => string;
 };
 
 const I18nContext = createContext<I18nCtx | null>(null);
@@ -43,7 +44,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const dir: 'ltr' | 'rtl' = locale === 'ar' ? 'rtl' : 'ltr';
 
   const t = useCallback(
-    (key: string) => lookup(dictionaries[locale], key) ?? lookup(dictionaries.en, key) ?? key,
+    (key: string, vars?: Record<string, string | number>) => {
+      const raw = lookup(dictionaries[locale], key) ?? lookup(dictionaries.en, key) ?? key;
+      if (!vars) return raw;
+      return raw.replace(/\{\{(\w+)\}\}/g, (m, name) => (name in vars ? String(vars[name]) : m));
+    },
     [locale],
   );
 
@@ -57,6 +62,6 @@ export function useI18n(): I18nCtx {
 }
 
 /** Convenience: just the translate function. */
-export function useT(): (key: string) => string {
+export function useT(): (key: string, vars?: Record<string, string | number>) => string {
   return useI18n().t;
 }

@@ -6,6 +6,7 @@ import { products } from './dicts/products';
 import { categories } from './dicts/categories';
 import { inventory } from './dicts/inventory';
 import { analytics } from './dicts/analytics';
+import { profit } from './dicts/profit';
 import { stores } from './dicts/stores';
 import { billing } from './dicts/billing';
 import { settings } from './dicts/settings';
@@ -25,6 +26,7 @@ export const dictionaries = {
     categories: categories.en,
     inventory: inventory.en,
     analytics: analytics.en,
+    profit: profit.en,
     stores: stores.en,
     billing: billing.en,
     settings: settings.en,
@@ -38,6 +40,7 @@ export const dictionaries = {
     categories: categories.ar,
     inventory: inventory.ar,
     analytics: analytics.ar,
+    profit: profit.ar,
     stores: stores.ar,
     billing: billing.ar,
     settings: settings.ar,
