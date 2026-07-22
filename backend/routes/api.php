@@ -11,6 +11,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProfitController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -83,6 +84,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/analytics/top-customers', [AnalyticsController::class, 'topCustomers']);
     Route::get('/analytics/by-platform', [AnalyticsController::class, 'byPlatform']);
     Route::get('/analytics/top-products', [AnalyticsController::class, 'topProducts']);
+
+    // Profit reporting — reads the materialized rollups; nothing recomputes on request.
+    // Static segments stay above any /{id} route so they can't be captured as an id.
+    Route::get('/analytics/profit/timeline', [ProfitController::class, 'timeline']);
+    Route::get('/analytics/profit/by-sku', [ProfitController::class, 'bySku']);
+    Route::get('/analytics/profit/by-channel', [ProfitController::class, 'byChannel']);
+    Route::get('/analytics/profit/coverage', [ProfitController::class, 'coverage']);
+    Route::get('/analytics/profit', [ProfitController::class, 'summary']);
+    Route::get('/orders/{id}/profit', [ProfitController::class, 'order']);
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
