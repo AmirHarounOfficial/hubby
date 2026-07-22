@@ -16,7 +16,22 @@ class Integration extends Model
         'platform_id',
     ];
 
+    /**
+     * Platform credentials never belong in an API response — `Store::with('integration')`
+     * is serialised straight to the dashboard, so hide them at the model level.
+     */
+    protected $hidden = [
+        'access_token',
+        'refresh_token',
+    ];
+
+    /**
+     * Tokens are encrypted at rest so a database dump or backup leaks nothing usable.
+     * Encryption is transparent: reads and writes through Eloquent see plaintext.
+     */
     protected $casts = [
+        'access_token' => 'encrypted',
+        'refresh_token' => 'encrypted',
         'expires_at' => 'datetime',
     ];
 
