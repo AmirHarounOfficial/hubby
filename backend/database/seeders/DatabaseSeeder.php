@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PlanSeeder::class,
+            ReturnReasonSeeder::class,
             RealDataSeeder::class,
             ProfitDemoSeeder::class,
         ]);
