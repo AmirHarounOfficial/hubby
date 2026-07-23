@@ -10,6 +10,7 @@ import '../../features/analytics/analytics_page.dart';
 import '../../features/billing/billing_page.dart';
 import '../../features/customers/customers_page.dart';
 import '../../features/notifications/notifications_page.dart';
+import '../../features/profit/profit_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/stores/stores_page.dart';
 
@@ -35,6 +36,7 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/stores', builder: (_, _) => const StoresPage()),
       GoRoute(path: '/customers', builder: (_, _) => const CustomersPage()),
       GoRoute(path: '/analytics', builder: (_, _) => const AnalyticsPage()),
+      GoRoute(path: '/profit', builder: (_, _) => const ProfitPage()),
       GoRoute(path: '/billing', builder: (_, _) => const BillingPage()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
       GoRoute(path: '/notifications', builder: (_, _) => const NotificationsPage()),

@@ -11,6 +11,7 @@ import '../billing/billing_page.dart';
 import '../categories/categories_page.dart';
 import '../customers/customers_page.dart';
 import '../notifications/notifications_page.dart';
+import '../profit/profit_page.dart';
 import '../settings/settings_page.dart';
 import '../stores/stores_page.dart';
 
@@ -24,6 +25,7 @@ class MorePage extends StatelessWidget {
       (LucideIcons.folderTree, context.t('nav.categories'), const CategoriesPage()),
       (LucideIcons.users, context.t('nav.customers'), const CustomersPage()),
       (LucideIcons.barChart3, context.t('nav.analytics'), const AnalyticsPage()),
+      (LucideIcons.coins, context.t('nav.profit'), const ProfitPage()),
       (LucideIcons.creditCard, context.t('nav.billing'), const BillingPage()),
       (LucideIcons.bell, context.t('nav.notifications'), const NotificationsPage()),
       (LucideIcons.settings, context.t('nav.settings'), const SettingsPage()),
