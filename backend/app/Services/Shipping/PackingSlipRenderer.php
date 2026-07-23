@@ -21,6 +21,17 @@ class PackingSlipRenderer
 
     public function render(Shipment $shipment): ShippingLabel
     {
+        $html = View::make('shipping.packing-slip', $this->slipData($shipment))->render();
+
+        return $this->labels->store($shipment, [
+            'format' => 'html',
+            'content_base64' => base64_encode($html),
+        ], 'packing_slip');
+    }
+
+    /** The view data for one packing slip — shared by the single view and the batch view. */
+    public function slipData(Shipment $shipment): array
+    {
         $shipment->loadMissing(['order.items', 'items', 'packages', 'shipToAddress', 'store']);
 
         $settings = $shipment->store?->shipping_settings ?? [];
@@ -28,7 +39,7 @@ class PackingSlipRenderer
             ? $shipment->items->map(fn ($i) => ['sku' => $i->sku, 'name' => $i->name, 'quantity' => (int) $i->quantity])
             : $shipment->order?->items->map(fn ($i) => ['sku' => $i->sku, 'name' => $i->name, 'quantity' => (int) $i->quantity]) ?? collect();
 
-        $html = View::make('shipping.packing-slip', [
+        return [
             'shipment' => $shipment,
             'merchantName' => $settings['brand_name'] ?? $shipment->store?->name ?? 'Hubby',
             'logoUrl' => $settings['logo_url'] ?? null,
@@ -39,12 +50,7 @@ class PackingSlipRenderer
             'packageCount' => max(1, (int) $shipment->package_count),
             'barcodeSvg' => (new Code128())->svg($shipment->reference),
             'isCod' => (bool) $shipment->is_cod,
-        ])->render();
-
-        return $this->labels->store($shipment, [
-            'format' => 'html',
-            'content_base64' => base64_encode($html),
-        ], 'packing_slip');
+        ];
     }
 
     /** The stored packing slip for a shipment, rendering one if none exists yet. */

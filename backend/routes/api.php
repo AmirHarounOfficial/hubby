@@ -162,6 +162,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/manifests', [\App\Http\Controllers\ManifestController::class, 'store']);
     Route::get('/manifests/{id}', [\App\Http\Controllers\ManifestController::class, 'show']);
     Route::get('/manifests/{id}/document', [\App\Http\Controllers\ManifestController::class, 'document']);
+    Route::post('/shipments/packing-slips/batch', [\App\Http\Controllers\ShipmentBatchController::class, 'packingSlips']);
     Route::get('/pickups', [\App\Http\Controllers\PickupController::class, 'index']);
     Route::post('/pickups', [\App\Http\Controllers\PickupController::class, 'store']);
     Route::delete('/pickups/{id}', [\App\Http\Controllers\PickupController::class, 'destroy']);

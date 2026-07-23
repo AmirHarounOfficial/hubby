@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { ChevronLeft, FileText, Truck, X } from 'lucide-react';
+import { ChevronLeft, FileText, Printer, Truck, X } from 'lucide-react';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { useT } from '@/i18n';
@@ -46,6 +46,15 @@ export default function ManifestsPage() {
   const openDoc = async (id: number) => {
     try {
       const res = await api.get(`/manifests/${id}/document`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch { toast(t('shipping.actionError'), 'error'); }
+  };
+
+  const printSlips = async (manifestId: number) => {
+    try {
+      const res = await api.post('/shipments/packing-slips/batch', { manifest_id: manifestId }, { responseType: 'blob' });
       const url = URL.createObjectURL(res.data);
       window.open(url, '_blank');
       setTimeout(() => URL.revokeObjectURL(url), 10000);
@@ -129,9 +138,14 @@ export default function ManifestsPage() {
                   <td className="text-xs text-muted-foreground">{m.manifest_date}</td>
                   <td><span className="text-[10px] font-bold uppercase">{m.status}</span></td>
                   <td className="text-right">
-                    <button onClick={() => openDoc(m.id)} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                      <FileText size={14} /> {t('shipping.document')}
-                    </button>
+                    <div className="inline-flex items-center gap-3">
+                      <button onClick={() => printSlips(m.id)} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                        <Printer size={14} /> {t('shipping.printSlips')}
+                      </button>
+                      <button onClick={() => openDoc(m.id)} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                        <FileText size={14} /> {t('shipping.document')}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
