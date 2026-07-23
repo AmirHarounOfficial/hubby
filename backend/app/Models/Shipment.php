@@ -107,4 +107,9 @@ class Shipment extends Model
     {
         return $this->hasMany(TrackingEvent::class);
     }
+
+    public function labels(): HasMany
+    {
+        return $this->hasMany(ShippingLabel::class);
+    }
 }

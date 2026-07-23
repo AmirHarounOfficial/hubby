@@ -24,13 +24,17 @@ return [
             'credentials' => [], // none — the merchant enters AWBs by hand
             'capabilities' => ['cod'],
         ],
-        // Real carrier credential shapes (documented now, wired in their slices):
+        'dhl' => [
+            'label' => 'DHL Express',
+            'credentials' => ['api_key', 'api_secret', 'account_number'],
+            'capabilities' => ['rates', 'multi_package', 'pickup', 'cancel', 'address_validation', 'zpl'],
+        ],
+        // Remaining carrier credential shapes (documented now, wired in their slices):
         'aramex' => ['credentials' => ['username', 'password', 'account_number', 'account_pin', 'account_entity', 'account_country_code']],
         'smsa' => ['credentials' => ['passkey']],
         'naqel' => ['credentials' => ['client_id', 'password']],
         'jnt' => ['credentials' => ['api_account', 'private_key', 'customer_code', 'country_code']],
         'torod' => ['credentials' => ['api_token']],
-        'dhl' => ['credentials' => ['api_key', 'api_secret', 'account_number']],
         'fedex' => ['credentials' => ['client_id', 'client_secret', 'account_number']],
     ],
 ];

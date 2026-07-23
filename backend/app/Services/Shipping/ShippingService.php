@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\ShipmentItem;
 use App\Models\ShipmentPackage;
+use App\Services\Shipping\LabelStorageService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -17,6 +18,10 @@ use Illuminate\Support\Str;
  */
 class ShippingService
 {
+    public function __construct(private readonly LabelStorageService $labels)
+    {
+    }
+
     /**
      * Create a `draft` shipment for an order. Packages default to a single box carrying every order
      * line at the resolved weight; the merchant refines them before buying a label.
@@ -71,6 +76,12 @@ class ShippingService
      */
     public function purchaseLabel(Shipment $shipment, CarrierAccount $account, array $opts = []): Shipment
     {
+        // Idempotency: a shipment that already has a purchased AWB is returned as-is. Double-clicking
+        // "Buy label" must never buy two labels — every carrier bills per AWB (spec §4.4 step 2).
+        if ($shipment->status === Shipment::STATUS_LABEL_PURCHASED && $shipment->tracking_number) {
+            return $shipment->fresh(['packages', 'items']);
+        }
+
         if (! in_array($shipment->status, [Shipment::STATUS_DRAFT, Shipment::STATUS_RATED], true)) {
             ShipmentStateMachine::assert($shipment->status, Shipment::STATUS_LABEL_PURCHASED);
         }
@@ -105,7 +116,12 @@ class ShippingService
                 }
             }
 
-            return $shipment->fresh(['packages', 'items']);
+            // Download and keep our own copy of the label the moment it exists — carrier URLs expire.
+            if (! empty($result['label'])) {
+                $this->labels->store($shipment, $result['label']);
+            }
+
+            return $shipment->fresh(['packages', 'items', 'labels']);
         });
     }
 

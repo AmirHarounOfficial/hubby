@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { ChevronLeft, Truck, Ban, MapPin } from 'lucide-react';
+import { ChevronLeft, Truck, Ban, MapPin, Tag, Download } from 'lucide-react';
+import { Money } from '@/components/ui/Money';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
@@ -25,6 +26,8 @@ export default function ShipmentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [tracking, setTracking] = useState(false);
+  const [rates, setRates] = useState<any[] | null>(null);
+  const [ratesErr, setRatesErr] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -58,6 +61,31 @@ export default function ShipmentDetailPage() {
       toast(e?.response?.data?.message || t('shipping.actionError'), 'error');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const compareRates = async () => {
+    setBusy(true);
+    setRatesErr(false);
+    try {
+      const res = await api.post(`/shipments/${id}/rates`, {});
+      setRates(res.data.rates ?? []);
+      setRatesErr((res.data.errors ?? []).length > 0);
+    } catch (e: any) {
+      toast(e?.response?.data?.message || t('shipping.actionError'), 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const downloadLabel = async () => {
+    try {
+      const res = await api.get(`/shipments/${id}/label`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (e: any) {
+      toast(e?.response?.data?.message || t('shipping.actionError'), 'error');
     }
   };
 
@@ -95,6 +123,16 @@ export default function ShipmentDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           {isDraft && (
+            <Button variant="outline" onClick={compareRates} disabled={busy}>
+              <Tag size={16} className="mr-1" />{t('shipping.getRates')}
+            </Button>
+          )}
+          {!isDraft && shipment.tracking_number && (
+            <Button variant="outline" onClick={downloadLabel}>
+              <Download size={16} className="mr-1" />{t('shipping.downloadLabel')}
+            </Button>
+          )}
+          {isDraft && (
             <div className="flex items-center gap-2">
               {accounts.length === 0 ? (
                 <span className="text-xs text-muted-foreground">{t('shipping.noCarrierAccounts')}</span>
@@ -131,6 +169,38 @@ export default function ShipmentDetailPage() {
           )}
         </div>
       </div>
+
+      {isDraft && rates !== null && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-sm">{t('shipping.ratesTitle')}</h3>
+            {ratesErr && <span className="text-xs text-amber-600">{t('shipping.ratesError')}</span>}
+          </div>
+          {rates.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t('shipping.noRates')}</p>
+          ) : (
+            <div className="space-y-2">
+              {rates.map((r) => (
+                <div key={r.id} className={cn('flex items-center justify-between border rounded-lg px-3 py-2',
+                  r.rank === 1 ? 'border-primary/40 bg-primary/5' : 'border-border')}>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium capitalize">{r.carrier_code}</span>
+                    <span className="text-xs text-muted-foreground">{r.service_name}</span>
+                    {r.rank === 1 && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-primary text-white">{t('shipping.recommended')}</span>}
+                    {r.is_estimate && <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-500">{t('shipping.estimate')}</span>}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold tabular-nums"><Money amount={r.total_amount} currency={r.currency} /></span>
+                    <Button onClick={() => act(() => api.post(`/shipments/${id}/label`, { rate_id: r.id }), 'labelBought')} disabled={busy}>
+                      {t('shipping.buyThis')}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-0 overflow-hidden">

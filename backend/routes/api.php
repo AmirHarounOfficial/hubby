@@ -147,7 +147,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/shipments', [\App\Http\Controllers\ShipmentController::class, 'store']);
     Route::get('/shipments/{id}', [\App\Http\Controllers\ShipmentController::class, 'show']);
     Route::delete('/shipments/{id}', [\App\Http\Controllers\ShipmentController::class, 'destroy']);
+    Route::post('/shipments/{id}/rates', [\App\Http\Controllers\ShipmentController::class, 'rates']);
     Route::post('/shipments/{id}/label', [\App\Http\Controllers\ShipmentController::class, 'purchaseLabel']);
+    Route::get('/shipments/{id}/label', [\App\Http\Controllers\ShipmentController::class, 'downloadLabel']);
     Route::post('/shipments/{id}/cancel', [\App\Http\Controllers\ShipmentController::class, 'cancel']);
     Route::get('/shipments/{id}/tracking', [\App\Http\Controllers\ShipmentController::class, 'tracking']);
     Route::post('/shipments/{id}/tracking-events', [\App\Http\Controllers\ShipmentController::class, 'addManualEvent']);

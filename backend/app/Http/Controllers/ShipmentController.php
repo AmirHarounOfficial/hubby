@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CarrierAccount;
 use App\Models\Order;
 use App\Models\Organization;
 use App\Models\Shipment;
+use App\Models\ShippingLabel;
+use App\Models\ShippingRate;
+use App\Services\Shipping\Data\AddressData;
 use App\Services\Shipping\Data\CarrierTrackingEvent;
+use App\Services\Shipping\Data\PackageData;
+use App\Services\Shipping\Data\RateRequest;
+use App\Services\Shipping\LabelStorageService;
+use App\Services\Shipping\ShippingRateService;
 use App\Services\Shipping\ShippingService;
 use App\Services\Shipping\TrackingIngestService;
 use Illuminate\Http\Request;
@@ -29,6 +37,8 @@ class ShipmentController extends Controller
     public function __construct(
         private readonly ShippingService $service,
         private readonly TrackingIngestService $tracking,
+        private readonly ShippingRateService $rates,
+        private readonly LabelStorageService $labelStorage,
     ) {
     }
 
@@ -90,19 +100,61 @@ class ShipmentController extends Controller
         return $this->store($request);
     }
 
+    /** Rate-shop a draft across the org's active carrier accounts (spec §4.3). */
+    public function rates(Request $request, int $id)
+    {
+        $shipment = $this->find($request, $id)->load('packages');
+        $orgId = (int) $request->header('X-Organization-Id');
+
+        $data = $request->validate([
+            'carrier_codes' => ['nullable', 'array'],
+            'refresh' => ['nullable', 'boolean'],
+        ]);
+
+        $accounts = CarrierAccount::where('organization_id', $orgId)
+            ->where('is_active', true)
+            ->when($data['carrier_codes'] ?? null, fn ($q, $c) => $q->whereIn('carrier_code', $c))
+            ->get()->all();
+
+        $result = $this->rates->shop($orgId, $this->rateRequestFor($shipment), $accounts, null, (bool) ($data['refresh'] ?? false));
+
+        // Bind these quotes to this shipment so a rate_id can be chosen at purchase.
+        ShippingRate::where('request_hash', $result['request_hash'])->update(['shipment_id' => $shipment->id]);
+
+        return response()->json($result);
+    }
+
     public function purchaseLabel(Request $request, int $id)
     {
         $this->authorizeManage($request);
         $shipment = $this->find($request, $id);
 
         $data = $request->validate([
-            'carrier_account_id' => ['required', 'integer'],
+            'carrier_account_id' => ['nullable', 'integer'],
+            'rate_id' => ['nullable', 'integer'],
             'label_format' => ['nullable', Rule::in(['pdf', 'zpl', 'png'])],
         ]);
 
-        $account = \App\Models\CarrierAccount::where('organization_id', $request->header('X-Organization-Id'))
+        // A chosen rate supplies the carrier account + service + cost.
+        $rate = null;
+        if (! empty($data['rate_id'])) {
+            $rate = ShippingRate::where('organization_id', $request->header('X-Organization-Id'))->findOrFail($data['rate_id']);
+            $shipment->forceFill([
+                'service_code' => $rate->service_code,
+                'service_name' => $rate->service_name,
+                'shipping_cost' => $rate->total_amount,
+                'shipping_cost_currency' => $rate->currency,
+                'rate_id' => $rate->id,
+            ])->save();
+            $rate->update(['is_selected' => true]);
+        }
+
+        $accountId = $data['carrier_account_id'] ?? $rate?->carrier_account_id;
+        abort_unless($accountId, 422, 'A carrier account or a rate is required.');
+
+        $account = CarrierAccount::where('organization_id', $request->header('X-Organization-Id'))
             ->where('is_active', true)
-            ->findOrFail($data['carrier_account_id']);
+            ->findOrFail($accountId);
 
         try {
             $shipment = $this->service->purchaseLabel(
@@ -138,6 +190,22 @@ class ShipmentController extends Controller
         return response()->json(
             $shipment->trackingEvents()->orderByDesc('event_at')->orderByDesc('id')->get()
         );
+    }
+
+    /** Stream the stored label (spec §4.4 printing). We always serve our own copy, never the carrier URL. */
+    public function downloadLabel(Request $request, int $id)
+    {
+        $shipment = $this->find($request, $id);
+
+        $label = ShippingLabel::where('shipment_id', $shipment->id)
+            ->where('type', 'label')
+            ->whereNull('voided_at')
+            ->latest('id')
+            ->first();
+
+        abort_unless($label, 404, 'No label for this shipment yet.');
+
+        return $this->labelStorage->stream($label);
     }
 
     /** Manual tracking entry for carriers with no API at all (spec §4.1). owner/admin. */
@@ -181,6 +249,33 @@ class ShipmentController extends Controller
         $shipment->delete();
 
         return response()->json(null, 204);
+    }
+
+    /** Build a rate request from the shipment's addresses (or SA defaults) + its packages. */
+    private function rateRequestFor(Shipment $shipment): RateRequest
+    {
+        $from = $shipment->shipFromAddress ? AddressData::fromModel($shipment->shipFromAddress) : new AddressData(countryCode: 'SA');
+        $to = $shipment->shipToAddress ? AddressData::fromModel($shipment->shipToAddress) : new AddressData(countryCode: 'SA');
+
+        $packages = $shipment->packages->map(fn ($p) => new PackageData(
+            weightKg: (float) $p->weight_kg,
+            lengthCm: $p->length_cm ? (float) $p->length_cm : null,
+            widthCm: $p->width_cm ? (float) $p->width_cm : null,
+            heightCm: $p->height_cm ? (float) $p->height_cm : null,
+        ))->all();
+
+        if (empty($packages)) {
+            $packages = [new PackageData(weightKg: max(0.01, (float) $shipment->total_weight_kg))];
+        }
+
+        return new RateRequest(
+            from: $from,
+            to: $to,
+            packages: $packages,
+            currency: $shipment->currency ?? 'SAR',
+            isCod: (bool) $shipment->is_cod,
+            codAmount: (float) $shipment->cod_amount,
+        );
     }
 
     private function find(Request $request, int $id): Shipment

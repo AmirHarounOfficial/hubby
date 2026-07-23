@@ -31,6 +31,20 @@ class CarrierStatusMapSeeder extends Seeder
         'exception' => [false, true, 'Exception', 'استثناء'],
     ];
 
+    /** DHL Express MyDHL tracking typeCode => normalized (spec 04 §6.6). raw_code match. */
+    private const DHL = [
+        'PU' => 'picked_up',
+        'PL' => 'in_transit',
+        'DF' => 'in_transit',
+        'AF' => 'at_destination_hub',
+        'AR' => 'at_destination_hub',
+        'CC' => 'customs_clearance',
+        'WC' => 'out_for_delivery',
+        'OK' => 'delivered',
+        'OH' => 'held',
+        'RT' => 'returned_to_origin',
+    ];
+
     public function run(): void
     {
         foreach (self::VOCAB as $normalized => [$isFinal, $isException, $en, $ar]) {
@@ -42,6 +56,19 @@ class CarrierStatusMapSeeder extends Seeder
                     'is_exception' => $isException,
                     'description_en' => $en,
                     'description_ar' => $ar,
+                    'priority' => 100,
+                ]
+            );
+        }
+
+        foreach (self::DHL as $rawCode => $normalized) {
+            [$isFinal, $isException] = self::VOCAB[$normalized] ?? [false, false];
+            CarrierStatusMap::updateOrCreate(
+                ['carrier_code' => 'dhl', 'raw_code' => $rawCode, 'raw_status' => null],
+                [
+                    'normalized_status' => $normalized,
+                    'is_final' => $isFinal,
+                    'is_exception' => $isException,
                     'priority' => 100,
                 ]
             );

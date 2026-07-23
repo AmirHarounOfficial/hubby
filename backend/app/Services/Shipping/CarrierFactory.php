@@ -2,6 +2,7 @@
 
 namespace App\Services\Shipping;
 
+use App\Services\Shipping\Carriers\DhlCarrier;
 use App\Services\Shipping\Carriers\ManualCarrier;
 
 /**
@@ -14,6 +15,7 @@ class CarrierFactory
     {
         return match (strtolower($carrier)) {
             'manual' => new ManualCarrier(),
+            'dhl' => new DhlCarrier(),
             default => throw new \InvalidArgumentException("Carrier [{$carrier}] not supported"),
         };
     }
@@ -21,6 +23,6 @@ class CarrierFactory
     /** Codes the factory can currently build — drives the carrier-account creation UI. */
     public static function available(): array
     {
-        return ['manual'];
+        return ['manual', 'dhl'];
     }
 }
