@@ -100,4 +100,22 @@ abstract class BaseShippingCarrier implements ShippingCarrierInterface
     {
         return [];
     }
+
+    // Manifests/pickups default to LOCAL (non-throwing): carrier_manifest_id/carrier_pickup_id stay
+    // null so we know the document wasn't carrier-acknowledged. Real integrations override these.
+
+    public function createManifest(CarrierAccount $account, \App\Models\Manifest $manifest): array
+    {
+        return ['carrier_manifest_id' => null, 'document_base64' => null, 'document_url' => null, 'raw' => []];
+    }
+
+    public function createPickup(CarrierAccount $account, \App\Models\PickupRequest $pickup): array
+    {
+        return ['carrier_pickup_id' => null, 'confirmed' => false, 'raw' => []];
+    }
+
+    public function cancelPickup(CarrierAccount $account, \App\Models\PickupRequest $pickup): bool
+    {
+        return true;
+    }
 }

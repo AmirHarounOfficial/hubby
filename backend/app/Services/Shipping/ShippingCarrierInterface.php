@@ -3,6 +3,8 @@
 namespace App\Services\Shipping;
 
 use App\Models\CarrierAccount;
+use App\Models\Manifest;
+use App\Models\PickupRequest;
 use App\Models\Shipment;
 use App\Services\Shipping\Data\CarrierRate;
 use App\Services\Shipping\Data\CarrierTrackingEvent;
@@ -48,6 +50,22 @@ interface ShippingCarrierInterface
 
     /** Reverse logistics: a label the customer uses to send goods back. */
     public function createReturnShipment(CarrierAccount $account, Shipment $shipment): array;
+
+    /**
+     * Submit an end-of-day manifest to the carrier (spec §4.10).
+     *
+     * @return array{carrier_manifest_id:?string,document_base64:?string,document_url:?string,raw:array<string,mixed>}
+     */
+    public function createManifest(CarrierAccount $account, Manifest $manifest): array;
+
+    /**
+     * Book a pickup ("send a driver", spec §4.10).
+     *
+     * @return array{carrier_pickup_id:?string,confirmed:bool,raw:array<string,mixed>}
+     */
+    public function createPickup(CarrierAccount $account, PickupRequest $pickup): array;
+
+    public function cancelPickup(CarrierAccount $account, PickupRequest $pickup): bool;
 
     /** Map a raw carrier status to the normalized vocabulary (§4.2). */
     public function normalizeStatus(?string $rawStatus, ?string $rawCode = null): string;

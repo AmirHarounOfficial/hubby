@@ -157,6 +157,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/{id}/shipments', [\App\Http\Controllers\ShipmentController::class, 'storeForOrder']);
     Route::post('/addresses/validate', [\App\Http\Controllers\AddressController::class, 'validateAddress']);
 
+    // Manifests + pickups (spec 04 §4.10)
+    Route::get('/manifests', [\App\Http\Controllers\ManifestController::class, 'index']);
+    Route::post('/manifests', [\App\Http\Controllers\ManifestController::class, 'store']);
+    Route::get('/manifests/{id}', [\App\Http\Controllers\ManifestController::class, 'show']);
+    Route::get('/manifests/{id}/document', [\App\Http\Controllers\ManifestController::class, 'document']);
+    Route::get('/pickups', [\App\Http\Controllers\PickupController::class, 'index']);
+    Route::post('/pickups', [\App\Http\Controllers\PickupController::class, 'store']);
+    Route::delete('/pickups/{id}', [\App\Http\Controllers\PickupController::class, 'destroy']);
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);

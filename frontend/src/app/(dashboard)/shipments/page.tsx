@@ -58,12 +58,20 @@ export default function ShipmentsPage() {
           </h1>
           <p className="text-muted-foreground text-sm">{t('shipping.subtitle')}</p>
         </div>
-        <Link
-          href="/shipments/carriers"
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-border hover:bg-accent transition-colors"
-        >
-          <Settings2 size={16} /> {t('shipping.accountsTitle')}
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/shipments/manifests"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-border hover:bg-accent transition-colors"
+          >
+            <Truck size={16} /> {t('shipping.manifestsTitle')}
+          </Link>
+          <Link
+            href="/shipments/carriers"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-border hover:bg-accent transition-colors"
+          >
+            <Settings2 size={16} /> {t('shipping.accountsTitle')}
+          </Link>
+        </div>
       </div>
 
       <Card className="p-0 overflow-hidden">
