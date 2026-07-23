@@ -14,7 +14,10 @@ import {
   Box,
   ShoppingBag,
   Zap,
+  Truck,
+  ChevronRight,
 } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
@@ -23,6 +26,7 @@ import { useT } from '@/i18n';
 const tabs = [
   { id: 'profile', icon: User },
   { id: 'organization', icon: Building2 },
+  { id: 'shipping', icon: Truck },
   { id: 'security', icon: Lock },
   { id: 'notifications', icon: Bell },
 ];
@@ -223,6 +227,28 @@ export default function SettingsPage() {
                   </Button>
                 </div>
               </form>
+            </Card>
+          )}
+
+          {activeTab === 'shipping' && (
+            <Card className="p-8 space-y-6">
+              <div>
+                <h3 className="text-lg font-bold">{t('settings.shipping.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('settings.shipping.desc')}</p>
+              </div>
+              <Link
+                href="/shipments/carriers"
+                className="flex items-center justify-between rounded-xl border border-border px-5 py-4 hover:bg-accent transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Truck size={20} className="text-primary" />
+                  <div>
+                    <p className="font-medium">{t('settings.shipping.carriersTitle')}</p>
+                    <p className="text-xs text-muted-foreground">{t('settings.shipping.carriersDesc')}</p>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-muted-foreground" />
+              </Link>
             </Card>
           )}
 

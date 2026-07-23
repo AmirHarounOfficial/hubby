@@ -92,9 +92,15 @@ export default function ShipmentsPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
           ) : rows.length === 0 ? (
-            <div className="p-12 text-center space-y-2">
+            <div className="p-12 text-center space-y-3">
               <p className="font-medium">{t('shipping.empty')}</p>
               <p className="text-sm text-muted-foreground">{t('shipping.emptyHint')}</p>
+              <Link
+                href="/shipments/carriers"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-white hover:opacity-90 transition-opacity"
+              >
+                <Settings2 size={16} /> {t('shipping.setupCarriers')}
+              </Link>
             </div>
           ) : (
             <table className="w-full text-left text-sm">

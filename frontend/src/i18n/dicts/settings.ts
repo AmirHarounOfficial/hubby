@@ -5,8 +5,15 @@ export const settings = {
     tabs: {
       profile: 'Profile',
       organization: 'Organization',
+      shipping: 'Shipping',
       security: 'Security',
       notifications: 'Notifications',
+    },
+    shipping: {
+      title: 'Shipping',
+      desc: 'Connect the carriers you ship with and manage their credentials.',
+      carriersTitle: 'Carrier accounts',
+      carriersDesc: 'DHL, Aramex and more — enter API credentials, enable COD.',
     },
     profile: {
       title: 'Your Profile',
@@ -64,8 +71,15 @@ export const settings = {
     tabs: {
       profile: 'الملف الشخصي',
       organization: 'المؤسسة',
+      shipping: 'الشحن',
       security: 'الأمان',
       notifications: 'الإشعارات',
+    },
+    shipping: {
+      title: 'الشحن',
+      desc: 'اربط النواقل التي تشحن بها وأدر بيانات دخولها.',
+      carriersTitle: 'حسابات النواقل',
+      carriersDesc: 'DHL وأرامكس وغيرها — أدخل بيانات الـ API، فعّل الدفع عند الاستلام.',
     },
     profile: {
       title: 'ملفك الشخصي',
