@@ -45,6 +45,18 @@ class CarrierStatusMapSeeder extends Seeder
         'RT' => 'returned_to_origin',
     ];
 
+    /** Aramex tracking update text => normalized (spec 04 §6.1). Matched on lowercased raw_status. */
+    private const ARAMEX = [
+        'shipment picked up' => 'picked_up',
+        'picked up' => 'picked_up',
+        'in transit' => 'in_transit',
+        'out for delivery' => 'out_for_delivery',
+        'delivered' => 'delivered',
+        'delivery attempted' => 'delivery_attempted',
+        'on hold' => 'held',
+        'returned to shipper' => 'returned_to_origin',
+    ];
+
     public function run(): void
     {
         foreach (self::VOCAB as $normalized => [$isFinal, $isException, $en, $ar]) {
@@ -65,6 +77,19 @@ class CarrierStatusMapSeeder extends Seeder
             [$isFinal, $isException] = self::VOCAB[$normalized] ?? [false, false];
             CarrierStatusMap::updateOrCreate(
                 ['carrier_code' => 'dhl', 'raw_code' => $rawCode, 'raw_status' => null],
+                [
+                    'normalized_status' => $normalized,
+                    'is_final' => $isFinal,
+                    'is_exception' => $isException,
+                    'priority' => 100,
+                ]
+            );
+        }
+
+        foreach (self::ARAMEX as $rawStatus => $normalized) {
+            [$isFinal, $isException] = self::VOCAB[$normalized] ?? [false, false];
+            CarrierStatusMap::updateOrCreate(
+                ['carrier_code' => 'aramex', 'raw_code' => null, 'raw_status' => $rawStatus],
                 [
                     'normalized_status' => $normalized,
                     'is_final' => $isFinal,

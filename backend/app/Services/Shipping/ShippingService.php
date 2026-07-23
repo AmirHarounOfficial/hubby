@@ -86,11 +86,10 @@ class ShippingService
             ShipmentStateMachine::assert($shipment->status, Shipment::STATUS_LABEL_PURCHASED);
         }
         if ($shipment->packages->isEmpty() || $shipment->packages->every(fn ($p) => (float) $p->weight_kg <= 0)) {
-            throw new \RuntimeException('shipment_requires_a_package_with_weight');
+            throw new \RuntimeException('PACKAGE_WEIGHT_REQUIRED');
         }
-        if ($shipment->is_cod && (float) $shipment->cod_amount <= 0) {
-            throw new \RuntimeException('cod_shipment_requires_a_cod_amount');
-        }
+
+        $this->assertCodRules($shipment, $account);
 
         $carrier = CarrierFactory::make($account->carrier_code);
 
@@ -123,6 +122,43 @@ class ShippingService
 
             return $shipment->fresh(['packages', 'items', 'labels']);
         });
+    }
+
+    /**
+     * COD is a collection instruction, not a flag (spec §4.7). Silently dropping it ships a parcel
+     * with no instruction and the merchant loses the whole order value — so these checks are not
+     * optional. Error messages are the API error codes the dashboard keys on.
+     */
+    private function assertCodRules(Shipment $shipment, CarrierAccount $account): void
+    {
+        if (! $shipment->is_cod) {
+            return;
+        }
+
+        if ((float) $shipment->cod_amount <= 0) {
+            throw new \RuntimeException('COD_AMOUNT_REQUIRED');
+        }
+        if (! $account->cod_enabled) {
+            throw new \RuntimeException('COD_NOT_ENABLED_ON_ACCOUNT');
+        }
+
+        $order = $shipment->order()->first();
+        $orderCurrency = $order->currency ?? $shipment->currency;
+        if ($shipment->cod_currency && strtoupper((string) $shipment->cod_currency) !== strtoupper((string) $orderCurrency)) {
+            throw new \RuntimeException('COD_CURRENCY_MISMATCH');
+        }
+
+        // Σ COD across all non-cancelled shipments for the order must not exceed the order total —
+        // otherwise a split order could instruct the carrier to collect more than the customer owes.
+        if ($order && (float) $order->total > 0) {
+            $sumCod = (float) Shipment::where('order_id', $order->id)
+                ->where('id', '!=', $shipment->id)
+                ->where('status', '!=', Shipment::STATUS_CANCELLED)
+                ->sum('cod_amount');
+            if ($sumCod + (float) $shipment->cod_amount > (float) $order->total + 0.001) {
+                throw new \RuntimeException('COD_EXCEEDS_ORDER_TOTAL');
+            }
+        }
     }
 
     /** Cancel a pre-transit shipment (void the label with the carrier where supported). */

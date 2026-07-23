@@ -29,8 +29,12 @@ return [
             'credentials' => ['api_key', 'api_secret', 'account_number'],
             'capabilities' => ['rates', 'multi_package', 'pickup', 'cancel', 'address_validation', 'zpl'],
         ],
+        'aramex' => [
+            'label' => 'Aramex',
+            'credentials' => ['username', 'password', 'account_number', 'account_pin', 'account_entity', 'account_country_code'],
+            'capabilities' => ['rates', 'cod', 'pickup', 'cancel', 'multi_package', 'address_validation'],
+        ],
         // Remaining carrier credential shapes (documented now, wired in their slices):
-        'aramex' => ['credentials' => ['username', 'password', 'account_number', 'account_pin', 'account_entity', 'account_country_code']],
         'smsa' => ['credentials' => ['passkey']],
         'naqel' => ['credentials' => ['client_id', 'password']],
         'jnt' => ['credentials' => ['api_account', 'private_key', 'customer_code', 'country_code']],

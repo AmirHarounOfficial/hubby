@@ -59,7 +59,8 @@ export const shipping = {
     validated: 'Credentials look good.',
     deactivate: 'Deactivate',
     accountSaved: 'Carrier account saved.',
-    manualOnlyHint: 'Manual works today — enter AWBs and tracking by hand. Live carrier integrations arrive next.',
+    codEnabled: 'This account is approved for Cash on Delivery',
+    manualOnlyHint: 'Manual works today — enter AWBs and tracking by hand. DHL and Aramex are available in sandbox; capture a live fixture before production.',
     statuses: {
       draft: 'Draft', rated: 'Rated', label_purchased: 'Label bought', awaiting_pickup: 'Awaiting pickup',
       picked_up: 'Picked up', in_transit: 'In transit', at_origin_hub: 'At origin hub',
@@ -126,7 +127,8 @@ export const shipping = {
     validated: 'بيانات الدخول صحيحة.',
     deactivate: 'تعطيل',
     accountSaved: 'تم حفظ حساب الناقل.',
-    manualOnlyHint: 'الوضع اليدوي متاح الآن — أدخل البوالص والتتبّع يدويًا. تكامل النواقل المباشر قادم.',
+    codEnabled: 'هذا الحساب معتمد للدفع عند الاستلام',
+    manualOnlyHint: 'الوضع اليدوي متاح الآن — أدخل البوالص والتتبّع يدويًا. DHL وأرامكس متاحان في وضع الاختبار؛ التقط عيّنة حيّة قبل الإنتاج.',
     statuses: {
       draft: 'مسودة', rated: 'مُسعّرة', label_purchased: 'تم شراء البوليصة', awaiting_pickup: 'بانتظار الاستلام',
       picked_up: 'تم الاستلام', in_transit: 'قيد النقل', at_origin_hub: 'في مركز المصدر',

@@ -22,7 +22,13 @@ export default function CarrierAccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [carrier, setCarrier] = useState('');
   const [label, setLabel] = useState('');
+  const [creds, setCreds] = useState<Record<string, string>>({});
+  const [codEnabled, setCodEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const selected = catalog.find((c) => c.code === carrier);
+  const credFields = selected?.credential_fields ?? [];
+  const supportsCod = (selected?.capabilities ?? []).includes('cod');
 
   const load = useCallback(async () => {
     const [cat, acc] = await Promise.all([api.get('/shipping/carriers'), api.get('/shipping/accounts')]);
@@ -41,9 +47,16 @@ export default function CarrierAccountsPage() {
     if (!carrier || !label.trim()) return;
     setBusy(true);
     try {
-      await api.post('/shipping/accounts', { carrier_code: carrier, label: label.trim() });
+      await api.post('/shipping/accounts', {
+        carrier_code: carrier,
+        label: label.trim(),
+        credentials: credFields.length ? creds : undefined,
+        cod_enabled: supportsCod ? codEnabled : undefined,
+      });
       toast(t('shipping.accountSaved'), 'success');
       setLabel('');
+      setCreds({});
+      setCodEnabled(false);
       await load();
     } catch (e: any) {
       toast(e?.response?.data?.message || t('shipping.actionError'), 'error');
@@ -104,6 +117,29 @@ export default function CarrierAccountsPage() {
           </div>
           <Button onClick={add} disabled={busy || !label.trim()}>{t('shipping.addAccount')}</Button>
         </div>
+
+        {credFields.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-3">
+            {credFields.map((f) => (
+              <div key={f}>
+                <label className="text-xs font-medium text-muted-foreground capitalize">{f.replace(/_/g, ' ')}</label>
+                <Input
+                  type={/password|secret|key|pin/i.test(f) ? 'password' : 'text'}
+                  value={creds[f] ?? ''}
+                  onChange={(e) => setCreds((c) => ({ ...c, [f]: e.target.value }))}
+                  className="mt-1"
+                  autoComplete="off"
+                />
+              </div>
+            ))}
+            {supportsCod && (
+              <label className="flex items-center gap-2 text-sm md:col-span-2">
+                <input type="checkbox" checked={codEnabled} onChange={(e) => setCodEnabled(e.target.checked)} />
+                {t('shipping.codEnabled')}
+              </label>
+            )}
+          </div>
+        )}
       </Card>
 
       <Card className="p-0 overflow-hidden">
