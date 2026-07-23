@@ -24,6 +24,7 @@ import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { PlatformLogo } from '@/components/ui/PlatformLogo';
 import { OrderProfitCard } from '@/components/orders/OrderProfitCard';
+import { CreateReturnModal } from '@/components/returns/CreateReturnModal';
 import { useT } from '@/i18n';
 
 const statusConfig: Record<string, any> = {
@@ -42,6 +43,7 @@ export default function OrderDetailsPage() {
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [creatingReturn, setCreatingReturn] = useState(false);
 
   const fetchOrder = async () => {
     setIsLoading(true);
@@ -147,6 +149,11 @@ export default function OrderDetailsPage() {
           <Button variant="outline" size="sm" onClick={handlePrint}>
             {t('orders.detail.printOrder')}
           </Button>
+          {(order.items?.length ?? 0) > 0 && (
+            <Button variant="outline" size="sm" onClick={() => setCreatingReturn(true)}>
+              {t('returns.create')}
+            </Button>
+          )}
           {['paid', 'processing'].includes(order.status.toLowerCase()) && (
             <Button 
               variant="primary" 
@@ -382,6 +389,8 @@ export default function OrderDetailsPage() {
           </Card>
         </div>
       </div>
+
+      {creatingReturn && <CreateReturnModal order={order} onClose={() => setCreatingReturn(false)} />}
     </div>
   );
 }

@@ -3,6 +3,7 @@ export const common = {
     nav: {
       dashboard: 'Dashboard',
       orders: 'Orders',
+      returns: 'Returns',
       customers: 'Customers',
       products: 'Products',
       inventory: 'Inventory',
@@ -52,6 +53,7 @@ export const common = {
     nav: {
       dashboard: 'لوحة التحكم',
       orders: 'الطلبات',
+      returns: 'المرتجعات',
       customers: 'العملاء',
       products: 'المنتجات',
       inventory: 'المخزون',

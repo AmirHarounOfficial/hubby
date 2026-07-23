@@ -1,6 +1,7 @@
 import { common } from './dicts/common';
 import { dashboard } from './dicts/dashboard';
 import { orders } from './dicts/orders';
+import { returns } from './dicts/returns';
 import { customers } from './dicts/customers';
 import { products } from './dicts/products';
 import { categories } from './dicts/categories';
@@ -22,6 +23,7 @@ export const dictionaries = {
     ...common.en,
     dashboard: dashboard.en,
     orders: orders.en,
+    returns: returns.en,
     customers: customers.en,
     products: products.en,
     categories: categories.en,
@@ -37,6 +39,7 @@ export const dictionaries = {
     ...common.ar,
     dashboard: dashboard.ar,
     orders: orders.ar,
+    returns: returns.ar,
     customers: customers.ar,
     products: products.ar,
     categories: categories.ar,

@@ -121,6 +121,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/automation/rules/{id}/toggle', [\App\Http\Controllers\AutomationController::class, 'toggle']);
     Route::delete('/automation/rules/{id}', [\App\Http\Controllers\AutomationController::class, 'destroy']);
 
+    // Returns / RMA (spec 03)
+    Route::get('/return-reasons', [\App\Http\Controllers\ReturnReasonController::class, 'index']);
+    Route::get('/returns', [\App\Http\Controllers\ReturnController::class, 'index']);
+    Route::post('/returns', [\App\Http\Controllers\ReturnController::class, 'store']);
+    Route::get('/returns/{id}', [\App\Http\Controllers\ReturnController::class, 'show']);
+    Route::post('/returns/{id}/approve', [\App\Http\Controllers\ReturnController::class, 'approve']);
+    Route::post('/returns/{id}/reject', [\App\Http\Controllers\ReturnController::class, 'reject']);
+    Route::post('/returns/{id}/ship', [\App\Http\Controllers\ReturnController::class, 'ship']);
+    Route::post('/returns/{id}/receive', [\App\Http\Controllers\ReturnController::class, 'receive']);
+    Route::post('/returns/{id}/inspect', [\App\Http\Controllers\ReturnController::class, 'inspect']);
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);

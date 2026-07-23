@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { 
   LayoutDashboard, 
-  ShoppingBag, 
+  ShoppingBag,
+  Undo2,
   Users,
   Package, 
   Database, 
@@ -27,6 +28,7 @@ import { useI18n } from '@/i18n';
 const menuItems = [
   { icon: LayoutDashboard, key: 'dashboard', href: '/dashboard' },
   { icon: ShoppingBag, key: 'orders', href: '/orders' },
+  { icon: Undo2, key: 'returns', href: '/returns' },
   { icon: Users, key: 'customers', href: '/customers' },
   { icon: Package, key: 'products', href: '/products' },
   { icon: Database, key: 'inventory', href: '/inventory' },
