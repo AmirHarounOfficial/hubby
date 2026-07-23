@@ -2,9 +2,12 @@
 
 namespace App\Services\Integrations;
 
+use App\Models\Order;
 use App\Models\Store;
 use App\Models\Integration;
+use App\Services\Integrations\Contracts\CapturesOrderFees;
 use App\Services\Integrations\Support\AwsSignatureV4;
+use App\Services\Profit\FeeCapture\AmazonFeeParser;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\RequestInterface;
@@ -20,7 +23,7 @@ use Psr\Http\Message\RequestInterface;
  * (getHttpClient() → AwsSignatureV4). Without them we fall back to the LWA token alone,
  * which the newer SP-API auth model accepts.
  */
-class AmazonService extends BaseIntegrationService
+class AmazonService extends BaseIntegrationService implements CapturesOrderFees
 {
     private function region(): string
     {
@@ -194,6 +197,24 @@ class AmazonService extends BaseIntegrationService
         }
 
         return true;
+    }
+
+    /**
+     * Actual per-order fees from SP-API Finances (commission, FBA fulfilment, etc.).
+     * Requires the Finance role on the app; SigV4-signed like every other SP-API call.
+     */
+    public function fetchOrderFees(Store $store, Order $order): array
+    {
+        $response = $this->getHttpClient($store->integration)
+            ->get($this->endpoint()."/finances/v0/orders/{$order->external_id}/financialEvents");
+
+        if ($response->failed()) {
+            Log::error("Amazon fetchOrderFees failed for {$order->external_id}: ".$response->body());
+
+            return [];
+        }
+
+        return AmazonFeeParser::parse($response->json('payload.FinancialEvents') ?? []);
     }
 
     public function updateOrderStatus(Store $store, string $externalId, string $status): bool

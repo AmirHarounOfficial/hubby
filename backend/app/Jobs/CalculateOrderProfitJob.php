@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Order;
 use App\Services\Profit\FeeEstimator;
+use App\Services\Profit\OrderFeeCaptureService;
 use App\Services\Profit\OrderProfitCalculator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -28,8 +29,11 @@ class CalculateOrderProfitJob implements ShouldQueue
     {
     }
 
-    public function handle(FeeEstimator $feeEstimator, OrderProfitCalculator $calculator): void
-    {
+    public function handle(
+        OrderFeeCaptureService $feeCapture,
+        FeeEstimator $feeEstimator,
+        OrderProfitCalculator $calculator,
+    ): void {
         $order = Order::with('store')->find($this->orderId);
 
         if (! $order) {
@@ -37,7 +41,10 @@ class CalculateOrderProfitJob implements ShouldQueue
         }
 
         try {
-            // Fill in modelled fees for platforms that never report them, then compute profit.
+            // 1. Capture the platform's actual fees where it reports them (Amazon, Shopify Payments).
+            // 2. Model the rest with rules — the estimator never overwrites a captured (measured) fee.
+            // 3. Compute profit from whatever fees now exist.
+            $feeCapture->capture($order);
             $feeEstimator->estimate($order);
             $calculator->calculate($order);
         } catch (\Throwable $e) {

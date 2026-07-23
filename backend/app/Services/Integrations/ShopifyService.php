@@ -2,18 +2,22 @@
 
 namespace App\Services\Integrations;
 
+use App\Models\Order;
 use App\Models\Store;
 use App\Models\Integration;
+use App\Services\Integrations\Contracts\CapturesOrderFees;
+use App\Services\Profit\FeeCapture\ShopifyFeeParser;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class ShopifyService extends BaseIntegrationService
+class ShopifyService extends BaseIntegrationService implements CapturesOrderFees
 {
     public function getAuthUrl(): string
     {
         $shop = request('shop'); // myshopify.com URL
         $apiKey = config('services.shopify.api_key');
-        $scopes = 'read_orders,write_orders,read_products,write_products,read_inventory,write_inventory';
+        // read_shopify_payments_payouts lets us read the actual processing fees on each order.
+        $scopes = 'read_orders,write_orders,read_products,write_products,read_inventory,write_inventory,read_shopify_payments_payouts';
         $redirectUri = route('oauth.callback', ['platform' => 'shopify']);
 
         return "https://{$shop}/admin/oauth/authorize?client_id={$apiKey}&scope={$scopes}&redirect_uri={$redirectUri}";
@@ -131,6 +135,26 @@ class ShopifyService extends BaseIntegrationService
         }
 
         return true;
+    }
+
+    /**
+     * Actual Shopify Payments processing fees for an order, from its transactions.
+     * Needs the read_shopify_payments_payouts scope (see getAuthUrl).
+     */
+    public function fetchOrderFees(Store $store, Order $order): array
+    {
+        $domain = $store->domain;
+
+        $response = $this->getHttpClient($store->integration)
+            ->get("https://{$domain}/admin/api/2024-01/orders/{$order->external_id}/transactions.json");
+
+        if ($response->failed()) {
+            Log::error("Shopify fetchOrderFees failed for {$order->external_id}: ".$response->body());
+
+            return [];
+        }
+
+        return ShopifyFeeParser::parse($response->json('transactions') ?? []);
     }
 
     public function updateOrderStatus(Store $store, string $externalId, string $status): bool
