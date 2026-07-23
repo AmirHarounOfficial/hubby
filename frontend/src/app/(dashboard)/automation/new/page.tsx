@@ -41,6 +41,18 @@ export default function NewRulePage() {
     return CATEGORY_ORDER.filter((c) => byCat[c]?.length).map((c) => ({ category: c, items: byCat[c] }));
   }, [templates]);
 
+  // Translated card text, falling back to the backend's English if a template has no translation yet.
+  const tName = (tpl: Template) => {
+    const k = `automation.templates.${tpl.id}.name`;
+    const v = t(k);
+    return v === k ? tpl.name : v;
+  };
+  const tDesc = (tpl: Template) => {
+    const k = `automation.templates.${tpl.id}.description`;
+    const v = t(k);
+    return v === k ? tpl.description : v;
+  };
+
   const pick = (tpl: Template) =>
     setInitial({
       name: tpl.rule.name,
@@ -102,8 +114,8 @@ export default function NewRulePage() {
                   {items.map((tpl) => (
                     <button key={tpl.id} onClick={() => pick(tpl)} className="text-left">
                       <Card className="p-4 h-full flex flex-col gap-2 hover:border-primary/40 hover:shadow-md transition-all">
-                        <p className="font-bold text-sm">{tpl.name}</p>
-                        <p className="text-xs text-muted-foreground flex-1">{tpl.description}</p>
+                        <p className="font-bold text-sm">{tName(tpl)}</p>
+                        <p className="text-xs text-muted-foreground flex-1">{tDesc(tpl)}</p>
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
                           {t('automation.builder.use')} <ArrowRight size={13} />
                         </span>

@@ -88,6 +88,36 @@ export const automation = {
       tags: 'Tags', status: 'Status', folder: 'Folder', location: 'Location',
       carrier: 'Carrier', service: 'Service', reason: 'Reason', text: 'Note', channel: 'Channel', template: 'Template', url: 'URL', title: 'Title', message: 'Message',
     },
+    templates: {
+      hold_high_value_cod: {
+        name: 'Hold high-value COD orders for review',
+        description: 'Cash-on-delivery orders above a threshold are parked for a human to confirm before they ship.',
+      },
+      flag_big_baskets: {
+        name: 'Flag large orders for careful packing',
+        description: 'Orders with many items get a tag so the warehouse knows to double-check the pack.',
+      },
+      route_city_folder: {
+        name: 'Group orders by city',
+        description: 'Send orders shipping to a specific city into their own queue for a local courier.',
+      },
+      hold_missing_address: {
+        name: 'Catch orders with a missing country',
+        description: 'If the shipping country is blank, hold the order so no one ships it blind.',
+      },
+      tag_fragile: {
+        name: 'Handle fragile products with care',
+        description: 'Orders containing fragile SKUs are tagged so they get bubble wrap and the right courier.',
+      },
+      notify_big_order: {
+        name: 'Get notified about big orders',
+        description: 'A dashboard notification the moment an order over a threshold comes in.',
+      },
+      tag_new_channel: {
+        name: 'Label orders by sales channel',
+        description: 'Automatically tag every order with the channel it came from, for easy filtering.',
+      },
+    },
   },
   ar: {
     title: 'الأتمتة',
@@ -177,6 +207,36 @@ export const automation = {
     params: {
       tags: 'الوسوم', status: 'الحالة', folder: 'المجلد', location: 'الموقع',
       carrier: 'شركة الشحن', service: 'الخدمة', reason: 'السبب', text: 'ملاحظة', channel: 'القناة', template: 'القالب', url: 'الرابط', title: 'العنوان', message: 'الرسالة',
+    },
+    templates: {
+      hold_high_value_cod: {
+        name: 'حجز طلبات الدفع عند الاستلام عالية القيمة للمراجعة',
+        description: 'تُحجز طلبات الدفع عند الاستلام التي تتجاوز حدًا معيّنًا ليؤكّدها شخص قبل شحنها.',
+      },
+      flag_big_baskets: {
+        name: 'تمييز الطلبات الكبيرة للتغليف بعناية',
+        description: 'تحصل الطلبات كثيرة الأصناف على وسم لينتبه المستودع لمراجعة التغليف مرتين.',
+      },
+      route_city_folder: {
+        name: 'تجميع الطلبات حسب المدينة',
+        description: 'إرسال الطلبات المتجهة إلى مدينة معيّنة إلى قائمتها الخاصة لمندوب محلي.',
+      },
+      hold_missing_address: {
+        name: 'اكتشاف الطلبات التي تنقصها الدولة',
+        description: 'إذا كانت دولة الشحن فارغة، يُحجز الطلب حتى لا يُشحن دون عنوان.',
+      },
+      tag_fragile: {
+        name: 'التعامل مع المنتجات القابلة للكسر بعناية',
+        description: 'تُوسَم الطلبات التي تحتوي أكوادًا قابلة للكسر لتحصل على تغليف واقٍ وشركة الشحن المناسبة.',
+      },
+      notify_big_order: {
+        name: 'تنبيهي عند الطلبات الكبيرة',
+        description: 'إشعار في لوحة التحكم لحظة ورود طلب يتجاوز حدًا معيّنًا.',
+      },
+      tag_new_channel: {
+        name: 'تصنيف الطلبات حسب قناة البيع',
+        description: 'وسم كل طلب تلقائيًا بالقناة التي جاء منها لتسهيل التصفية.',
+      },
     },
   },
 };
