@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\ProductCost;
+use App\Models\Shipment;
 use App\Observers\ProductCostObserver;
+use App\Observers\ShipmentObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 
@@ -24,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Keeps landed_unit_cost / _base derived and closes superseded cost windows.
         ProductCost::observe(ProductCostObserver::class);
+
+        // Keeps orders.fulfillment_status / shipments_count in sync with their shipments.
+        Shipment::observe(ShipmentObserver::class);
 
         // Password-reset emails should link to the SPA, not an API route.
         ResetPassword::createUrlUsing(function ($notifiable, string $token) {
