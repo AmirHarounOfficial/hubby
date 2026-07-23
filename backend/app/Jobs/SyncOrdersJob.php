@@ -69,6 +69,11 @@ class SyncOrdersJob implements ShouldQueue
 
                 $synced++;
 
+                // Capture the prior status before the upsert, so we can fire order.status_changed.
+                $previousStatus = Order::where('store_id', $this->store->id)
+                    ->where('external_id', $mappedData['external_id'])
+                    ->value('status');
+
                 $order = Order::updateOrCreate(
                     [
                         'store_id' => $this->store->id,
@@ -113,6 +118,13 @@ class SyncOrdersJob implements ShouldQueue
                     $order->wasRecentlyCreated ? 'order.created' : 'order.updated',
                     'sync',
                 );
+
+                // Additionally fire order.status_changed when the platform status actually moved.
+                if (! $order->wasRecentlyCreated
+                    && $previousStatus !== null
+                    && $previousStatus !== $order->status) {
+                    RunAutomationJob::dispatch($order->id, 'order.status_changed', 'sync', $previousStatus);
+                }
             }
 
             $log->update(['status' => 'success']);

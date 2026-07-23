@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
-import { Workflow, Power, Trash2, Activity } from 'lucide-react';
+import { Workflow, Power, Trash2, Activity, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { useT } from '@/i18n';
@@ -37,6 +38,7 @@ const outcomeColor: Record<string, string> = {
 
 export default function AutomationPage() {
   const t = useT();
+  const router = useRouter();
   const [rules, setRules] = useState<Rule[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,12 +80,21 @@ export default function AutomationPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-3">
-          <Workflow className="text-primary" />
-          {t('automation.title')}
-        </h1>
-        <p className="text-muted-foreground text-sm">{t('automation.subtitle')}</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-3">
+            <Workflow className="text-primary" />
+            {t('automation.title')}
+          </h1>
+          <p className="text-muted-foreground text-sm">{t('automation.subtitle')}</p>
+        </div>
+        <button
+          onClick={() => router.push('/automation/new')}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors self-start"
+        >
+          <Plus size={16} />
+          {t('automation.newRule')}
+        </button>
       </div>
 
       {isLoading ? (
@@ -118,7 +129,14 @@ export default function AutomationPage() {
                   <tbody className="divide-y divide-border">
                     {rules.map((rule) => (
                       <tr key={rule.id} className="hover:bg-accent/30 transition-colors">
-                        <td className="px-5 py-3 font-medium">{rule.name}</td>
+                        <td className="px-5 py-3">
+                          <button
+                            onClick={() => router.push(`/automation/${rule.id}`)}
+                            className="font-medium text-left hover:text-primary transition-colors"
+                          >
+                            {rule.name}
+                          </button>
+                        </td>
                         <td className="px-5 py-3 text-muted-foreground">
                           {t(`automation.triggers.${rule.trigger.replace(/\./g, '_')}`)}
                         </td>

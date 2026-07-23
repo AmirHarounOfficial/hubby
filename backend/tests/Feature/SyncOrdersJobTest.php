@@ -146,6 +146,34 @@ class SyncOrdersJobTest extends TestCase
         $this->assertSame(['synced-auto'], $order->fresh()->tags);
     }
 
+    public function test_a_status_change_on_re_sync_fires_the_status_changed_trigger(): void
+    {
+        $store = $this->store();
+        \App\Models\AutomationRule::create([
+            'organization_id' => $store->organization_id,
+            'name' => 'Tag on ship',
+            'trigger' => 'order.status_changed',
+            'conditions' => ['match' => 'all', 'rules' => [
+                ['field' => 'order.previous_status', 'operator' => 'eq', 'value' => 'paid'],
+                ['field' => 'order.status', 'operator' => 'eq', 'value' => 'shipped'],
+            ]],
+            'actions' => [['id' => 'a1', 'type' => 'add_tag', 'tags' => ['just-shipped']]],
+            'enabled' => true,
+            'run_mode' => 'live',
+        ]);
+
+        // First sync: created as paid.
+        $this->runSync($store, $this->orderPayload());
+        // Re-sync with the status moved to shipped.
+        $shipped = $this->orderPayload();
+        $shipped[0]['financial_status'] = 'shipped';
+        $this->runSync($store, $shipped);
+
+        $order = Order::where('store_id', $store->id)->where('external_id', '12345')->firstOrFail();
+        $this->assertSame('shipped', $order->status);
+        $this->assertSame(['just-shipped'], $order->fresh()->tags);
+    }
+
     public function test_webhook_scoped_sync_only_writes_the_named_order(): void
     {
         $store = $this->store();
