@@ -81,6 +81,12 @@ docker compose exec -T app php artisan storage:link || true
 echo "🗄️  Running migrations..."
 docker compose exec -T app php artisan migrate --force
 
+# Seed the Profit & Loss demo data. Runs once — the seeder no-ops if its PFD-* orders already
+# exist, so repeat deploys don't duplicate data. Scoped to this one seeder on purpose (the full
+# db:seed would also run RealDataSeeder, which wipes all orders on every run).
+echo "🌱 Seeding profit demo data (first run only)..."
+docker compose exec -T app php artisan db:seed --class="Database\\Seeders\\ProfitDemoSeeder" --force || true
+
 echo "⚡ Caching config/routes/views..."
 docker compose exec -T app php artisan optimize
 
