@@ -86,13 +86,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/analytics/top-products', [AnalyticsController::class, 'topProducts']);
 
     // Profit reporting — reads the materialized rollups; nothing recomputes on request.
-    // Static segments stay above any /{id} route so they can't be captured as an id.
-    Route::get('/analytics/profit/timeline', [ProfitController::class, 'timeline']);
-    Route::get('/analytics/profit/by-sku', [ProfitController::class, 'bySku']);
-    Route::get('/analytics/profit/by-channel', [ProfitController::class, 'byChannel']);
-    Route::get('/analytics/profit/coverage', [ProfitController::class, 'coverage']);
-    Route::get('/analytics/profit', [ProfitController::class, 'summary']);
-    Route::get('/orders/{id}/profit', [ProfitController::class, 'order']);
+    // Cost/margin data is gated by role (spec 01 §9): a viewer-level teammate can work orders
+    // without seeing what the business makes. Static segments stay above any /{id} route so they
+    // can't be captured as an id.
+    Route::middleware('cost.access')->group(function () {
+        Route::get('/analytics/profit/timeline', [ProfitController::class, 'timeline']);
+        Route::get('/analytics/profit/by-sku', [ProfitController::class, 'bySku']);
+        Route::get('/analytics/profit/by-channel', [ProfitController::class, 'byChannel']);
+        Route::get('/analytics/profit/coverage', [ProfitController::class, 'coverage']);
+        Route::get('/analytics/profit', [ProfitController::class, 'summary']);
+        Route::get('/orders/{id}/profit', [ProfitController::class, 'order']);
+    });
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);

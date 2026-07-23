@@ -91,6 +91,29 @@ class ProfitReportTest extends TestCase
             ->assertStatus(403);
     }
 
+    public function test_a_viewer_is_denied_cost_and_profit_data_by_default(): void
+    {
+        // A viewer-level teammate can work orders but must not see margins (org default: admin).
+        $viewer = User::factory()->create();
+        $viewer->organizations()->attach($this->organization->id, ['role' => 'viewer']);
+        Sanctum::actingAs($viewer);
+
+        $this->getJson('/api/analytics/profit', $this->headers())->assertStatus(403);
+        $this->getJson('/api/analytics/profit/by-sku', $this->headers())->assertStatus(403);
+    }
+
+    public function test_a_viewer_is_allowed_once_the_org_opens_cost_visibility(): void
+    {
+        $this->organization->forceFill(['cost_visibility_role' => 'viewer'])->save();
+
+        $viewer = User::factory()->create();
+        $viewer->organizations()->attach($this->organization->id, ['role' => 'viewer']);
+        Sanctum::actingAs($viewer);
+
+        $this->getJson('/api/analytics/profit?start_date=2026-06-01&end_date=2026-06-30', $this->headers())
+            ->assertOk();
+    }
+
     public function test_timeline_groups_by_day(): void
     {
         $this->profit(netRevenue: '100.0000', cogs: '40.0000', fees: '0.0000', netProfit: '60.0000', placedOn: '2026-06-01');

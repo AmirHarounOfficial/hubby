@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
 import { PlatformLogo } from '@/components/ui/PlatformLogo';
+import { OrderProfitCard } from '@/components/orders/OrderProfitCard';
 import { useT } from '@/i18n';
 
 const statusConfig: Record<string, any> = {
@@ -213,6 +214,9 @@ export default function OrderDetailsPage() {
               </div>
             </div>
           </Card>
+
+          {/* Profit & Loss (gated by cost.access; renders nothing without permission) */}
+          <OrderProfitCard orderId={id as string} />
 
           {/* Timeline Card */}
           <Card className="p-6">

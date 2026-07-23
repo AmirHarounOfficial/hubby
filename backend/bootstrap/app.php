@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // with a 419 CSRF error.
         $middleware->alias([
             'org.member' => \App\Http\Middleware\EnsureOrganizationMember::class,
+            'cost.access' => \App\Http\Middleware\EnsureCostAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

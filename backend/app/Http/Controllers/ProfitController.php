@@ -10,8 +10,9 @@ use Illuminate\Http\Request;
  *
  * All reads come from the materialized rollups — nothing recomputes profit on request.
  *
- * NOTE: cost/margin data is commercially sensitive. Role gating (`cost.access`, spec §9) is a
- * follow-up; today these sit behind Sanctum + `org.member` like every other org-scoped endpoint.
+ * Cost/margin data is commercially sensitive, so these routes sit behind `cost.access` (spec §9)
+ * in addition to Sanctum + `org.member`: only members whose org role meets the organization's
+ * `cost_visibility_role` threshold reach them.
  */
 class ProfitController extends Controller
 {
