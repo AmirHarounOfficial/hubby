@@ -111,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Automation rules engine (spec 02) — org-scoped but ungated in every plan.
     Route::get('/automation/schema', [\App\Http\Controllers\AutomationController::class, 'schema']);
+    Route::get('/automation/templates', [\App\Http\Controllers\AutomationController::class, 'templates']);
     Route::get('/automation/rules', [\App\Http\Controllers\AutomationController::class, 'index']);
     Route::post('/automation/rules', [\App\Http\Controllers\AutomationController::class, 'store']);
     Route::post('/automation/rules/simulate', [\App\Http\Controllers\AutomationController::class, 'simulate']);

@@ -155,6 +155,12 @@ class AutomationController extends Controller
         return response()->json(\App\Services\Automation\AutomationSchema::describe());
     }
 
+    /** Ready-made rule recipes — the "start from a template" experience. */
+    public function templates()
+    {
+        return response()->json(\App\Services\Automation\AutomationTemplates::all());
+    }
+
     private function find(Request $request, int $id): AutomationRule
     {
         return AutomationRule::where('organization_id', $request->header('X-Organization-Id'))->findOrFail($id);

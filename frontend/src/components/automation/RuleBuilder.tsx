@@ -10,12 +10,13 @@ import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { useT } from '@/i18n';
 
-type FieldDef = { field: string; type: string; operators: string[] };
+type FieldDef = { field: string; type: string; operators: string[]; options?: string[]; unit?: string };
 type ActionDef = { type: string; params: string[]; deferred: boolean };
 export type Schema = {
   triggers: { value: string; label_key: string }[];
   fields: FieldDef[];
   operators: string[];
+  operatorLabels: Record<string, string>;
   actions: ActionDef[];
 };
 
@@ -125,12 +126,15 @@ export function RuleBuilder({ schema, initial }: { schema: Schema; initial: Init
         </label>
       </Card>
 
+      <RulePreview trigger={trigger} conditions={conditions} actions={actions} schema={schema} fieldMap={fieldMap} t={t} />
+
       <Card className="p-5 space-y-3">
         <h3 className="font-bold text-sm">{t('automation.builder.when')}</h3>
         <GroupEditor
           group={conditions}
           fields={schema.fields}
           fieldMap={fieldMap}
+          operatorLabels={schema.operatorLabels}
           onChange={setConditions}
           depth={0}
           t={t}
@@ -171,11 +175,12 @@ export function RuleBuilder({ schema, initial }: { schema: Schema; initial: Init
 }
 
 function GroupEditor({
-  group, fields, fieldMap, onChange, depth, t,
+  group, fields, fieldMap, operatorLabels, onChange, depth, t,
 }: {
   group: Group;
   fields: FieldDef[];
   fieldMap: Record<string, FieldDef>;
+  operatorLabels: Record<string, string>;
   onChange: (g: Group) => void;
   depth: number;
   t: (k: string) => string;
@@ -211,12 +216,12 @@ function GroupEditor({
             <div key={idx} className="flex gap-2">
               <CornerDownRight size={16} className="mt-3 text-muted-foreground shrink-0" />
               <div className="flex-1">
-                <GroupEditor group={node} fields={fields} fieldMap={fieldMap} onChange={(g) => setNode(idx, g)} depth={depth + 1} t={t} />
+                <GroupEditor group={node} fields={fields} fieldMap={fieldMap} operatorLabels={operatorLabels} onChange={(g) => setNode(idx, g)} depth={depth + 1} t={t} />
               </div>
               <button onClick={() => removeNode(idx)} className="mt-2 text-muted-foreground hover:text-destructive"><Trash2 size={15} /></button>
             </div>
           ) : (
-            <LeafRow key={idx} leaf={node} fields={fields} fieldMap={fieldMap} onChange={(l) => setNode(idx, l)} onRemove={() => removeNode(idx)} t={t} />
+            <LeafRow key={idx} leaf={node} fields={fields} fieldMap={fieldMap} operatorLabels={operatorLabels} onChange={(l) => setNode(idx, l)} onRemove={() => removeNode(idx)} t={t} />
           )
         )}
       </div>
@@ -242,11 +247,12 @@ function GroupEditor({
 }
 
 function LeafRow({
-  leaf, fields, fieldMap, onChange, onRemove, t,
+  leaf, fields, fieldMap, operatorLabels, onChange, onRemove, t,
 }: {
   leaf: Leaf;
   fields: FieldDef[];
   fieldMap: Record<string, FieldDef>;
+  operatorLabels: Record<string, string>;
   onChange: (l: Leaf) => void;
   onRemove: () => void;
   t: (k: string) => string;
@@ -254,6 +260,7 @@ function LeafRow({
   const def = fieldMap[leaf.field];
   const operators = def?.operators ?? [];
   const showValue = !NO_VALUE.includes(leaf.operator);
+  const singleEnum = def?.options && ['eq', 'neq'].includes(leaf.operator);
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg bg-background border border-border p-2">
@@ -267,11 +274,16 @@ function LeafRow({
       >
         {fields.map((f) => <option key={f.field} value={f.field}>{t(`automation.fields.${f.field}`)}</option>)}
       </Select>
-      <Select value={leaf.operator} onChange={(operator) => onChange({ ...leaf, operator })} className="min-w-[110px]">
-        {operators.map((op) => <option key={op} value={op}>{op}</option>)}
+      <Select value={leaf.operator} onChange={(operator) => onChange({ ...leaf, operator })} className="min-w-[130px]">
+        {operators.map((op) => <option key={op} value={op}>{operatorLabels[op] ?? op}</option>)}
       </Select>
       {showValue && (
-        leaf.operator === 'between' ? (
+        singleEnum ? (
+          <Select value={String(leaf.value ?? '')} onChange={(v) => onChange({ ...leaf, value: v })} className="min-w-[130px]">
+            <option value="" disabled>{t('automation.builder.value')}</option>
+            {def!.options!.map((o) => <option key={o} value={o}>{o}</option>)}
+          </Select>
+        ) : leaf.operator === 'between' ? (
           <div className="flex items-center gap-1">
             <input type="number" value={Array.isArray(leaf.value) ? leaf.value[0] ?? '' : ''} placeholder="min"
               onChange={(e) => onChange({ ...leaf, value: [Number(e.target.value), Array.isArray(leaf.value) ? leaf.value[1] ?? 0 : 0] })}
@@ -341,6 +353,54 @@ function ActionRow({
       {def?.deferred && <span className="text-[10px] text-orange-500">{t('automation.builder.deferredNote')}</span>}
       <button onClick={onRemove} className="text-muted-foreground hover:text-destructive ms-auto"><Trash2 size={15} /></button>
     </div>
+  );
+}
+
+/** A plain-English rendering of the rule, so a non-technical user sees exactly what they're building. */
+function RulePreview({
+  trigger, conditions, actions, schema, t,
+}: {
+  trigger: string;
+  conditions: Group;
+  actions: Action[];
+  schema: Schema;
+  fieldMap: Record<string, FieldDef>;
+  t: (k: string) => string;
+}) {
+  const opLabel = (op: string) => schema.operatorLabels[op] ?? op;
+  const fieldLabel = (f: string) => t(`automation.fields.${f}`);
+  const renderVal = (v: any) =>
+    Array.isArray(v) ? v.join(', ') : v === undefined || v === null || v === '' ? '…' : String(v);
+
+  const leafText = (leaf: Leaf) => {
+    const noVal = NO_VALUE.includes(leaf.operator);
+    return `${fieldLabel(leaf.field)} ${opLabel(leaf.operator)}${noVal ? '' : ' ' + renderVal(leaf.value)}`.trim();
+  };
+  const groupText = (group: Group): string => {
+    const parts = (group.rules ?? []).map((n) => (isGroup(n) ? `(${groupText(n)})` : leafText(n)));
+    if (parts.length === 0) return t('automation.builder.anyOrder');
+    return parts.join(group.match === 'any' ? ` ${t('automation.builder.or')} ` : ` ${t('automation.builder.and')} `);
+  };
+  const actionText = (a: Action) => {
+    const label = t(`automation.actionTypes.${a.type}`);
+    const detail = a.tags
+      ? `“${Array.isArray(a.tags) ? a.tags.join(', ') : a.tags}”`
+      : a.status ?? a.folder ?? a.location ?? a.carrier ?? a.reason ?? a.title ?? '';
+    return detail ? `${label} ${detail}` : label;
+  };
+
+  const triggerLabel = t(`automation.triggers.${trigger.replace(/\./g, '_')}`);
+  const acts = actions.map(actionText).join(', ') || '…';
+
+  return (
+    <Card className="p-4 bg-primary/5 border-primary/20">
+      <p className="text-[10px] uppercase font-bold text-primary/70 tracking-widest mb-1">{t('automation.builder.previewTitle')}</p>
+      <p className="text-sm leading-relaxed">
+        <span className="font-bold text-primary">{t('automation.builder.pWhen')}</span> {triggerLabel.toLowerCase()},{' '}
+        <span className="font-bold text-primary">{t('automation.builder.pIf')}</span> {groupText(conditions)},{' '}
+        <span className="font-bold text-primary">{t('automation.builder.pThen')}</span> {acts}.
+      </p>
+    </Card>
   );
 }
 

@@ -63,6 +63,10 @@ export const automation = {
       saved: 'Rule saved.',
       saveError: 'Could not save the rule. Check the fields and try again.',
       deferredNote: 'Runs after the rule commits.',
+      previewTitle: 'In plain words',
+      pWhen: 'When', pIf: 'if', pThen: 'then', and: 'and', or: 'or', anyOrder: 'any order',
+      startTemplate: 'Start from a template', startScratch: 'Start from scratch', startScratchHint: 'Build a rule from the ground up.', use: 'Use this',
+      categories: { risk: 'Risk & fraud', fulfilment: 'Fulfilment', organisation: 'Organisation', alerts: 'Alerts' },
     },
     fields: {
       order: {
@@ -149,6 +153,10 @@ export const automation = {
       saved: 'تم حفظ القاعدة.',
       saveError: 'تعذّر حفظ القاعدة. تحقّق من الحقول وحاول مجددًا.',
       deferredNote: 'يعمل بعد حفظ القاعدة.',
+      previewTitle: 'بكلمات بسيطة',
+      pWhen: 'عندما', pIf: 'وإذا', pThen: 'عندها', and: 'و', or: 'أو', anyOrder: 'أي طلب',
+      startTemplate: 'ابدأ من قالب', startScratch: 'ابدأ من الصفر', startScratchHint: 'أنشئ قاعدة من البداية.', use: 'استخدم هذا',
+      categories: { risk: 'المخاطر والاحتيال', fulfilment: 'التجهيز', organisation: 'التنظيم', alerts: 'التنبيهات' },
     },
     fields: {
       order: {

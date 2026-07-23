@@ -101,9 +101,28 @@ class AutomationApiTest extends TestCase
 
     public function test_schema_lists_fields_operators_and_actions(): void
     {
-        $this->getJson('/api/automation/schema', $this->headers())
+        $res = $this->getJson('/api/automation/schema', $this->headers())
             ->assertOk()
-            ->assertJsonStructure(['triggers', 'fields', 'operators', 'actions']);
+            ->assertJsonStructure(['triggers', 'fields', 'operators', 'operatorLabels', 'actions']);
+
+        // Plain-language labels so the builder reads like a sentence, and enum fields carry options.
+        $this->assertSame('is at least', $res->json('operatorLabels.gte'));
+        $channel = collect($res->json('fields'))->firstWhere('field', 'order.channel');
+        $this->assertContains('salla', $channel['options']);
+    }
+
+    public function test_templates_are_ready_to_use_rules(): void
+    {
+        $res = $this->getJson('/api/automation/templates', $this->headers())->assertOk();
+
+        $this->assertNotEmpty($res->json());
+        $first = $res->json('0');
+        $this->assertArrayHasKey('name', $first);
+        $this->assertArrayHasKey('category', $first);
+        // Each template embeds a complete, valid rule the builder can load and save as-is.
+        $this->assertArrayHasKey('trigger', $first['rule']);
+        $this->assertArrayHasKey('conditions', $first['rule']);
+        $this->assertArrayHasKey('actions', $first['rule']);
     }
 
     public function test_simulate_reports_a_match_without_applying(): void
