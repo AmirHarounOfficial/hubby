@@ -24,7 +24,7 @@ class Shipment extends Model
 
     protected $fillable = [
         'organization_id', 'store_id', 'order_id', 'return_request_id', 'carrier_account_id',
-        'carrier_code', 'service_code', 'service_name', 'direction', 'reference', 'tracking_number',
+        'carrier_code', 'underlying_carrier', 'service_code', 'service_name', 'direction', 'reference', 'tracking_number',
         'carrier_shipment_id', 'status', 'carrier_status_raw', 'carrier_status_code',
         'ship_from_address_id', 'ship_to_address_id', 'return_to_address_id', 'package_count',
         'total_weight_kg', 'declared_value', 'currency', 'is_cod', 'cod_amount', 'cod_currency',

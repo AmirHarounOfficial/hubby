@@ -100,19 +100,29 @@ class CarrierStatusMapSeeder extends Seeder
             );
         }
 
-        foreach (['aramex' => self::ARAMEX, 'smsa' => self::SMSA] as $carrier => $map) {
+        // Aramex/SMSA + the breadth carriers share a common English tracking-text vocabulary.
+        $textMaps = ['aramex' => self::ARAMEX, 'smsa' => self::SMSA];
+        foreach (['naqel', 'jnt', 'torod', 'fedex'] as $carrier) {
+            $textMaps[$carrier] = self::ARAMEX; // same delivered/out-for-delivery/... phrases
+        }
+        foreach ($textMaps as $carrier => $map) {
             foreach ($map as $rawStatus => $normalized) {
                 [$isFinal, $isException] = self::VOCAB[$normalized] ?? [false, false];
                 CarrierStatusMap::updateOrCreate(
                     ['carrier_code' => $carrier, 'raw_code' => null, 'raw_status' => $rawStatus],
-                    [
-                        'normalized_status' => $normalized,
-                        'is_final' => $isFinal,
-                        'is_exception' => $isException,
-                        'priority' => 100,
-                    ]
+                    ['normalized_status' => $normalized, 'is_final' => $isFinal, 'is_exception' => $isException, 'priority' => 100],
                 );
             }
+        }
+
+        // FedEx also uses short event-type codes.
+        $fedexCodes = ['PU' => 'picked_up', 'IT' => 'in_transit', 'OD' => 'out_for_delivery', 'DL' => 'delivered', 'DE' => 'delivery_attempted', 'RS' => 'returned_to_origin'];
+        foreach ($fedexCodes as $rawCode => $normalized) {
+            [$isFinal, $isException] = self::VOCAB[$normalized] ?? [false, false];
+            CarrierStatusMap::updateOrCreate(
+                ['carrier_code' => 'fedex', 'raw_code' => $rawCode, 'raw_status' => null],
+                ['normalized_status' => $normalized, 'is_final' => $isFinal, 'is_exception' => $isException, 'priority' => 90],
+            );
         }
     }
 }

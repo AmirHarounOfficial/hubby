@@ -112,6 +112,7 @@ class ShippingService
             $shipment->forceFill([
                 'carrier_account_id' => $account->id,
                 'carrier_code' => $account->carrier_code,
+                'underlying_carrier' => $result['underlying_carrier'] ?? $shipment->underlying_carrier, // aggregators (Torod)
                 'tracking_number' => $result['tracking_number'] ?: $shipment->tracking_number,
                 'carrier_shipment_id' => $result['carrier_shipment_id'] ?? null,
                 'status' => Shipment::STATUS_LABEL_PURCHASED,

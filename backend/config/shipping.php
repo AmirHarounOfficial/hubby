@@ -40,10 +40,31 @@ return [
             'credentials' => ['mode', 'passkey', 'api_key'],
             'capabilities' => ['cod', 'cancel'],
         ],
-        // Remaining carrier credential shapes (documented now, wired in their slices):
-        'naqel' => ['credentials' => ['client_id', 'password']],
-        'jnt' => ['credentials' => ['api_account', 'private_key', 'customer_code', 'country_code']],
-        'torod' => ['credentials' => ['api_token']],
-        'fedex' => ['credentials' => ['client_id', 'client_secret', 'account_number']],
+        'naqel' => [
+            'label' => 'Naqel Express',
+            'credentials' => ['client_id', 'password'],
+            'capabilities' => ['cod', 'cancel', 'pickup'],
+        ],
+        'jnt' => [
+            'label' => 'J&T Express',
+            'credentials' => ['api_account', 'private_key', 'customer_code', 'country_code'],
+            'capabilities' => ['cod', 'cancel'],
+            // country-fragmented base URLs (spec §6.4) — extend as launch countries are onboarded.
+            'countries' => [
+                'sa' => 'https://api.jtexpress.sa',
+                'eg' => 'https://api.jtexpress.com.eg',
+                'ae' => 'https://api.jtexpress.ae',
+            ],
+        ],
+        'torod' => [
+            'label' => 'Torod (aggregator)',
+            'credentials' => ['api_token'],
+            'capabilities' => ['cod', 'cancel'],
+        ],
+        'fedex' => [
+            'label' => 'FedEx',
+            'credentials' => ['client_id', 'client_secret', 'account_number'],
+            'capabilities' => ['rates', 'cancel', 'multi_package'],
+        ],
     ],
 ];

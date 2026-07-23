@@ -51,14 +51,17 @@ class ShipmentApiTest extends TestCase
         ]);
     }
 
-    public function test_the_carrier_catalog_marks_manual_available_and_real_carriers_coming_soon(): void
+    public function test_the_carrier_catalog_lists_the_built_carriers_as_available(): void
     {
         $res = $this->getJson('/api/shipping/carriers', $this->headers)->assertOk();
+        $carriers = collect($res->json('carriers'));
 
-        $manual = collect($res->json('carriers'))->firstWhere('code', 'manual');
-        $naqel = collect($res->json('carriers'))->firstWhere('code', 'naqel'); // not wired yet
-        $this->assertTrue($manual['available']);
-        $this->assertFalse($naqel['available']);
+        // Every configured carrier is now implemented (manual + DHL + the Gulf set + FedEx).
+        foreach (['manual', 'dhl', 'aramex', 'smsa', 'naqel', 'jnt', 'torod', 'fedex'] as $code) {
+            $this->assertTrue($carriers->firstWhere('code', $code)['available'], "{$code} should be available");
+        }
+        // The catalogue still advertises each carrier's credential fields for the connect form.
+        $this->assertNotEmpty($carriers->firstWhere('code', 'aramex')['credential_fields']);
     }
 
     public function test_creating_a_carrier_account_never_returns_the_credentials(): void
