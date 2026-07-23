@@ -96,6 +96,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/analytics/profit/coverage', [ProfitController::class, 'coverage']);
         Route::get('/analytics/profit', [ProfitController::class, 'summary']);
         Route::get('/orders/{id}/profit', [ProfitController::class, 'order']);
+
+        // Operating-cost inputs that feed the P&L: business expenses + advertising spend.
+        Route::get('/expenses', [\App\Http\Controllers\ExpenseController::class, 'index']);
+        Route::post('/expenses', [\App\Http\Controllers\ExpenseController::class, 'store']);
+        Route::put('/expenses/{id}', [\App\Http\Controllers\ExpenseController::class, 'update']);
+        Route::delete('/expenses/{id}', [\App\Http\Controllers\ExpenseController::class, 'destroy']);
+
+        Route::get('/ad-spend', [\App\Http\Controllers\AdSpendController::class, 'index']);
+        Route::post('/ad-spend', [\App\Http\Controllers\AdSpendController::class, 'store']);
+        Route::post('/ad-spend/import', [\App\Http\Controllers\AdSpendController::class, 'import']);
+        Route::delete('/ad-spend/{id}', [\App\Http\Controllers\AdSpendController::class, 'destroy']);
     });
 
     // Categories

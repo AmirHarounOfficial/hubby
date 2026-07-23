@@ -36,7 +36,15 @@ class ProfitReportService
         )->first();
 
         $netRevenue = (string) ($totals->net_revenue ?? 0);
-        $netProfit = (string) ($totals->net_profit ?? 0);
+        // Order-level profit (before period-level advertising and operating expenses, which aren't
+        // attributable to a single order — the P&L's last two lines, spec 01 §7.1).
+        $operatingProfit = (string) ($totals->net_profit ?? 0);
+
+        $adSpend = $this->adSpendTotal($organizationId, $from, $to, $storeId);
+        $expenses = $this->expenseTotal($organizationId, $from, $to, $storeId);
+
+        // NET PROFIT = operating profit − advertising − operating expenses.
+        $netProfit = Money::subtract(Money::subtract($operatingProfit, $adSpend), $expenses);
 
         return [
             'period' => ['from' => $from, 'to' => $to],
@@ -46,7 +54,9 @@ class ProfitReportService
             'vat' => Money::sum($totals->vat ?? 0),
             'cogs' => Money::sum($totals->cogs ?? 0),
             'fees' => Money::sum($totals->fees ?? 0),
-            'ad_spend' => Money::sum($totals->ad_spend ?? 0),
+            'ad_spend' => Money::sum($adSpend),
+            'expenses' => Money::sum($expenses),
+            'operating_profit' => Money::sum($operatingProfit),
             'refund_cogs' => Money::sum($totals->refund_cogs ?? 0),
             'lost_cogs' => Money::sum($totals->lost_cogs ?? 0),
             'net_profit' => Money::sum($netProfit),
@@ -263,6 +273,34 @@ class ProfitReportService
         $start = $from ? Carbon::parse($from) : (clone $end)->subDays(29);
 
         return [$start->toDateString(), $end->toDateString()];
+    }
+
+    /** Advertising spend in the period (spec 01 §7.1 "Advertising" line). */
+    private function adSpendTotal(int $organizationId, string $from, string $to, ?int $storeId): string
+    {
+        $total = DB::table('ad_spend')
+            ->where('organization_id', $organizationId)
+            ->whereBetween('date', [$from, $to])
+            ->when($storeId, fn ($q) => $q->where('store_id', $storeId))
+            ->sum('spend_base');
+
+        return (string) ($total ?? 0);
+    }
+
+    /**
+     * Operating expenses in the period, summed from the materialized daily allocations (never the
+     * recurrence rules). A store filter counts only expenses pinned to that store; org-level P&L
+     * counts everything.
+     */
+    private function expenseTotal(int $organizationId, string $from, string $to, ?int $storeId): string
+    {
+        $total = DB::table('expense_allocations')
+            ->where('organization_id', $organizationId)
+            ->whereBetween('date', [$from, $to])
+            ->when($storeId, fn ($q) => $q->where('store_id', $storeId))
+            ->sum('amount_base');
+
+        return (string) ($total ?? 0);
     }
 
     private function scope(int $organizationId, string $from, string $to, ?int $storeId)

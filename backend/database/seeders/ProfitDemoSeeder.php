@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\AdSpend;
 use App\Models\CostLayer;
+use App\Models\Expense;
 use App\Models\FeeRule;
 use App\Models\Order;
 use App\Models\OrderFee;
@@ -122,6 +124,8 @@ class ProfitDemoSeeder extends Seeder
             }
         }
 
+        $this->seedOverheads($org);
+
         $this->command?->info("ProfitDemoSeeder: {$n} demo orders with materialised P&L for org #{$org->id}.");
     }
 
@@ -214,6 +218,67 @@ class ProfitDemoSeeder extends Seeder
                 ],
             );
         }
+    }
+
+    /**
+     * Recurring overheads + a run of advertising spend, so the P&L's operating-expenses and
+     * advertising lines aren't empty in the demo. Amortized to daily slices for reporting.
+     */
+    private function seedOverheads(Organization $org): void
+    {
+        $start = \Illuminate\Support\Carbon::now()->subDays(89)->startOfDay();
+
+        $expenses = [
+            ['name' => 'SaaS & tools', 'category' => 'software', 'amount' => 1200, 'recurrence' => 'monthly'],
+            ['name' => 'Warehouse rent', 'category' => 'rent', 'amount' => 6000, 'recurrence' => 'monthly'],
+            ['name' => 'Packaging supplies', 'category' => 'packaging', 'amount' => 900, 'recurrence' => 'monthly'],
+        ];
+        foreach ($expenses as $e) {
+            Expense::updateOrCreate(
+                ['organization_id' => $org->id, 'name' => $e['name']],
+                [
+                    'category' => $e['category'],
+                    'type' => 'recurring',
+                    'recurrence' => $e['recurrence'],
+                    'amount' => $e['amount'],
+                    'amount_base' => $e['amount'],
+                    'currency' => $org->base_currency ?? 'SAR',
+                    'fx_rate_to_base' => 1,
+                    'starts_on' => $start->toDateString(),
+                    'amortize' => true,
+                    'allocation_method' => 'revenue',
+                ],
+            );
+        }
+
+        // A meta ad campaign running most days over the window.
+        for ($day = 89; $day >= 0; $day--) {
+            $date = \Illuminate\Support\Carbon::now()->subDays($day)->toDateString();
+            if ($day % 3 === 0) {
+                continue; // not every day
+            }
+            $spend = 80 + ($day % 5) * 25;
+            AdSpend::updateOrCreate(
+                [
+                    'organization_id' => $org->id,
+                    'spend_key' => AdSpend::buildSpendKey('meta', 'demo-brand', null, $date, null),
+                ],
+                [
+                    'channel' => 'meta',
+                    'campaign_name' => 'Brand — always on',
+                    'campaign_external_id' => 'demo-brand',
+                    'date' => $date,
+                    'spend' => $spend,
+                    'currency' => $org->base_currency ?? 'SAR',
+                    'fx_rate_to_base' => 1,
+                    'spend_base' => $spend,
+                    'source' => 'manual',
+                ],
+            );
+        }
+
+        app(\App\Services\Profit\ExpenseAmortizer::class)
+            ->amortize($org, $start->toDateString(), \Illuminate\Support\Carbon::now()->addDay()->toDateString());
     }
 
     /** Modelled platform fees so the P&L reflects channel take-rates. */

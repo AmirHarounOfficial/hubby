@@ -39,6 +39,8 @@ type Summary = {
   cogs: string;
   fees: string;
   ad_spend: string;
+  expenses: string;
+  operating_profit: string;
   refund_cogs: string;
   lost_cogs: string;
   net_profit: string;
@@ -149,6 +151,7 @@ export default function ProfitPage() {
       { key: 'cogs', value: Number(summary.cogs), color: 'bg-primary' },
       { key: 'fees', value: Number(summary.fees), color: 'bg-orange-400' },
       { key: 'adSpend', value: Number(summary.ad_spend), color: 'bg-purple-400' },
+      { key: 'expenses', value: Number(summary.expenses), color: 'bg-rose-400' },
       { key: 'netProfit', value: Number(summary.net_profit), color: 'bg-secondary' },
     ];
     return rows
