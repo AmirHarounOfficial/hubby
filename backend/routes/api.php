@@ -135,6 +135,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/returns/{id}/receive', [\App\Http\Controllers\ReturnController::class, 'receive']);
     Route::post('/returns/{id}/inspect', [\App\Http\Controllers\ReturnController::class, 'inspect']);
 
+    // Shipping (spec 04) — carrier accounts + shipment lifecycle over the shipment engine.
+    Route::get('/shipping/carriers', [\App\Http\Controllers\CarrierController::class, 'catalog']);
+    Route::get('/shipping/accounts', [\App\Http\Controllers\CarrierAccountController::class, 'index']);
+    Route::post('/shipping/accounts', [\App\Http\Controllers\CarrierAccountController::class, 'store']);
+    Route::put('/shipping/accounts/{id}', [\App\Http\Controllers\CarrierAccountController::class, 'update']);
+    Route::delete('/shipping/accounts/{id}', [\App\Http\Controllers\CarrierAccountController::class, 'destroy']);
+    Route::post('/shipping/accounts/{id}/validate', [\App\Http\Controllers\CarrierAccountController::class, 'validateCredentials']);
+
+    Route::get('/shipments', [\App\Http\Controllers\ShipmentController::class, 'index']);
+    Route::post('/shipments', [\App\Http\Controllers\ShipmentController::class, 'store']);
+    Route::get('/shipments/{id}', [\App\Http\Controllers\ShipmentController::class, 'show']);
+    Route::delete('/shipments/{id}', [\App\Http\Controllers\ShipmentController::class, 'destroy']);
+    Route::post('/shipments/{id}/label', [\App\Http\Controllers\ShipmentController::class, 'purchaseLabel']);
+    Route::post('/shipments/{id}/cancel', [\App\Http\Controllers\ShipmentController::class, 'cancel']);
+    Route::get('/shipments/{id}/tracking', [\App\Http\Controllers\ShipmentController::class, 'tracking']);
+    Route::post('/shipments/{id}/tracking-events', [\App\Http\Controllers\ShipmentController::class, 'addManualEvent']);
+    Route::post('/orders/{id}/shipments', [\App\Http\Controllers\ShipmentController::class, 'storeForOrder']);
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);
