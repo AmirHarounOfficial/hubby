@@ -178,8 +178,12 @@ class OrderProfitCalculatorTest extends TestCase
         // 40 of COGS came back on the shelf.
         $this->assertEquals(40.0, (float) $profit->refund_cogs_base);
         $this->assertEquals(0.0, (float) $profit->lost_cogs_base);
-        // Net COGS is now 40; leaving it at 80 would penalise the restock twice.
-        $this->assertEquals(40.0, (float) $profit->cogs_base);
+        // cogs_base stays GROSS (the full 80 of the sale) — the recovery is reported separately as
+        // refund_cogs and credited back in net_profit. Netting it into cogs_base *and* adding
+        // refund_cogs would credit the restock twice.
+        $this->assertEquals(80.0, (float) $profit->cogs_base);
+        // net revenue 230/1.15 = 200, − 80 COGS + 40 recovered = 160: the restock credited once.
+        $this->assertEquals(160.0, (float) $profit->net_profit_base);
     }
 
     public function test_written_off_refund_is_recorded_as_a_loss_not_recovered(): void

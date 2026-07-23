@@ -2,11 +2,14 @@
 
 namespace App\Services\Returns;
 
+use App\Jobs\CalculateOrderProfitJob;
 use App\Models\InventoryLog;
 use App\Models\Order;
+use App\Models\Refund;
 use App\Models\ReturnEvent;
 use App\Models\ReturnItem;
 use App\Models\ReturnRequest;
+use App\Services\Profit\FifoLedger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -22,6 +25,12 @@ use Illuminate\Support\Facades\DB;
  */
 class ReturnService
 {
+    public function __construct(
+        private readonly RefundCalculator $refundCalculator,
+        private readonly FifoLedger $ledger,
+    ) {
+    }
+
     /**
      * Create a `requested` RMA from an order.
      *
@@ -189,6 +198,22 @@ class ReturnService
                 $inventoryLogId = $this->restock($item, $quantityRestock);
             }
 
+            // Reverse the COGS in the FIFO ledger so profit reflects the return: a restock recovers
+            // the cost (added back), a scrap is a write-off (lost). Best-effort — an order that was
+            // never costed (no consumption) simply has nothing to reverse.
+            if ($orderItem = $item->orderItem) {
+                try {
+                    if ($quantityRestock > 0) {
+                        $this->ledger->reverse($orderItem, $quantityRestock, true);
+                    }
+                    if ($quantityScrap > 0) {
+                        $this->ledger->reverse($orderItem, $quantityScrap, false);
+                    }
+                } catch (\Throwable $e) {
+                    // no consumption to reverse — leave COGS as-is
+                }
+            }
+
             $item->update([
                 'condition' => $condition,
                 'disposition' => $disposition,
@@ -232,23 +257,75 @@ class ReturnService
         return $log->id;
     }
 
-    /** total_refund = approved value + tax + shipping refund − restocking fee − customer-paid return leg. */
+    /**
+     * Issue the refund (spec §4.4): re-derive the amount, record a refund row, accumulate it on the
+     * RMA, and move inspected → refund_pending → refunded. A return with nothing to refund
+     * (marketplace-issued, RTO, or zero total) closes instead. Recomputes the order's profit so the
+     * refunded revenue and recovered/lost COGS land in the P&L.
+     */
+    public function refund(ReturnRequest $rma, string $method = 'original_payment', ?int $userId = null): ReturnRequest
+    {
+        return DB::transaction(function () use ($rma, $method, $userId) {
+            $calc = $this->refundCalculator->compute($rma);
+            foreach ($calc['lines'] as $itemId => $amount) {
+                ReturnItem::whereKey($itemId)->update(['refund_amount' => $amount]);
+            }
+            $rma->forceFill([
+                'items_subtotal' => $calc['items_subtotal'],
+                'tax_refund' => $calc['tax_refund'],
+                'total_refund' => $calc['total_refund'],
+            ])->save();
+
+            // Nothing owed → close (still recording the reason it was a no-op).
+            if ($calc['total_refund'] <= 0 || $rma->refund_responsibility === 'marketplace' || $rma->type === 'rto') {
+                $rma->forceFill(['closed_at' => now()])->save();
+                $this->transition($rma, 'closed', 'system', $userId, 'no_refund_due');
+                CalculateOrderProfitJob::dispatch($rma->order_id);
+
+                return $rma->fresh('items');
+            }
+
+            Refund::create([
+                'organization_id' => $rma->organization_id,
+                'store_id' => $rma->store_id,
+                'order_id' => $rma->order_id,
+                'return_request_id' => $rma->id,
+                'issuer' => 'merchant',
+                'method' => $method,
+                'status' => 'succeeded', // slice 3: manual/immediate; a real gateway call is a follow-up
+                'amount' => $calc['total_refund'],
+                'items_amount' => $calc['items_subtotal'],
+                'tax_amount' => $calc['tax_refund'],
+                'shipping_amount' => $rma->shipping_refund,
+                'currency' => $rma->currency,
+                'gateway' => 'manual',
+                'idempotency_key' => sha1('rma:'.$rma->id.':'.$calc['total_refund']),
+                'processed_at' => now(),
+                'created_by_user_id' => $userId,
+            ]);
+
+            $rma->forceFill(['refunded_amount' => $calc['total_refund'], 'refunded_at' => now()])->save();
+            $this->transition($rma, 'refund_pending', 'user', $userId);
+            $this->transition($rma->fresh(), 'refunded', 'system', null);
+
+            // The refund revenue + recovered/lost COGS now flow into the order's P&L.
+            CalculateOrderProfitJob::dispatch($rma->order_id);
+
+            return $rma->fresh('items');
+        });
+    }
+
+    /** Preview the refund total at approval time (uses approved quantities). */
     private function recomputeRefund(ReturnRequest $rma): void
     {
-        $itemsValue = 0.0;
-        foreach ($rma->items as $item) {
-            $lineRefund = round((float) $item->unit_price * (int) $item->quantity_approved, 2);
-            $item->update(['refund_amount' => $lineRefund]);
-            $itemsValue += $lineRefund;
+        $calc = $this->refundCalculator->compute($rma);
+        foreach ($calc['lines'] as $itemId => $amount) {
+            ReturnItem::whereKey($itemId)->update(['refund_amount' => $amount]);
         }
-
-        $customerPaidReturn = $rma->return_shipping_paid_by === 'customer' ? (float) $rma->return_shipping_cost : 0.0;
-        $total = $itemsValue + (float) $rma->tax_refund + (float) $rma->shipping_refund
-            - (float) $rma->restocking_fee - $customerPaidReturn;
-
         $rma->update([
-            'items_subtotal' => round($itemsValue, 2),
-            'total_refund' => round(max(0, $total), 2),
+            'items_subtotal' => $calc['items_subtotal'],
+            'tax_refund' => $calc['tax_refund'],
+            'total_refund' => $calc['total_refund'],
         ]);
     }
 

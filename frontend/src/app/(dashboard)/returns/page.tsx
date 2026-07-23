@@ -26,6 +26,16 @@ type Rma = {
 
 const FILTERS = ['', 'requested', 'approved', 'in_transit', 'received', 'inspected', 'closed'];
 
+type Analytics = {
+  total_returns: number;
+  return_rate: number | null;
+  rto_rate: number | null;
+  restock_ratio: number | null;
+  refund_value: string;
+};
+
+const pct = (v: number | null) => (v === null ? null : `${(v * 100).toFixed(1)}%`);
+
 export default function ReturnsPage() {
   const t = useT();
   const router = useRouter();
@@ -33,6 +43,7 @@ export default function ReturnsPage() {
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Analytics | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -51,6 +62,12 @@ export default function ReturnsPage() {
     return () => clearTimeout(timer);
   }, [load]);
 
+  useEffect(() => {
+    api.get('/returns/analytics')
+      .then((res) => setStats(res.data))
+      .catch((err) => console.error('Failed to load returns analytics', err));
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -60,6 +77,26 @@ export default function ReturnsPage() {
         </h1>
         <p className="text-muted-foreground text-sm">{t('returns.subtitle')}</p>
       </div>
+
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {[
+            { label: t('returns.statTotal'), value: String(stats.total_returns) },
+            { label: t('returns.statReturnRate'), value: pct(stats.return_rate) },
+            { label: t('returns.statRtoRate'), value: pct(stats.rto_rate) },
+            { label: t('returns.statRestock'), value: pct(stats.restock_ratio) },
+            {
+              label: t('returns.statRefundValue'),
+              value: <Money amount={stats.refund_value} />,
+            },
+          ].map((s, i) => (
+            <Card key={i} className="p-4">
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold">{s.label}</p>
+              <p className="mt-1 text-xl font-bold tabular-nums">{s.value ?? t('returns.statNone')}</p>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-border space-y-3">

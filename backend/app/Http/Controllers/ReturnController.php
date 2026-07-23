@@ -136,6 +136,26 @@ class ReturnController extends Controller
         });
     }
 
+    public function refund(Request $request, int $id)
+    {
+        $rma = $this->find($request, $id);
+        $data = $request->validate(['method' => ['nullable', 'string', 'max:24']]);
+
+        return $this->guard(fn () => response()->json(
+            $this->service->refund($rma, $data['method'] ?? 'original_payment', $request->user()?->id)->load('items')
+        ));
+    }
+
+    public function analytics(Request $request, \App\Services\Returns\ReturnsReportService $reports)
+    {
+        [$from, $to] = \App\Services\Profit\ProfitReportService::defaultRange(
+            $request->get('start_date'),
+            $request->get('end_date'),
+        );
+
+        return response()->json($reports->summary((int) $request->header('X-Organization-Id'), $from, $to));
+    }
+
     private function find(Request $request, int $id): ReturnRequest
     {
         return ReturnRequest::where('organization_id', $request->header('X-Organization-Id'))->findOrFail($id);

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { ChevronLeft, CheckCircle2, XCircle, Truck, PackageCheck, ClipboardCheck } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, XCircle, Truck, PackageCheck, ClipboardCheck, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Money } from '@/components/ui/Money';
 import api from '@/lib/api';
@@ -75,6 +75,10 @@ export default function ReturnDetailPage() {
     actions.push(<Button key="rc" onClick={() => act('receive', {}, 'received')} disabled={busy}><PackageCheck size={16} className="mr-1" />{t('returns.receive')}</Button>);
   } else if (status === 'received' || status === 'inspecting') {
     actions.push(<Button key="i" onClick={() => setInspecting(true)} disabled={busy}><ClipboardCheck size={16} className="mr-1" />{t('returns.inspect')}</Button>);
+  } else if (status === 'inspected' || status === 'refund_pending') {
+    actions.push(
+      <Button key="rf" onClick={() => act('refund', {}, 'refunded')} disabled={busy}><Banknote size={16} className="mr-1" />{t('returns.issueRefund')}</Button>,
+    );
   }
 
   return (

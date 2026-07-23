@@ -111,8 +111,15 @@ class OrderProfitCalculator
      */
     private function cogsFor(OrderItem $item, Order $order, int $organizationId): array
     {
+        // Gross sale COGS only. Refund reversals (restock/writeoff) live in the same table but are
+        // reported separately as refund_cogs / lost_cogs — folding them in here would net them out of
+        // cogs_base AND credit them again in net_profit, double-counting the recovery.
         $ledgerTotal = (string) CostLayerConsumption::query()
             ->where('order_item_id', $item->id)
+            ->whereNotIn('reason', [
+                CostLayerConsumption::REASON_REFUND_RESTOCK,
+                CostLayerConsumption::REASON_REFUND_WRITEOFF,
+            ])
             ->sum('amount_base');
 
         if (! Money::isZero($ledgerTotal)) {
@@ -209,13 +216,25 @@ class OrderProfitCalculator
         $refundCogs = $this->absSumOfReversals($order, CostLayerConsumption::REASON_REFUND_RESTOCK);
         $lostCogs = $this->absSumOfReversals($order, CostLayerConsumption::REASON_REFUND_WRITEOFF);
 
-        // refund_cogs is ADDED back: the revenue reversal already removed the sale, so leaving
-        // the COGS charged would penalise a restocked return twice.
+        // Revenue given back to the customer via a succeeded refund (Returns, spec 03). The item
+        // portion only, and de-VAT'd to match net_revenue: the VAT was never profit (the merchant
+        // reclaims it), so only the ex-VAT amount should reverse out of the P&L.
+        $refundGross = (float) \App\Models\Refund::where('order_id', $order->id)->where('status', 'succeeded')->sum('items_amount');
+        $org = $store->organization;
+        $refundNet = ($org?->prices_include_vat ?? true)
+            ? $refundGross / (1 + (float) ($org?->default_vat_rate ?? 0.15))
+            : $refundGross;
+        $refundRevenue = Money::sum($refundNet);
+
+        // refund_cogs is ADDED back (a restocked return we no longer bear the cost of); refund
+        // revenue is SUBTRACTED (money returned to the buyer). A fully restocked+refunded order
+        // nets out to roughly −fees, which is the real loss: the merchant ate the platform fee.
         $netProfit = Money::sum(
             $netRevenue,
             '-'.ltrim($cogsTotal, '-'),
             '-'.ltrim($feesTotal, '-'),
-            $refundCogs
+            $refundCogs,
+            '-'.ltrim($refundRevenue, '-')
         );
 
         $missingCost = (bool) array_sum(array_map(fn ($l) => $l['cogs_missing'] ? 1 : 0, $lines));
@@ -237,7 +256,7 @@ class OrderProfitCalculator
                 'total_fees_base' => $feesTotal,
                 'fees_by_type' => $feesByType,
                 'ad_spend_base' => '0.0000',
-                'refund_revenue_base' => '0.0000',
+                'refund_revenue_base' => $refundRevenue,
                 'refund_cogs_base' => $refundCogs,
                 'lost_cogs_base' => $lostCogs,
                 'net_profit_base' => $netProfit,

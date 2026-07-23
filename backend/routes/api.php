@@ -125,7 +125,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/return-reasons', [\App\Http\Controllers\ReturnReasonController::class, 'index']);
     Route::get('/returns', [\App\Http\Controllers\ReturnController::class, 'index']);
     Route::post('/returns', [\App\Http\Controllers\ReturnController::class, 'store']);
+    // Static segment before /{id} so it isn't captured as an id.
+    Route::get('/returns/analytics', [\App\Http\Controllers\ReturnController::class, 'analytics']);
     Route::get('/returns/{id}', [\App\Http\Controllers\ReturnController::class, 'show']);
+    Route::post('/returns/{id}/refund', [\App\Http\Controllers\ReturnController::class, 'refund']);
     Route::post('/returns/{id}/approve', [\App\Http\Controllers\ReturnController::class, 'approve']);
     Route::post('/returns/{id}/reject', [\App\Http\Controllers\ReturnController::class, 'reject']);
     Route::post('/returns/{id}/ship', [\App\Http\Controllers\ReturnController::class, 'ship']);
