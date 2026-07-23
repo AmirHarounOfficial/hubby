@@ -66,6 +66,7 @@ class OrderSubject implements AutomationSubject
         return $this->facts = [
             'order.channel' => $order->store?->platform,
             'order.store_id' => (int) $order->store_id,
+            'order.external_id' => $order->external_id,
             'order.status' => $order->status,
             'order.previous_status' => $this->previousStatus,
             'order.total' => (float) $order->total,

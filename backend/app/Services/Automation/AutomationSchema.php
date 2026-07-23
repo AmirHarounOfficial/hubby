@@ -71,9 +71,9 @@ class AutomationSchema
             ['type' => 'release_hold', 'params' => [], 'deferred' => false],
             ['type' => 'add_note', 'params' => ['text'], 'deferred' => false],
             ['type' => 'stop_processing', 'params' => [], 'deferred' => false],
-            ['type' => 'notify', 'params' => ['channel', 'template'], 'deferred' => true],
+            ['type' => 'notify', 'params' => ['title', 'message'], 'deferred' => true],
             ['type' => 'call_webhook', 'params' => ['url'], 'deferred' => true],
-            ['type' => 'split_order', 'params' => [], 'deferred' => true],
+            ['type' => 'split_order', 'params' => [], 'deferred' => false],
         ];
     }
 }

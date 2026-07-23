@@ -15,11 +15,15 @@ use App\Services\Automation\Contracts\AutomationSubject;
  */
 class ActionDispatcher
 {
-    private const DEFERRED = ['notify', 'call_webhook', 'split_order'];
+    // Actions executed outside the rule transaction, off the ingest path (spec §4.8).
+    private const DEFERRED = ['notify', 'call_webhook'];
 
     /**
      * @param  array<int, array<string, mixed>>  $actions
-     * @return array{results: array<int, ActionResult>, mutated: bool, terminated: bool}
+     * @return array{
+     *   results: array<int, ActionResult>, mutated: bool, terminated: bool,
+     *   deferred: array<int, array<string, mixed>>, splitChildren: array<int, int>
+     * }
      */
     public function apply(array $actions, AutomationSubject $subject, bool $dryRun = false): array
     {
@@ -27,12 +31,14 @@ class ActionDispatcher
         $order = $subject->model();
         $results = [];
         $mutated = false;
-        $terminated = false;
+        $deferred = [];
+        $splitChildren = [];
 
-        Automation::whileApplying(function () use ($actions, $order, $dryRun, &$results, &$mutated, &$terminated) {
+        Automation::whileApplying(function () use ($actions, $order, $dryRun, &$results, &$mutated, &$deferred, &$splitChildren) {
             foreach ($actions as $i => $action) {
                 $type = $action['type'] ?? 'unknown';
                 $id = (string) ($action['id'] ?? $type.'-'.$i);
+                $action['id'] = $id;
                 $start = hrtime(true);
 
                 if ($type === 'stop_processing') {
@@ -41,9 +47,30 @@ class ActionDispatcher
                     continue;
                 }
 
+                // notify / call_webhook: queued by the engine after commit, never executed inline.
                 if (in_array($type, self::DEFERRED, true)) {
-                    // Slice 1: not yet executed. Recorded honestly rather than dropped.
-                    $results[] = new ActionResult($id, $type, 'skipped', error: 'deferred_to_later_slice');
+                    $results[] = new ActionResult($id, $type, $dryRun ? 'skipped' : 'queued');
+                    if (! $dryRun) {
+                        $deferred[] = $action;
+                    }
+
+                    continue;
+                }
+
+                if ($type === 'split_order') {
+                    if ($dryRun) {
+                        $results[] = new ActionResult($id, $type, 'skipped', terminal: true);
+
+                        continue;
+                    }
+                    try {
+                        $children = $this->splitOrder($order, $action);
+                        $splitChildren = $children;
+                        $mutated = true;
+                        $results[] = new ActionResult($id, $type, 'applied', result: ['children' => count($children)], mutated: true, terminal: true);
+                    } catch (\Throwable $e) {
+                        $results[] = new ActionResult($id, $type, 'failed', error: $e->getMessage());
+                    }
 
                     continue;
                 }
@@ -58,6 +85,11 @@ class ActionDispatcher
                         result: ['changed' => $changed],
                         durationMs: (int) ((hrtime(true) - $start) / 1_000_000),
                     );
+
+                    // set_status can additionally push to the platform — that half is deferred.
+                    if ($type === 'set_status' && ! $dryRun && ! empty($action['push_to_platform'])) {
+                        $deferred[] = $action;
+                    }
                 } catch (\Throwable $e) {
                     $results[] = new ActionResult($id, $type, 'failed', error: $e->getMessage());
                 }
@@ -70,7 +102,83 @@ class ActionDispatcher
 
         $terminated = collect($results)->contains(fn (ActionResult $r) => $r->terminal);
 
-        return ['results' => $results, 'mutated' => $mutated, 'terminated' => $terminated];
+        return [
+            'results' => $results,
+            'mutated' => $mutated,
+            'terminated' => $terminated,
+            'deferred' => $deferred,
+            'splitChildren' => $splitChildren,
+        ];
+    }
+
+    /**
+     * Split an order into child orders by SKU group (spec §4.7). Local-only — nothing is pushed to
+     * the channel. The parent is retained, held, and tagged so it drops out of analytics. Refuses if
+     * the order was already split.
+     *
+     * @return array<int, int> child order ids
+     */
+    private function splitOrder(Order $order, array $config): array
+    {
+        if (Order::where('parent_order_id', $order->id)->exists()) {
+            throw new \RuntimeException('already_split');
+        }
+
+        $items = $order->items()->get();
+        $groups = $this->splitGroups($items, $config);
+
+        if (count($groups) < 2) {
+            throw new \RuntimeException('nothing_to_split');
+        }
+
+        $children = [];
+        $index = 1;
+        foreach ($groups as $groupItems) {
+            $total = $groupItems->sum(fn ($it) => (float) $it->price * (int) $it->quantity);
+            $child = Order::create([
+                'store_id' => $order->store_id,
+                'external_id' => $order->external_id.'-S'.$index,
+                'status' => $order->status,
+                'total' => round($total, 2),
+                'currency' => $order->currency,
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'placed_at' => $order->placed_at,
+                'parent_order_id' => $order->id,
+                'split_index' => $index,
+                'raw_data' => ['_split_of' => $order->id, '_split_strategy' => $config['strategy'] ?? 'by_sku'],
+            ]);
+            foreach ($groupItems as $item) {
+                $item->update(['order_id' => $child->id]);
+            }
+            $children[] = $child->id;
+            $index++;
+        }
+
+        // The parent is retained (audit + reconciliation), held, and excluded from analytics.
+        $tags = $order->tags ?? [];
+        $order->fill([
+            'is_held' => true,
+            'folder' => 'Split — parent',
+            'tags' => array_values(array_unique([...$tags, 'parent_of_split'])),
+        ])->save();
+
+        return $children;
+    }
+
+    /** Group the order's items per the split strategy. Only by_sku is implemented in this slice. */
+    private function splitGroups($items, array $config)
+    {
+        // Explicit groups take precedence when provided.
+        if (! empty($config['groups']) && is_array($config['groups'])) {
+            return collect($config['groups'])
+                ->map(fn ($g) => $items->filter(fn ($it) => in_array($it->sku, $g['skus'] ?? [], true)))
+                ->filter(fn ($group) => $group->isNotEmpty())
+                ->values();
+        }
+
+        // Default by_sku: one child per distinct SKU.
+        return $items->groupBy('sku')->values();
     }
 
     /** Mutate the order in memory; return whether anything actually changed. */

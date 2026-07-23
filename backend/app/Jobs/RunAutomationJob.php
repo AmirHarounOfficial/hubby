@@ -28,6 +28,7 @@ class RunAutomationJob implements ShouldQueue
         public string $trigger,
         public string $source = 'sync',
         public ?string $previousStatus = null,
+        public int $chainDepth = 0,
     ) {
     }
 
@@ -44,6 +45,7 @@ class RunAutomationJob implements ShouldQueue
                 new OrderSubject($order, $this->previousStatus),
                 $this->trigger,
                 $this->source,
+                $this->chainDepth,
             );
         } catch (\Throwable $e) {
             Log::error("RunAutomationJob failed for order {$this->orderId} [{$this->trigger}]: ".$e->getMessage());

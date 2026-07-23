@@ -5,7 +5,7 @@ export const automation = {
     rules: 'Rules',
     runs: 'Recent activity',
     empty: 'No automation rules yet.',
-    emptyHint: 'Rules tag, hold, route and route orders the moment they arrive. The visual builder is coming next; rules created via the API appear here.',
+    emptyHint: 'Rules tag, hold, route and split orders the moment they arrive. Create one with the builder.',
     runsEmpty: 'No rule activity yet.',
     colName: 'Rule',
     colTrigger: 'Trigger',
@@ -62,7 +62,7 @@ export const automation = {
       cancel: 'Cancel',
       saved: 'Rule saved.',
       saveError: 'Could not save the rule. Check the fields and try again.',
-      deferredNote: 'Runs after commit (not yet active in this build).',
+      deferredNote: 'Runs after the rule commits.',
     },
     fields: {
       order: {
@@ -82,7 +82,7 @@ export const automation = {
     },
     params: {
       tags: 'Tags', status: 'Status', folder: 'Folder', location: 'Location',
-      carrier: 'Carrier', service: 'Service', reason: 'Reason', text: 'Note', channel: 'Channel', template: 'Template', url: 'URL',
+      carrier: 'Carrier', service: 'Service', reason: 'Reason', text: 'Note', channel: 'Channel', template: 'Template', url: 'URL', title: 'Title', message: 'Message',
     },
   },
   ar: {
@@ -148,7 +148,7 @@ export const automation = {
       cancel: 'إلغاء',
       saved: 'تم حفظ القاعدة.',
       saveError: 'تعذّر حفظ القاعدة. تحقّق من الحقول وحاول مجددًا.',
-      deferredNote: 'يعمل بعد الحفظ (غير مُفعّل بعد في هذه النسخة).',
+      deferredNote: 'يعمل بعد حفظ القاعدة.',
     },
     fields: {
       order: {
@@ -168,7 +168,7 @@ export const automation = {
     },
     params: {
       tags: 'الوسوم', status: 'الحالة', folder: 'المجلد', location: 'الموقع',
-      carrier: 'شركة الشحن', service: 'الخدمة', reason: 'السبب', text: 'ملاحظة', channel: 'القناة', template: 'القالب', url: 'الرابط',
+      carrier: 'شركة الشحن', service: 'الخدمة', reason: 'السبب', text: 'ملاحظة', channel: 'القناة', template: 'القالب', url: 'الرابط', title: 'العنوان', message: 'الرسالة',
     },
   },
 };

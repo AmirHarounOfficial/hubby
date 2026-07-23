@@ -103,12 +103,18 @@ class AutomationEngine
                 $rule->increment('failed_count');
             }
 
-            $runs[] = $this->record($rule, $subject, $trigger, $source, $correlationId, $chainDepth, [
+            $run = $this->record($rule, $subject, $trigger, $source, $correlationId, $chainDepth, [
                 'outcome' => $outcome, 'matched' => true, 'dry_run' => $dryRun, 'facts' => $facts,
                 'trace' => $evaluation['trace'],
                 'actions' => collect($applied['results'])->map(fn (ActionResult $r) => $r->toArray())->all(),
                 'duration' => $this->ms($started),
             ]);
+            $runs[] = $run;
+
+            if (! $dryRun) {
+                $this->queueDeferred($run, $subject, $facts, $fingerprint, $applied['deferred']);
+                $this->dispatchSplitChildren($applied['splitChildren'], $chainDepth);
+            }
 
             $rule->forceFill(['last_run_at' => now()])->saveQuietly();
 
@@ -118,6 +124,30 @@ class AutomationEngine
         }
 
         return $runs;
+    }
+
+    /** Queue every deferred action outside the transaction (spec §4.8). */
+    private function queueDeferred(AutomationRun $run, AutomationSubject $subject, array $facts, string $fingerprint, array $deferred): void
+    {
+        foreach ($deferred as $action) {
+            \App\Jobs\ApplyAutomationActionJob::dispatch(
+                $run->id,
+                $subject->organizationId(),
+                $subject->id(),
+                $action,
+                $facts,
+                $fingerprint.':'.($action['id'] ?? 'x'), // idempotency key the receiver can dedupe on
+            )->afterCommit();
+        }
+    }
+
+    /** Children from a split re-enter as fresh order.created passes at the next chain depth. */
+    private function dispatchSplitChildren(array $childOrderIds, int $chainDepth): void
+    {
+        foreach ($childOrderIds as $childId) {
+            \App\Jobs\RunAutomationJob::dispatch($childId, 'order.created', 'automation', null, $chainDepth + 1)
+                ->afterCommit();
+        }
     }
 
     /** Claim the idempotency slot. Returns false when the rule was already applied (the unique index). */
