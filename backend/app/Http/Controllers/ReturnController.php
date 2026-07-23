@@ -40,8 +40,18 @@ class ReturnController extends Controller
     public function show(Request $request, int $id)
     {
         $rma = $this->find($request, $id);
+        $rma->load(['items', 'events' => fn ($q) => $q->latest('id'), 'order:id,external_id,total,currency', 'store:id,platform']);
 
-        return response()->json($rma->load(['items', 'events' => fn ($q) => $q->latest('id'), 'order:id,external_id,total,currency']));
+        // Tell the dashboard whether issuing the refund will also push it to the channel, so it can
+        // label the action honestly ("Refund on Shopify") instead of implying a local-only record.
+        $platform = strtolower((string) $rma->store?->platform);
+        $refund = \App\Models\Refund::where('return_request_id', $rma->id)->latest('id')->first();
+
+        return response()->json(array_merge($rma->toArray(), [
+            'platform' => $platform,
+            'can_push_refund' => in_array('refund', config("returns.capabilities.{$platform}", []), true),
+            'refund' => $refund ? $refund->only(['status', 'external_id', 'gateway', 'failure_reason', 'processed_at']) : null,
+        ]));
     }
 
     public function store(Request $request)

@@ -3,12 +3,15 @@
 namespace App\Services\Returns;
 
 use App\Jobs\CalculateOrderProfitJob;
+use App\Jobs\IssueRefundJob;
 use App\Models\InventoryLog;
 use App\Models\Order;
 use App\Models\Refund;
 use App\Models\ReturnEvent;
 use App\Models\ReturnItem;
 use App\Models\ReturnRequest;
+use App\Services\Integrations\IntegrationFactory;
+use App\Services\Integrations\SupportsReturnsInterface;
 use App\Services\Profit\FifoLedger;
 use Illuminate\Support\Facades\DB;
 
@@ -20,8 +23,10 @@ use Illuminate\Support\Facades\DB;
  * Every status change goes through transition(), which the state machine validates and which writes
  * a return_events audit row in the same transaction — the audit never lags the state.
  *
- * Deferred to later slices: refund posting into profit, RTO auto-detection (needs carrier tracking,
- * Spec 04), marketplace-managed mirrors, and the customer portal.
+ * Refunds post into the P&L (slice 3) and, on returns-capable channels (Shopify/Woo), push to the
+ * platform over the queue (slice 4); local-only channels settle immediately. Deferred to later
+ * slices: RTO auto-detection (needs carrier tracking, Spec 04), marketplace-managed mirrors, and
+ * the customer portal.
  */
 class ReturnService
 {
@@ -265,7 +270,11 @@ class ReturnService
      */
     public function refund(ReturnRequest $rma, string $method = 'original_payment', ?int $userId = null): ReturnRequest
     {
-        return DB::transaction(function () use ($rma, $method, $userId) {
+        // Can this channel push the refund itself? Shopify/Woo refund over REST; a local-only
+        // platform (marketplace mirrors are M4) is settled here and reconciled out-of-band.
+        $pushable = $this->canPushRefund($rma);
+
+        $pushRefundId = DB::transaction(function () use ($rma, $method, $userId, $pushable) {
             $calc = $this->refundCalculator->compute($rma);
             foreach ($calc['lines'] as $itemId => $amount) {
                 ReturnItem::whereKey($itemId)->update(['refund_amount' => $amount]);
@@ -282,37 +291,108 @@ class ReturnService
                 $this->transition($rma, 'closed', 'system', $userId, 'no_refund_due');
                 CalculateOrderProfitJob::dispatch($rma->order_id);
 
-                return $rma->fresh('items');
+                return null;
             }
 
-            Refund::create([
+            $refund = Refund::create([
                 'organization_id' => $rma->organization_id,
                 'store_id' => $rma->store_id,
                 'order_id' => $rma->order_id,
                 'return_request_id' => $rma->id,
                 'issuer' => 'merchant',
                 'method' => $method,
-                'status' => 'succeeded', // slice 3: manual/immediate; a real gateway call is a follow-up
+                // Always born pending; settleRefund() flips it to succeeded once the money is real —
+                // immediately for a local channel, or after the platform confirms for a pushable one.
+                'status' => 'pending',
                 'amount' => $calc['total_refund'],
                 'items_amount' => $calc['items_subtotal'],
                 'tax_amount' => $calc['tax_refund'],
                 'shipping_amount' => $rma->shipping_refund,
                 'currency' => $rma->currency,
-                'gateway' => 'manual',
+                'gateway' => $pushable ? $rma->store->platform : 'manual',
                 'idempotency_key' => sha1('rma:'.$rma->id.':'.$calc['total_refund']),
-                'processed_at' => now(),
+                'processed_at' => null,
                 'created_by_user_id' => $userId,
             ]);
 
-            $rma->forceFill(['refunded_amount' => $calc['total_refund'], 'refunded_at' => now()])->save();
+            $rma->forceFill(['refunded_amount' => $calc['total_refund']])->save();
             $this->transition($rma, 'refund_pending', 'user', $userId);
-            $this->transition($rma->fresh(), 'refunded', 'system', null);
 
-            // The refund revenue + recovered/lost COGS now flow into the order's P&L.
-            CalculateOrderProfitJob::dispatch($rma->order_id);
+            // Local channel: settle in-transaction (money moved out-of-band). Pushable channel: leave
+            // it pending and hand the id back so the job is dispatched *after* this commit — the job
+            // must never read the refund row before it exists.
+            if (! $pushable) {
+                $this->settleRefund($refund, null);
 
-            return $rma->fresh('items');
+                return null;
+            }
+
+            return $refund->id;
         });
+
+        if ($pushRefundId !== null) {
+            IssueRefundJob::dispatch($pushRefundId);
+        }
+
+        return $rma->fresh('items');
+    }
+
+    /** Does the store's platform advertise a refund-push capability? */
+    private function canPushRefund(ReturnRequest $rma): bool
+    {
+        try {
+            $service = IntegrationFactory::make((string) $rma->store->platform);
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return $service instanceof SupportsReturnsInterface
+            && $service->supportsReturnCapability('refund')
+            && $rma->store->integration !== null;
+    }
+
+    /**
+     * Mark a refund settled (money has moved) and complete the RMA. Idempotent: a second call after
+     * the refund already succeeded is a no-op, so a job retry never re-posts the P&L twice.
+     */
+    public function settleRefund(Refund $refund, ?string $externalId): void
+    {
+        if ($refund->status === 'succeeded') {
+            return;
+        }
+
+        DB::transaction(function () use ($refund, $externalId) {
+            $refund->forceFill([
+                'status' => 'succeeded',
+                'external_id' => $externalId ?? $refund->external_id,
+                'processed_at' => now(),
+                'failure_reason' => null,
+            ])->save();
+
+            $rma = $refund->returnRequest;
+            if ($rma && $rma->status === 'refund_pending') {
+                $rma->forceFill(['refunded_at' => now()])->save();
+                $this->transition($rma, 'refunded', 'system', null,
+                    $externalId ? 'platform_refund:'.$externalId : null);
+            }
+
+            // Only now is the refund real money — post the refunded revenue + recovered/lost COGS.
+            CalculateOrderProfitJob::dispatch($refund->order_id);
+        });
+    }
+
+    /** Record a failed push attempt without rolling back the local decision (spec §5.4). */
+    public function failRefund(Refund $refund, string $reason): void
+    {
+        $refund->forceFill([
+            'status' => 'failed',
+            'attempts' => (int) $refund->attempts + 1,
+            'failure_reason' => $reason,
+        ])->save();
+
+        if ($rma = $refund->returnRequest) {
+            $this->event($rma, $rma->status, $rma->status, 'system', null, 'refund_push_failed:'.$reason);
+        }
     }
 
     /** Preview the refund total at approval time (uses approved quantities). */

@@ -10,7 +10,7 @@ use App\Services\Profit\FeeCapture\ShopifyFeeParser;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class ShopifyService extends BaseIntegrationService implements CapturesOrderFees
+class ShopifyService extends BaseIntegrationService implements CapturesOrderFees, SupportsReturnsInterface
 {
     public function getAuthUrl(): string
     {
@@ -244,6 +244,108 @@ class ShopifyService extends BaseIntegrationService implements CapturesOrderFees
         }
 
         return $response->json('locations.0.id');
+    }
+
+    // --- Returns two-way sync (spec 03 §5.3) -------------------------------------------------
+
+    public function supportsReturnCapability(string $capability): bool
+    {
+        // Only refunds today — Shopify's Return objects (fetch/approve/reject) require a GraphQL
+        // client this codebase doesn't have yet (M2 follow-up), and labels need Spec 04.
+        return in_array($capability, config('returns.capabilities.shopify', []), true);
+    }
+
+    /**
+     * Refund an order over the REST Admin API. Refunds still live in REST (only Return objects
+     * moved to GraphQL), so this is safe. We attach the refund to the order's original sale/capture
+     * transaction so the money actually goes back through the same gateway; without a resolvable
+     * parent transaction we cannot move money, so we report failure rather than silently record a
+     * zero-value refund.
+     *
+     * @return array{id:string,status:string,amount:float}|null
+     */
+    public function refundOrder(Store $store, string $externalOrderId, array $payload): ?array
+    {
+        $amount = round((float) ($payload['amount'] ?? 0), 2);
+        if ($amount <= 0) {
+            return null;
+        }
+
+        $client = $this->getHttpClient($store->integration);
+        $base = "https://{$store->domain}/admin/api/2024-01";
+
+        $parent = $this->parentTransactionId($client, $base, $externalOrderId);
+        if (! $parent) {
+            Log::error("Shopify refundOrder: no parent transaction for order {$externalOrderId}; cannot refund.");
+
+            return null;
+        }
+
+        $response = $client->post("{$base}/orders/{$externalOrderId}/refunds.json", [
+            'refund' => [
+                'currency' => $payload['currency'] ?? $store->organization?->base_currency ?? 'SAR',
+                'notify' => (bool) ($payload['notify'] ?? false),
+                'note' => $payload['note'] ?? 'Refund via Hubby returns',
+                'transactions' => [[
+                    'parent_id' => $parent,
+                    'amount' => number_format($amount, 2, '.', ''),
+                    'kind' => 'refund',
+                    'gateway' => $payload['gateway'] ?? null,
+                ]],
+            ],
+        ]);
+
+        if ($response->failed()) {
+            Log::error("Shopify refundOrder failed for {$externalOrderId}: ".$response->body());
+
+            return null;
+        }
+
+        $refund = $response->json('refund') ?? [];
+
+        return [
+            'id' => (string) ($refund['id'] ?? ''),
+            'status' => 'succeeded',
+            'amount' => $amount,
+        ];
+    }
+
+    /** The order's original sale/capture transaction id — the parent a refund attaches to. */
+    protected function parentTransactionId($client, string $base, string $externalOrderId): ?int
+    {
+        $response = $client->get("{$base}/orders/{$externalOrderId}/transactions.json");
+        if ($response->failed()) {
+            return null;
+        }
+
+        $transactions = $response->json('transactions') ?? [];
+        foreach ($transactions as $tx) {
+            if (in_array($tx['kind'] ?? '', ['sale', 'capture'], true) && ($tx['status'] ?? '') === 'success') {
+                return (int) $tx['id'];
+            }
+        }
+
+        return null;
+    }
+
+    public function fetchReturns(Store $store, array $params = []): array
+    {
+        return []; // needs the Shopify GraphQL Return API — M2 follow-up.
+    }
+
+    public function approveReturn(Store $store, string $externalReturnId, array $payload = []): bool
+    {
+        return false;
+    }
+
+    public function rejectReturn(Store $store, string $externalReturnId, string $reason): bool
+    {
+        return false;
+    }
+
+    public function createReturnLabel(Store $store, string $externalReturnId, array $payload = []): ?array
+    {
+        return null; // needs Spec 04 (Shipping & Labels).
     }
 
     /** Resolve a SKU to its Shopify inventory_item_id by scanning product variants. */

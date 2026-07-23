@@ -30,6 +30,11 @@ class Refund extends Model
         return $this->belongsTo(Order::class);
     }
 
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
     public function returnRequest(): BelongsTo
     {
         return $this->belongsTo(ReturnRequest::class);

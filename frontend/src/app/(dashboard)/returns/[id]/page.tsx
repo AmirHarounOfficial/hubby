@@ -13,6 +13,9 @@ import { useT } from '@/i18n';
 import { statusColor } from '@/components/returns/statusColor';
 import { InspectModal } from '@/components/returns/InspectModal';
 
+const platformLabel = (p?: string) =>
+  p ? p.charAt(0).toUpperCase() + p.slice(1) : '';
+
 export default function ReturnDetailPage() {
   const t = useT();
   const { id } = useParams();
@@ -76,8 +79,14 @@ export default function ReturnDetailPage() {
   } else if (status === 'received' || status === 'inspecting') {
     actions.push(<Button key="i" onClick={() => setInspecting(true)} disabled={busy}><ClipboardCheck size={16} className="mr-1" />{t('returns.inspect')}</Button>);
   } else if (status === 'inspected' || status === 'refund_pending') {
+    const failed = rma.refund?.status === 'failed';
     actions.push(
-      <Button key="rf" onClick={() => act('refund', {}, 'refunded')} disabled={busy}><Banknote size={16} className="mr-1" />{t('returns.issueRefund')}</Button>,
+      <Button key="rf" onClick={() => act('refund', {}, rma.can_push_refund ? 'refundQueued' : 'refunded')} disabled={busy}>
+        <Banknote size={16} className="mr-1" />
+        {rma.can_push_refund
+          ? (failed ? t('returns.retryRefund') : t('returns.refundOnPlatform', { platform: platformLabel(rma.platform) }))
+          : t('returns.issueRefund')}
+      </Button>,
     );
   }
 
@@ -99,6 +108,20 @@ export default function ReturnDetailPage() {
         </div>
         <div className="flex items-center gap-2">{actions}</div>
       </div>
+
+      {rma.refund && rma.can_push_refund && (
+        <div className={cn('rounded-lg border px-4 py-3 text-sm flex items-center gap-2',
+          rma.refund.status === 'succeeded' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+            : rma.refund.status === 'failed' ? 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400'
+            : 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-500')}>
+          <Banknote size={16} className="shrink-0" />
+          {rma.refund.status === 'succeeded'
+            ? t('returns.refundPushed', { platform: platformLabel(rma.platform) }) + (rma.refund.external_id ? ` · #${rma.refund.external_id}` : '')
+            : rma.refund.status === 'failed'
+              ? t('returns.refundPushFailed', { platform: platformLabel(rma.platform) })
+              : t('returns.refundPushPending', { platform: platformLabel(rma.platform) })}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-0 overflow-hidden">
