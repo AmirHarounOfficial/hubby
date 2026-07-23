@@ -49,6 +49,9 @@ class PlanSeeder extends Seeder
         ];
 
         foreach ($plans as $plan) {
+            // Non-negotiable commitment (spec 02 §1): the automation rules engine is ungated in
+            // EVERY plan, including the free trial — Linnworks' one genuinely generous policy, matched.
+            $plan['features'] = array_values(array_unique([...$plan['features'], 'Automation Rules (unlimited)']));
             Plan::updateOrCreate(['slug' => $plan['slug']], $plan);
         }
     }
