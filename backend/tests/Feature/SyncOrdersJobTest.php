@@ -124,6 +124,28 @@ class SyncOrdersJobTest extends TestCase
         $this->assertTrue((bool) $profit->missing_cost);
     }
 
+    public function test_sync_fires_the_automation_engine_on_new_orders(): void
+    {
+        $store = $this->store();
+        \App\Models\AutomationRule::create([
+            'organization_id' => $store->organization_id,
+            'name' => 'Tag shopify',
+            'trigger' => 'order.created',
+            'conditions' => ['match' => 'all', 'rules' => [
+                ['field' => 'order.channel', 'operator' => 'eq', 'value' => 'shopify'],
+            ]],
+            'actions' => [['id' => 'a1', 'type' => 'add_tag', 'tags' => ['synced-auto']]],
+            'enabled' => true,
+            'run_mode' => 'live',
+        ]);
+
+        // Queue is sync in tests, so the RunAutomationJob dispatched by the sync runs inline.
+        $this->runSync($store, $this->orderPayload());
+
+        $order = Order::where('store_id', $store->id)->where('external_id', '12345')->firstOrFail();
+        $this->assertSame(['synced-auto'], $order->fresh()->tags);
+    }
+
     public function test_webhook_scoped_sync_only_writes_the_named_order(): void
     {
         $store = $this->store();

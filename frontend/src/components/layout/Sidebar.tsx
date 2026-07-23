@@ -13,6 +13,7 @@ import {
   Store as StoreIcon, 
   BarChart3,
   Coins,
+  Workflow,
   CreditCard,
   Settings,
   ChevronLeft,
@@ -32,6 +33,7 @@ const menuItems = [
   { icon: StoreIcon, key: 'stores', href: '/stores' },
   { icon: BarChart3, key: 'analytics', href: '/analytics' },
   { icon: Coins, key: 'profit', href: '/profit' },
+  { icon: Workflow, key: 'automation', href: '/automation' },
   { icon: CreditCard, key: 'billing', href: '/billing' },
   { icon: Settings, key: 'settings', href: '/settings' },
 ];

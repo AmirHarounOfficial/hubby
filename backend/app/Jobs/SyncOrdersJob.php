@@ -105,6 +105,14 @@ class SyncOrdersJob implements ShouldQueue
 
                 // Refresh the P&L rollup for this order now that its lines are in place.
                 CalculateOrderProfitJob::dispatch($order->id);
+
+                // Fire automation rules. order.created on first ingest, order.updated on re-sync;
+                // the engine's ledger keeps a re-synced order from re-applying a rule.
+                RunAutomationJob::dispatch(
+                    $order->id,
+                    $order->wasRecentlyCreated ? 'order.created' : 'order.updated',
+                    'sync',
+                );
             }
 
             $log->update(['status' => 'success']);

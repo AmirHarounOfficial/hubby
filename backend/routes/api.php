@@ -109,6 +109,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/ad-spend/{id}', [\App\Http\Controllers\AdSpendController::class, 'destroy']);
     });
 
+    // Automation rules engine (spec 02) — org-scoped but ungated in every plan.
+    Route::get('/automation/schema', [\App\Http\Controllers\AutomationController::class, 'schema']);
+    Route::get('/automation/rules', [\App\Http\Controllers\AutomationController::class, 'index']);
+    Route::post('/automation/rules', [\App\Http\Controllers\AutomationController::class, 'store']);
+    Route::post('/automation/rules/simulate', [\App\Http\Controllers\AutomationController::class, 'simulate']);
+    Route::get('/automation/runs', [\App\Http\Controllers\AutomationController::class, 'runs']);
+    Route::get('/automation/rules/{id}', [\App\Http\Controllers\AutomationController::class, 'show']);
+    Route::put('/automation/rules/{id}', [\App\Http\Controllers\AutomationController::class, 'update']);
+    Route::post('/automation/rules/{id}/toggle', [\App\Http\Controllers\AutomationController::class, 'toggle']);
+    Route::delete('/automation/rules/{id}', [\App\Http\Controllers\AutomationController::class, 'destroy']);
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);
