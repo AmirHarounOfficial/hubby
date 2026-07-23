@@ -24,8 +24,15 @@ class AnalyticsController extends Controller
                 $q->where('organization_id', $organizationId);
             });
 
-            $totalRevenue = (clone $scoped())->whereBetween('created_at', [$startDate, $endDate])->sum('total');
-            $totalOrders = (clone $scoped())->whereBetween('created_at', [$startDate, $endDate])->count();
+            // Bucket by when the order was placed, falling back to insert time for historical rows
+            // and platforms that don't supply a date (defect #7). COALESCE works on MySQL + sqlite.
+            $orderDate = fn ($q, $from, $to) => $q->whereRaw(
+                'COALESCE(placed_at, created_at) BETWEEN ? AND ?',
+                [$from, $to]
+            );
+
+            $totalRevenue = $orderDate(clone $scoped(), $startDate, $endDate)->sum('total');
+            $totalOrders = $orderDate(clone $scoped(), $startDate, $endDate)->count();
             $activeProducts = Product::where('organization_id', $organizationId)->count();
 
             // Previous equal-length period, for trend deltas.
@@ -33,8 +40,8 @@ class AnalyticsController extends Controller
             $end = Carbon::parse($endDate);
             $length = max(1, $start->diffInDays($end));
             $prevStart = $start->copy()->subDays($length);
-            $prevRevenue = (clone $scoped())->whereBetween('created_at', [$prevStart, $start])->sum('total');
-            $prevOrders = (clone $scoped())->whereBetween('created_at', [$prevStart, $start])->count();
+            $prevRevenue = $orderDate(clone $scoped(), $prevStart, $start)->sum('total');
+            $prevOrders = $orderDate(clone $scoped(), $prevStart, $start)->count();
 
             // Only report a delta when the prior period has a real baseline,
             // otherwise a near-zero denominator yields absurd percentages.
@@ -104,8 +111,9 @@ class AnalyticsController extends Controller
             $data = Order::whereHas('store', function($q) use ($organizationId) {
                     $q->where('organization_id', $organizationId);
                 })
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as orders'), DB::raw('SUM(total) as revenue'))
+                // Group by order date, not insert time (defect #7).
+                ->whereRaw('COALESCE(placed_at, created_at) BETWEEN ? AND ?', [$startDate, $endDate])
+                ->select(DB::raw('DATE(COALESCE(placed_at, created_at)) as date'), DB::raw('COUNT(*) as orders'), DB::raw('SUM(total) as revenue'))
                 ->groupBy('date')
                 ->orderBy('date')
                 ->get();

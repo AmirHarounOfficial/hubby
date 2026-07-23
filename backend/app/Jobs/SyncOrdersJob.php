@@ -80,6 +80,9 @@ class SyncOrdersJob implements ShouldQueue
                         'currency' => $mappedData['currency'],
                         'customer_name' => $mappedData['customer_name'],
                         'customer_email' => $mappedData['customer_email'],
+                        // The platform's order date, so analytics buckets by when the order was
+                        // placed, not when we happened to sync it (defect #7).
+                        'placed_at' => $this->parseDate($mappedData['placed_at'] ?? null),
                         'raw_data' => $orderData,
                     ]
                 );
@@ -99,6 +102,9 @@ class SyncOrdersJob implements ShouldQueue
                         ]
                     );
                 }
+
+                // Refresh the P&L rollup for this order now that its lines are in place.
+                CalculateOrderProfitJob::dispatch($order->id);
             }
 
             $log->update(['status' => 'success']);
@@ -138,6 +144,24 @@ class SyncOrdersJob implements ShouldQueue
     }
 
     /**
+     * Normalise a platform-supplied order date to a Carbon instance, or null if it is
+     * missing/unparseable — the caller stores null and analytics falls back to created_at.
+     */
+    protected function parseDate($value): ?\Illuminate\Support\Carbon
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        try {
+            // Carbon::parse handles ISO strings and DateTimeInterface (e.g. the Trendyol Carbon) alike.
+            return \Illuminate\Support\Carbon::parse($value);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * Query params narrowing the fetch to a single order, where the platform
      * supports it. Others fall back to a normal fetch plus a local filter.
      *
@@ -166,6 +190,7 @@ class SyncOrdersJob implements ShouldQueue
                 'currency' => $data['currency'],
                 'customer_name' => ($data['customer']['first_name'] ?? '') . ' ' . ($data['customer']['last_name'] ?? ''),
                 'customer_email' => $data['customer']['email'] ?? null,
+                'placed_at' => $data['created_at'] ?? $data['processed_at'] ?? null,
                 'items' => array_map(fn($item) => [
                     'external_id' => (string) $item['id'],
                     'name' => $item['title'],
@@ -184,6 +209,7 @@ class SyncOrdersJob implements ShouldQueue
                 'currency' => $data['amounts']['total']['currency'] ?? 'SAR',
                 'customer_name' => ($data['customer']['first_name'] ?? '') . ' ' . ($data['customer']['last_name'] ?? ''),
                 'customer_email' => $data['customer']['email'] ?? null,
+                'placed_at' => $data['date']['date'] ?? $data['created_at'] ?? null,
                 'items' => array_map(fn($item) => [
                     'external_id' => (string) $item['id'],
                     'name' => $item['name'],
@@ -202,6 +228,10 @@ class SyncOrdersJob implements ShouldQueue
                 'currency' => $data['currencyCode'] ?? 'TRY',
                 'customer_name' => trim(($data['customerFirstName'] ?? '') . ' ' . ($data['customerLastName'] ?? '')),
                 'customer_email' => $data['customerEmail'] ?? null,
+                // Trendyol sends orderDate as epoch milliseconds.
+                'placed_at' => isset($data['orderDate'])
+                    ? \Illuminate\Support\Carbon::createFromTimestampMs((int) $data['orderDate'])
+                    : null,
                 'items' => array_map(fn($item) => [
                     'external_id' => (string) ($item['id'] ?? $item['lineItemId'] ?? ''),
                     'name' => $item['productName'] ?? $item['name'] ?? '',

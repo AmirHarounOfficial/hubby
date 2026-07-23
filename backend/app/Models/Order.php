@@ -16,11 +16,13 @@ class Order extends Model
         'currency',
         'customer_name',
         'customer_email',
+        'placed_at',
         'raw_data',
     ];
 
     protected $casts = [
         'raw_data' => 'array',
+        'placed_at' => 'datetime',
     ];
 
     public function store(): BelongsTo

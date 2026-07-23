@@ -46,6 +46,7 @@ class SyncOrdersJobTest extends TestCase
             'total_price' => '150.00',
             'currency' => 'SAR',
             'customer' => ['first_name' => 'Sara', 'last_name' => 'A', 'email' => 'sara@example.com'],
+            'created_at' => '2026-06-15T10:30:00+03:00',
             'line_items' => [
                 ['id' => 900, 'title' => 'Oud 50ml', 'sku' => 'OUD-50', 'quantity' => 1, 'price' => '100.00'],
                 ['id' => 901, 'title' => 'Dates 1kg', 'sku' => 'DATES-1', 'quantity' => 2, 'price' => '25.00'],
@@ -67,6 +68,8 @@ class SyncOrdersJobTest extends TestCase
 
         $order = Order::where('store_id', $store->id)->where('external_id', '12345')->firstOrFail();
         $this->assertEqualsWithDelta(150.0, (float) $order->total, 0.001);
+        // #7: the platform order date is captured, not just the sync time.
+        $this->assertSame('2026-06-15', $order->placed_at?->toDateString());
 
         $items = OrderItem::where('order_id', $order->id)->orderBy('external_id')->get();
         $this->assertCount(2, $items);
@@ -103,6 +106,22 @@ class SyncOrdersJobTest extends TestCase
         $this->assertSame(1, Order::where('store_id', $storeA->id)->where('external_id', 'SAME-1')->count());
         $this->assertSame(1, Order::where('store_id', $storeB->id)->where('external_id', 'SAME-1')->count());
         $this->assertSame(2, Order::where('external_id', 'SAME-1')->count());
+    }
+
+    public function test_sync_materialises_the_profit_rollup_for_each_order(): void
+    {
+        $store = $this->store();
+
+        // Queue is sync in tests, so the CalculateOrderProfitJob dispatched by the sync runs inline.
+        $this->runSync($store, $this->orderPayload());
+
+        $order = Order::where('store_id', $store->id)->where('external_id', '12345')->firstOrFail();
+        $profit = \App\Models\OrderProfit::where('order_id', $order->id)->first();
+
+        $this->assertNotNull($profit, 'syncing an order should produce its P&L rollup');
+        $this->assertGreaterThan(0, (float) $profit->net_revenue_base);
+        // No costs on file for these SKUs yet, so the rollup honestly flags itself.
+        $this->assertTrue((bool) $profit->missing_cost);
     }
 
     public function test_webhook_scoped_sync_only_writes_the_named_order(): void
