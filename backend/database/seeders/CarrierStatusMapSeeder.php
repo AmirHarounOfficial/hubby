@@ -57,6 +57,20 @@ class CarrierStatusMapSeeder extends Seeder
         'returned to shipper' => 'returned_to_origin',
     ];
 
+    /** SMSA status text => normalized (spec 04 §6.2). Matched on lowercased raw_status. */
+    private const SMSA = [
+        'shipment picked up' => 'picked_up',
+        'picked up' => 'picked_up',
+        'in transit' => 'in_transit',
+        'shipment in transit' => 'in_transit',
+        'out for delivery' => 'out_for_delivery',
+        'delivered' => 'delivered',
+        'delivery attempted' => 'delivery_attempted',
+        'on hold' => 'held',
+        'returned to shipper' => 'returned_to_origin',
+        'returned' => 'returned_to_origin',
+    ];
+
     public function run(): void
     {
         foreach (self::VOCAB as $normalized => [$isFinal, $isException, $en, $ar]) {
@@ -86,17 +100,19 @@ class CarrierStatusMapSeeder extends Seeder
             );
         }
 
-        foreach (self::ARAMEX as $rawStatus => $normalized) {
-            [$isFinal, $isException] = self::VOCAB[$normalized] ?? [false, false];
-            CarrierStatusMap::updateOrCreate(
-                ['carrier_code' => 'aramex', 'raw_code' => null, 'raw_status' => $rawStatus],
-                [
-                    'normalized_status' => $normalized,
-                    'is_final' => $isFinal,
-                    'is_exception' => $isException,
-                    'priority' => 100,
-                ]
-            );
+        foreach (['aramex' => self::ARAMEX, 'smsa' => self::SMSA] as $carrier => $map) {
+            foreach ($map as $rawStatus => $normalized) {
+                [$isFinal, $isException] = self::VOCAB[$normalized] ?? [false, false];
+                CarrierStatusMap::updateOrCreate(
+                    ['carrier_code' => $carrier, 'raw_code' => null, 'raw_status' => $rawStatus],
+                    [
+                        'normalized_status' => $normalized,
+                        'is_final' => $isFinal,
+                        'is_exception' => $isException,
+                        'priority' => 100,
+                    ]
+                );
+            }
         }
     }
 }

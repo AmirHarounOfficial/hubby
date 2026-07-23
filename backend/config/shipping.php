@@ -34,8 +34,13 @@ return [
             'credentials' => ['username', 'password', 'account_number', 'account_pin', 'account_entity', 'account_country_code'],
             'capabilities' => ['rates', 'cod', 'pickup', 'cancel', 'multi_package', 'address_validation'],
         ],
+        'smsa' => [
+            'label' => 'SMSA Express',
+            // mode = 'secom_soap' (legacy, passkey) | 'rest' (newer, api_key). Fill the one you use.
+            'credentials' => ['mode', 'passkey', 'api_key'],
+            'capabilities' => ['cod', 'cancel'],
+        ],
         // Remaining carrier credential shapes (documented now, wired in their slices):
-        'smsa' => ['credentials' => ['passkey']],
         'naqel' => ['credentials' => ['client_id', 'password']],
         'jnt' => ['credentials' => ['api_account', 'private_key', 'customer_code', 'country_code']],
         'torod' => ['credentials' => ['api_token']],

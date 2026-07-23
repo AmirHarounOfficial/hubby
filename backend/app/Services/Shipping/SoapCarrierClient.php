@@ -45,7 +45,11 @@ class SoapCarrierClient
     /** Parse a SOAP response, stripping namespaces so xpath/property access is simple. */
     public function parse(string $xml): SimpleXMLElement
     {
-        $clean = preg_replace('/(<\/?)[a-zA-Z0-9]+:/', '$1', $xml); // drop namespace prefixes
+        // Neutralise namespaces entirely: drop prefixes AND xmlns declarations. Without removing the
+        // default xmlns, every element inherits that namespace and namespace-unaware xpath('//X')
+        // silently matches nothing — the classic SOAP-parsing trap.
+        $clean = preg_replace('/\s+xmlns(:\w+)?="[^"]*"/', '', $xml);
+        $clean = preg_replace('/(<\/?)[a-zA-Z0-9]+:/', '$1', $clean);
         $doc = @simplexml_load_string($clean);
 
         if ($doc === false) {

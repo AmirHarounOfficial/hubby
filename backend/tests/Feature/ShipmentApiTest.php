@@ -56,9 +56,9 @@ class ShipmentApiTest extends TestCase
         $res = $this->getJson('/api/shipping/carriers', $this->headers)->assertOk();
 
         $manual = collect($res->json('carriers'))->firstWhere('code', 'manual');
-        $smsa = collect($res->json('carriers'))->firstWhere('code', 'smsa'); // not wired yet
+        $naqel = collect($res->json('carriers'))->firstWhere('code', 'naqel'); // not wired yet
         $this->assertTrue($manual['available']);
-        $this->assertFalse($smsa['available']);
+        $this->assertFalse($naqel['available']);
     }
 
     public function test_creating_a_carrier_account_never_returns_the_credentials(): void
