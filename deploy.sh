@@ -87,6 +87,11 @@ docker compose exec -T app php artisan migrate --force
 echo "🌱 Seeding profit demo data (first run only)..."
 docker compose exec -T app php artisan db:seed --class="Database\\Seeders\\ProfitDemoSeeder" --force || true
 
+# Reference data (idempotent, safe on every deploy): carrier status vocab + city aliases (spec 04).
+echo "🌱 Seeding shipping reference data..."
+docker compose exec -T app php artisan db:seed --class="Database\\Seeders\\CarrierStatusMapSeeder" --force || true
+docker compose exec -T app php artisan db:seed --class="Database\\Seeders\\CityAliasSeeder" --force || true
+
 echo "⚡ Caching config/routes/views..."
 docker compose exec -T app php artisan optimize
 

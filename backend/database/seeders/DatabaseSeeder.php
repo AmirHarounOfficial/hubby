@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PlanSeeder::class,
             ReturnReasonSeeder::class,
+            CarrierStatusMapSeeder::class,
+            CityAliasSeeder::class,
             RealDataSeeder::class,
             ProfitDemoSeeder::class,
         ]);

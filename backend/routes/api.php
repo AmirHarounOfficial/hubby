@@ -154,6 +154,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/shipments/{id}/tracking', [\App\Http\Controllers\ShipmentController::class, 'tracking']);
     Route::post('/shipments/{id}/tracking-events', [\App\Http\Controllers\ShipmentController::class, 'addManualEvent']);
     Route::post('/orders/{id}/shipments', [\App\Http\Controllers\ShipmentController::class, 'storeForOrder']);
+    Route::post('/addresses/validate', [\App\Http\Controllers\AddressController::class, 'validateAddress']);
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);

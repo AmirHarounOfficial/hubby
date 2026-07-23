@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\ShipmentItem;
 use App\Models\ShipmentPackage;
+use App\Services\Shipping\AddressValidator;
 use App\Services\Shipping\LabelStorageService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,8 +19,10 @@ use Illuminate\Support\Str;
  */
 class ShippingService
 {
-    public function __construct(private readonly LabelStorageService $labels)
-    {
+    public function __construct(
+        private readonly LabelStorageService $labels,
+        private readonly AddressValidator $addresses,
+    ) {
     }
 
     /**
@@ -90,6 +93,16 @@ class ShippingService
         }
 
         $this->assertCodRules($shipment, $account);
+
+        // Address validation (§4.8): only when an address exists and the merchant hasn't overridden.
+        // A structural error (missing required field) blocks; city warnings never do. Shipments with
+        // no captured ship-to address (address capture is a later slice) simply skip this.
+        if ($shipment->shipToAddress && empty($opts['override_address_warnings'])) {
+            $result = $this->addresses->validate($shipment->shipToAddress->toArray(), (int) $shipment->organization_id, $account);
+            if (! $result['is_valid']) {
+                throw new \RuntimeException('ADDRESS_INVALID');
+            }
+        }
 
         $carrier = CarrierFactory::make($account->carrier_code);
 
