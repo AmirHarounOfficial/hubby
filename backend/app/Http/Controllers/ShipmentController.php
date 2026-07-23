@@ -13,6 +13,7 @@ use App\Services\Shipping\Data\CarrierTrackingEvent;
 use App\Services\Shipping\Data\PackageData;
 use App\Services\Shipping\Data\RateRequest;
 use App\Services\Shipping\LabelStorageService;
+use App\Services\Shipping\PackingSlipRenderer;
 use App\Services\Shipping\ShippingRateService;
 use App\Services\Shipping\ShippingService;
 use App\Services\Shipping\TrackingIngestService;
@@ -190,6 +191,14 @@ class ShipmentController extends Controller
         return response()->json(
             $shipment->trackingEvents()->orderByDesc('event_at')->orderByDesc('id')->get()
         );
+    }
+
+    /** Render (or re-serve) the packing slip for a shipment (spec §4.9). */
+    public function packingSlip(Request $request, int $id, PackingSlipRenderer $renderer)
+    {
+        $shipment = $this->find($request, $id);
+
+        return $this->labelStorage->stream($renderer->forShipment($shipment));
     }
 
     /** Stream the stored label (spec §4.4 printing). We always serve our own copy, never the carrier URL. */

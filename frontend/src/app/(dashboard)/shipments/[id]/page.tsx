@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { ChevronLeft, Truck, Ban, MapPin, Tag, Download } from 'lucide-react';
+import { ChevronLeft, Truck, Ban, MapPin, Tag, Download, FileText } from 'lucide-react';
 import { Money } from '@/components/ui/Money';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
@@ -78,9 +78,9 @@ export default function ShipmentDetailPage() {
     }
   };
 
-  const downloadLabel = async () => {
+  const openBlob = async (path: string) => {
     try {
-      const res = await api.get(`/shipments/${id}/label`, { responseType: 'blob' });
+      const res = await api.get(path, { responseType: 'blob' });
       const url = URL.createObjectURL(res.data);
       window.open(url, '_blank');
       setTimeout(() => URL.revokeObjectURL(url), 10000);
@@ -88,6 +88,8 @@ export default function ShipmentDetailPage() {
       toast(e?.response?.data?.message || t('shipping.actionError'), 'error');
     }
   };
+  const downloadLabel = () => openBlob(`/shipments/${id}/label`);
+  const openPackingSlip = () => openBlob(`/shipments/${id}/packing-slip`);
 
   if (loading || !shipment) {
     return (
@@ -130,6 +132,11 @@ export default function ShipmentDetailPage() {
           {!isDraft && shipment.tracking_number && (
             <Button variant="outline" onClick={downloadLabel}>
               <Download size={16} className="mr-1" />{t('shipping.downloadLabel')}
+            </Button>
+          )}
+          {!isDraft && (
+            <Button variant="outline" onClick={openPackingSlip}>
+              <FileText size={16} className="mr-1" />{t('shipping.packingSlip')}
             </Button>
           )}
           {isDraft && (

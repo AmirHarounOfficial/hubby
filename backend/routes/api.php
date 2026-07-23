@@ -150,6 +150,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/shipments/{id}/rates', [\App\Http\Controllers\ShipmentController::class, 'rates']);
     Route::post('/shipments/{id}/label', [\App\Http\Controllers\ShipmentController::class, 'purchaseLabel']);
     Route::get('/shipments/{id}/label', [\App\Http\Controllers\ShipmentController::class, 'downloadLabel']);
+    Route::get('/shipments/{id}/packing-slip', [\App\Http\Controllers\ShipmentController::class, 'packingSlip']);
     Route::post('/shipments/{id}/cancel', [\App\Http\Controllers\ShipmentController::class, 'cancel']);
     Route::get('/shipments/{id}/tracking', [\App\Http\Controllers\ShipmentController::class, 'tracking']);
     Route::post('/shipments/{id}/tracking-events', [\App\Http\Controllers\ShipmentController::class, 'addManualEvent']);

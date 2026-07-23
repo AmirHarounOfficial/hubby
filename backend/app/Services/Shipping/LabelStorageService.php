@@ -60,9 +60,10 @@ class LabelStorageService
         $contentType = match ($label->format) {
             'pdf' => 'application/pdf',
             'png' => 'image/png',
+            'html' => 'text/html; charset=utf-8',
             default => 'application/octet-stream',
         };
-        $disposition = $label->format === 'pdf' ? 'inline' : 'attachment';
+        $disposition = in_array($label->format, ['pdf', 'html'], true) ? 'inline' : 'attachment';
 
         return response(Storage::disk($label->disk)->get($label->path), 200, [
             'Content-Type' => $contentType,
