@@ -137,8 +137,8 @@ class ProfitDemoSeeder extends Seeder
         }
 
         $user = User::firstOrCreate(
-            ['email' => 'admin@hubbyglobal.com'],
-            ['name' => 'Admin User', 'password' => Hash::make('password'), 'email_verified_at' => now()],
+            ['email' => DemoAdmin::email()],
+            ['name' => 'Admin User', 'password' => Hash::make(DemoAdmin::password()), 'email_verified_at' => now()],
         );
         $org = Organization::create([
             'slug' => 'hubbyglobal-demo',

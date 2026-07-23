@@ -21,12 +21,13 @@ class RealDataSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create User first (to be owner)
+        // 1. Create User first (to be owner). Credentials come from DemoAdmin so no weak known
+        // password ships — set DEMO_ADMIN_PASSWORD for a real demo login (random in production).
         $user = User::updateOrCreate(
-            ['email' => 'admin@hubbyglobal.com'],
+            ['email' => DemoAdmin::email()],
             [
                 'name' => 'Admin User',
-                'password' => Hash::make('password'),
+                'password' => Hash::make(DemoAdmin::password()),
                 'email_verified_at' => now(),
             ]
         );
