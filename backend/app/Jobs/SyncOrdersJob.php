@@ -108,6 +108,15 @@ class SyncOrdersJob implements ShouldQueue
                     );
                 }
 
+                // Capture the ship-to address (normalized + city-canonicalized) so shipping has a
+                // carrier-ready destination. Best-effort — a platform with no address just skips.
+                try {
+                    app(\App\Services\Shipping\AddressExtractor::class)
+                        ->forOrder($order->load('store'), $this->store->platform, $orderData);
+                } catch (\Throwable $e) {
+                    Log::warning("Address capture failed for order {$order->id}: ".$e->getMessage());
+                }
+
                 // Refresh the P&L rollup for this order now that its lines are in place.
                 CalculateOrderProfitJob::dispatch($order->id);
 

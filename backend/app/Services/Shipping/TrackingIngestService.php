@@ -29,8 +29,10 @@ class TrackingIngestService
      */
     public function ingest(Shipment $shipment, array $events): int
     {
-        return DB::transaction(function () use ($shipment, $events) {
-            $inserted = 0;
+        $priorStatus = $shipment->status;
+
+        $inserted = DB::transaction(function () use ($shipment, $events) {
+            $count = 0;
 
             foreach ($events as $event) {
                 $fingerprint = $event->fingerprint($shipment->id);
@@ -62,13 +64,21 @@ class TrackingIngestService
                     'fingerprint' => $fingerprint,
                     'payload' => $event->payload,
                 ]);
-                $inserted++;
+                $count++;
             }
 
             $this->recomputeStatus($shipment->fresh(['trackingEvents']));
 
-            return $inserted;
+            return $count;
         });
+
+        // A parcel that just started returning to origin becomes an RTO return (spec 03) — dispatched
+        // after the commit so the worker never races the shipment/event rows. Idempotent downstream.
+        if ($shipment->fresh()->status === 'returned_to_origin' && $priorStatus !== 'returned_to_origin') {
+            \App\Jobs\DetectRtoJob::dispatch($shipment->id);
+        }
+
+        return $inserted;
     }
 
     /** Recompute shipments.status from the full event history (the ordering rule above). */
