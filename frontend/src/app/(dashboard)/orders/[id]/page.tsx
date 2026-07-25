@@ -78,6 +78,21 @@ export default function OrderDetailsPage() {
     window.print();
   };
 
+  // Build a draft VAT invoice for this order and open it for review before issuing.
+  const createInvoice = async () => {
+    setIsUpdating(true);
+    try {
+      const res = await api.post('/invoices', { order_id: Number(id) });
+      router.push(`/invoices/${res.data.id}`);
+    } catch (err: any) {
+      const code = err?.response?.data?.code;
+      alert(code === 'NO_TAX_REGISTRATION' ? t('invoices.noRegistration')
+        : err?.response?.data?.message || t('invoices.actionError'));
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -152,6 +167,11 @@ export default function OrderDetailsPage() {
           {(order.items?.length ?? 0) > 0 && (
             <Button variant="outline" size="sm" onClick={() => setCreatingReturn(true)}>
               {t('returns.create')}
+            </Button>
+          )}
+          {(order.items?.length ?? 0) > 0 && (
+            <Button variant="outline" size="sm" onClick={createInvoice} disabled={isUpdating}>
+              {t('invoices.create')}
             </Button>
           )}
           {['paid', 'processing'].includes(order.status.toLowerCase()) && (

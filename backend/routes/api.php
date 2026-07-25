@@ -173,6 +173,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cod/transactions/{id}/collected', [\App\Http\Controllers\CodController::class, 'markCollected']);
     Route::post('/cod/transactions/{id}/remitted', [\App\Http\Controllers\CodController::class, 'markRemitted']);
 
+    // Invoicing / VAT (spec 05 Milestone 0 — proper VAT documents, not yet ZATCA-cleared).
+    // Note there is no delete route for an issued invoice: cancellation is a credit note only.
+    Route::get('/tax-registration', [\App\Http\Controllers\InvoiceController::class, 'taxRegistration']);
+    Route::put('/tax-registration', [\App\Http\Controllers\InvoiceController::class, 'saveTaxRegistration']);
+    Route::get('/invoices', [\App\Http\Controllers\InvoiceController::class, 'index']);
+    Route::post('/invoices', [\App\Http\Controllers\InvoiceController::class, 'store']);
+    Route::get('/invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'show']);
+    Route::post('/invoices/{id}/issue', [\App\Http\Controllers\InvoiceController::class, 'issue']);
+    Route::post('/invoices/{id}/credit-note', [\App\Http\Controllers\InvoiceController::class, 'creditNote']);
+    Route::delete('/invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'destroy']);
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);
