@@ -167,6 +167,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pickups', [\App\Http\Controllers\PickupController::class, 'store']);
     Route::delete('/pickups/{id}', [\App\Http\Controllers\PickupController::class, 'destroy']);
 
+    // COD reconciliation (spec 06)
+    Route::get('/cod/summary', [\App\Http\Controllers\CodController::class, 'summary']);
+    Route::get('/cod/transactions', [\App\Http\Controllers\CodController::class, 'index']);
+    Route::post('/cod/transactions/{id}/collected', [\App\Http\Controllers\CodController::class, 'markCollected']);
+    Route::post('/cod/transactions/{id}/remitted', [\App\Http\Controllers\CodController::class, 'markRemitted']);
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);

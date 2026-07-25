@@ -74,8 +74,14 @@ class TrackingIngestService
 
         // A parcel that just started returning to origin becomes an RTO return (spec 03) — dispatched
         // after the commit so the worker never races the shipment/event rows. Idempotent downstream.
-        if ($shipment->fresh()->status === 'returned_to_origin' && $priorStatus !== 'returned_to_origin') {
+        $fresh = $shipment->fresh();
+        if ($fresh->status === 'returned_to_origin' && $priorStatus !== 'returned_to_origin') {
             \App\Jobs\DetectRtoJob::dispatch($shipment->id);
+        }
+
+        // Keep the COD ledger in step with the parcel: delivery → collected, RTO → rto (spec 06).
+        if ($fresh->is_cod && $fresh->status !== $priorStatus) {
+            app(\App\Services\Cod\CodTransactionService::class)->syncFromShipment($fresh);
         }
 
         return $inserted;

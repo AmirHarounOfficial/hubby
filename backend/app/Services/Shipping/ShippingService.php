@@ -134,6 +134,12 @@ class ShippingService
                 $this->labels->store($shipment, $result['label']);
             }
 
+            // Open the COD ledger row for this shipment (spec 06) — a dispatched COD parcel is cash
+            // the carrier will collect.
+            if ($shipment->is_cod) {
+                app(\App\Services\Cod\CodTransactionService::class)->syncFromShipment($shipment->fresh());
+            }
+
             return $shipment->fresh(['packages', 'items', 'labels']);
         });
     }

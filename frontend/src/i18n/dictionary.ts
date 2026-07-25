@@ -3,6 +3,7 @@ import { dashboard } from './dicts/dashboard';
 import { orders } from './dicts/orders';
 import { returns } from './dicts/returns';
 import { shipping } from './dicts/shipping';
+import { cod } from './dicts/cod';
 import { customers } from './dicts/customers';
 import { products } from './dicts/products';
 import { categories } from './dicts/categories';
@@ -26,6 +27,7 @@ export const dictionaries = {
     orders: orders.en,
     returns: returns.en,
     shipping: shipping.en,
+    cod: cod.en,
     customers: customers.en,
     products: products.en,
     categories: categories.en,
@@ -43,6 +45,7 @@ export const dictionaries = {
     orders: orders.ar,
     returns: returns.ar,
     shipping: shipping.ar,
+    cod: cod.ar,
     customers: customers.ar,
     products: products.ar,
     categories: categories.ar,
