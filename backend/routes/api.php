@@ -173,6 +173,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cod/transactions/{id}/collected', [\App\Http\Controllers\CodController::class, 'markCollected']);
     Route::post('/cod/transactions/{id}/remitted', [\App\Http\Controllers\CodController::class, 'markRemitted']);
 
+    // Warehouse scanning (spec 08 slice 1: setup + barcode resolution + lookup scan).
+    Route::get('/warehouses', [\App\Http\Controllers\WarehouseController::class, 'index']);
+    Route::post('/warehouses', [\App\Http\Controllers\WarehouseController::class, 'storeWarehouse']);
+    Route::get('/warehouses/{id}/locations', [\App\Http\Controllers\WarehouseController::class, 'locations']);
+    Route::post('/warehouses/{id}/locations', [\App\Http\Controllers\WarehouseController::class, 'storeLocation']);
+    Route::get('/barcodes', [\App\Http\Controllers\WarehouseController::class, 'barcodes']);
+    Route::post('/barcodes', [\App\Http\Controllers\WarehouseController::class, 'storeBarcode']);
+    Route::delete('/barcodes/{id}', [\App\Http\Controllers\WarehouseController::class, 'destroyBarcode']);
+    Route::post('/scan', [\App\Http\Controllers\WarehouseController::class, 'scan']);
+    Route::get('/scan-events', [\App\Http\Controllers\WarehouseController::class, 'scanEvents']);
+
     // Invoicing / VAT (spec 05 Milestone 0 — proper VAT documents, not yet ZATCA-cleared).
     // Note there is no delete route for an issued invoice: cancellation is a credit note only.
     Route::get('/tax-registration', [\App\Http\Controllers\InvoiceController::class, 'taxRegistration']);
