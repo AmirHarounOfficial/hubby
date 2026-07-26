@@ -205,6 +205,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pack-sessions/{id}/scan', [\App\Http\Controllers\PickPackController::class, 'packScan']);
     Route::post('/pack-sessions/{id}/complete', [\App\Http\Controllers\PickPackController::class, 'completePack']);
     Route::post('/pack-sessions/{id}/void', [\App\Http\Controllers\PickPackController::class, 'voidPack']);
+
+    // Cycle counting (spec 08 §4.4). Approval is the only stock-mutating path and is owner/admin.
+    Route::get('/count-sessions', [\App\Http\Controllers\CountController::class, 'index']);
+    Route::post('/count-sessions', [\App\Http\Controllers\CountController::class, 'store']);
+    Route::get('/count-sessions/{id}', [\App\Http\Controllers\CountController::class, 'show']);
+    Route::post('/count-sessions/{id}/count', [\App\Http\Controllers\CountController::class, 'count']);
+    Route::post('/count-sessions/{id}/submit', [\App\Http\Controllers\CountController::class, 'submit']);
+    Route::post('/count-sessions/{id}/approve', [\App\Http\Controllers\CountController::class, 'approve']);
+    Route::post('/count-sessions/{id}/reject', [\App\Http\Controllers\CountController::class, 'reject']);
     Route::get('/scan-events', [\App\Http\Controllers\WarehouseController::class, 'scanEvents']);
 
     // Invoicing / VAT (spec 05 Milestone 0 — proper VAT documents, not yet ZATCA-cleared).
