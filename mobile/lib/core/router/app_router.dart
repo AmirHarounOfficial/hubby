@@ -9,6 +9,9 @@ import '../../features/auth/register_page.dart';
 import '../../features/analytics/analytics_page.dart';
 import '../../features/billing/billing_page.dart';
 import '../../features/customers/customers_page.dart';
+import '../../features/warehouse/warehouse_page.dart';
+import '../../features/warehouse/lookup_page.dart';
+import '../../features/warehouse/receive_page.dart';
 import '../../features/notifications/notifications_page.dart';
 import '../../features/profit/profit_page.dart';
 import '../../features/settings/settings_page.dart';
@@ -40,6 +43,9 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/billing', builder: (_, _) => const BillingPage()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
       GoRoute(path: '/notifications', builder: (_, _) => const NotificationsPage()),
+      GoRoute(path: '/warehouse', builder: (_, _) => const WarehousePage()),
+      GoRoute(path: '/warehouse/lookup', builder: (_, _) => const LookupPage()),
+      GoRoute(path: '/warehouse/receive', builder: (_, _) => const ReceivePage()),
     ],
   );
 }

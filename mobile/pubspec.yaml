@@ -44,6 +44,11 @@ dependencies:
   firebase_core: ^4.7.0
   firebase_messaging: ^16.2.0
   flutter_local_notifications: ^21.0.0
+  mobile_scanner: ^7.4.0
+  sqflite: ^2.4.2+1
+  uuid: ^4.6.0
+  connectivity_plus: ^7.3.1
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:
