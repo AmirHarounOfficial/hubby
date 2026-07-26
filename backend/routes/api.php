@@ -189,6 +189,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/receipts/{id}/scan', [\App\Http\Controllers\ReceiptController::class, 'scan']);
     Route::post('/receipts/{id}/complete', [\App\Http\Controllers\ReceiptController::class, 'complete']);
     Route::post('/receipts/{id}/cancel', [\App\Http\Controllers\ReceiptController::class, 'cancel']);
+
+    // Pick + pack (spec 08 §4.1/§4.2). Picking never moves stock; packing verifies by barcode.
+    Route::get('/pick-lists', [\App\Http\Controllers\PickPackController::class, 'index']);
+    Route::post('/pick-lists', [\App\Http\Controllers\PickPackController::class, 'store']);
+    Route::get('/pick-lists/{id}', [\App\Http\Controllers\PickPackController::class, 'show']);
+    Route::post('/pick-lists/{id}/start', [\App\Http\Controllers\PickPackController::class, 'start']);
+    Route::post('/pick-lists/{id}/pick', [\App\Http\Controllers\PickPackController::class, 'pick']);
+    Route::post('/pick-lists/{id}/items/{itemId}/short', [\App\Http\Controllers\PickPackController::class, 'short']);
+    Route::post('/pick-lists/{id}/complete', [\App\Http\Controllers\PickPackController::class, 'complete']);
+    Route::post('/pick-lists/{id}/cancel', [\App\Http\Controllers\PickPackController::class, 'cancel']);
+
+    Route::post('/pack-sessions', [\App\Http\Controllers\PickPackController::class, 'openPack']);
+    Route::get('/pack-sessions/{id}', [\App\Http\Controllers\PickPackController::class, 'showPack']);
+    Route::post('/pack-sessions/{id}/scan', [\App\Http\Controllers\PickPackController::class, 'packScan']);
+    Route::post('/pack-sessions/{id}/complete', [\App\Http\Controllers\PickPackController::class, 'completePack']);
+    Route::post('/pack-sessions/{id}/void', [\App\Http\Controllers\PickPackController::class, 'voidPack']);
     Route::get('/scan-events', [\App\Http\Controllers\WarehouseController::class, 'scanEvents']);
 
     // Invoicing / VAT (spec 05 Milestone 0 — proper VAT documents, not yet ZATCA-cleared).
