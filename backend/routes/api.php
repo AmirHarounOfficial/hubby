@@ -182,6 +182,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/barcodes', [\App\Http\Controllers\WarehouseController::class, 'storeBarcode']);
     Route::delete('/barcodes/{id}', [\App\Http\Controllers\WarehouseController::class, 'destroyBarcode']);
     Route::post('/scan', [\App\Http\Controllers\WarehouseController::class, 'scan']);
+    // Receiving (spec 08 §4.3) — stock moves on complete, never per scan.
+    Route::get('/receipts', [\App\Http\Controllers\ReceiptController::class, 'index']);
+    Route::post('/receipts', [\App\Http\Controllers\ReceiptController::class, 'store']);
+    Route::get('/receipts/{id}', [\App\Http\Controllers\ReceiptController::class, 'show']);
+    Route::post('/receipts/{id}/scan', [\App\Http\Controllers\ReceiptController::class, 'scan']);
+    Route::post('/receipts/{id}/complete', [\App\Http\Controllers\ReceiptController::class, 'complete']);
+    Route::post('/receipts/{id}/cancel', [\App\Http\Controllers\ReceiptController::class, 'cancel']);
     Route::get('/scan-events', [\App\Http\Controllers\WarehouseController::class, 'scanEvents']);
 
     // Invoicing / VAT (spec 05 Milestone 0 — proper VAT documents, not yet ZATCA-cleared).
